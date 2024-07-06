@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  StyleSheet,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
@@ -14,6 +13,11 @@ const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [text, setTextView] = useState("");
+  const [showPass, setShowPass] =useState(false);
+
+  const handleShowPass =()=>{
+    setShowPass(!showPass);
+  }
 
   const handleLogin = () => {
     Alert.alert("Login Successfully", `Welcome ${username}`, [
@@ -26,9 +30,7 @@ const LoginForm = () => {
     <View className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-800 px-4">
       <View className="w-full max-w-md">
         <View className="space-y-1 mb-3">
-          <Text className="text-center text-2xl">
-            Welcome to Eris App!
-          </Text>
+          <Text className="text-center text-2xl">Welcome to Eris App!</Text>
         </View>
 
         <View className="space-y-4">
@@ -64,37 +66,19 @@ const LoginForm = () => {
               <Text className="text-lg underline">Forget Password</Text>
             </View>
             <View className="relative">
-            <Icon
-                  name="lock"
-                  size={20}
-                  color="black"
-                  style={{
-                    position: "absolute",
-                    top: 12,
-                    left: 12,
-                    zIndex: 50,
-                  }}
-                />
+              <View className="absolute top-3 left-3 z-50 flex items-center">
+                <Icon name="lock" size={20} color="black" />
+              </View>
               <TextInput
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 pl-10  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChangeText={setPassword}
                 value={password}
                 placeholder="Enter your password"
-                secureTextEntry
+                secureTextEntry={!showPass}
               />
-              <View className="absolute inset-y-0 end-0 flex items-center pe-3">
-              <Icon
-                  name="visibility-off"
-                  size={20}
-                  color="black"
-                  style={{
-                    position: "absolute",
-                    top: 12,
-                   marginRight: 0,
-                    zIndex: 50,
-                  }}
-                />
-              </View>
+              <TouchableOpacity className="absolute right-4 top-4 flex items-center" onPress={handleShowPass}>
+                <Icon name={showPass ? "visibility" : "visibility-off"} size={20} color="black" />
+              </TouchableOpacity>
             </View>
           </View>
 
