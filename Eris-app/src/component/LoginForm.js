@@ -6,8 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Image
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import SvgUri from 'react-native-svg';
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -27,8 +29,11 @@ const LoginForm = () => {
   };
 
   return (
-    <View className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-gray-800 px-4">
-      <View className="w-full max-w-md">
+    <View className="flex h-full w-full justify-center bg-gray-100 dark:bg-gray-800 px-4">
+      <View className="flex items-center justify-cente pb-5">
+        <Image source={require('../../assets/logo.png')} className="z-50 h-24 w-24"/>
+        </View>
+      <View className="w-full px-6 max-w-md">
         <View className="space-y-1 mb-3">
           <Text className="text-center text-2xl">Welcome to Eris App!</Text>
         </View>
@@ -89,7 +94,7 @@ const LoginForm = () => {
             >
               <Text className="text-center text-white text-bold">Login</Text>
             </TouchableOpacity>
-            <Text>{text}</Text>
+            <Text className="text-lg py-2 text-center">Already have an account? <Text className="underline">Signup</Text></Text>
           </View>
         </View>
       </View>
