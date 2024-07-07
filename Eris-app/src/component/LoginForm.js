@@ -33,7 +33,7 @@ const LoginForm = () => {
       source={require('../../assets/background.jpg')}
       className="flex-1 justify-center w-full"
     >
-        <View className="flex-1 justify-center items-center px-5">
+        <View className="flex-1 justify-center items-center px-10">
           <View className="mb-5">
             <Image
               source={require('../../assets/logo.png')}
