@@ -1,13 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,SafeAreaView } from 'react-native';
-import LoginForm from './src/component/LoginForm';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { View, Button, Text } from "react-native";
+import LoginForm from "./src/component/LoginForm";
+import SignupForm from "./src/component/SignupForm";
 
-export default function App() {
-  return (
-    <View className="flex-1 items-center justify-center ">
-      <LoginForm/>
-      <StatusBar style="auto" />
-    </View>
+const Stack = createNativeStackNavigator();
+
+const App = () => {
+  return ( 
+
+  <NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={LoginForm} options={{headerShown: false}}/>
+      <Stack.Screen name="Signup" component={SignupForm}/>
+    </Stack.Navigator>
+  </NavigationContainer>
+
   );
-}
+};
 
+export default App;
