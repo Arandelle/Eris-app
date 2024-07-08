@@ -45,25 +45,21 @@ const LoginForm = () => {
             <View className="space-y-4">
               <View className="space-y-2">
                 <Text className="text-lg">Username</Text>
-                <View className="relative">
-                  <Icon
-                    name="alternate-email"
-                    size={20}
-                    color="black"
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 12,
-                      zIndex: 50,
-                    }}
-                  />
-                  <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    onChangeText={setUsername}
-                    value={username}
-                    placeholder="Enter your username"
-                    autoCapitalize="none"
-                  />
+                  <View className="relative z-10">
+                   <View className="flex items-center absolute top-4 left-3 z-50">
+                      <Icon
+                        name="alternate-email"
+                        size={20}
+                        color="black"
+                      />
+                   </View>
+                    <TextInput
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      onChangeText={setUsername}
+                      value={username}
+                      placeholder="Enter your username"
+                      autoCapitalize="none"
+                    />
                 </View>
               </View>
               <View className="space-y-2">
@@ -71,20 +67,16 @@ const LoginForm = () => {
                   <Text className="text-lg">Password</Text>
                   <Text className="text-lg underline">Forget Password</Text>
                 </View>
-                <View className="relative">
-                  <Icon
-                    name="lock"
-                    size={20}
-                    color="black"
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 12,
-                      zIndex: 50,
-                    }}
-                  />
+                <View className="relative z-10">
+                  <View className="flex items-center absolute top-4 left-3 z-50">
+                    <Icon
+                      name="lock"
+                      size={20}
+                      color="black"
+                    />
+                  </View>
                   <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     onChangeText={setPassword}
                     value={password}
                     placeholder="Enter your password"
@@ -103,13 +95,13 @@ const LoginForm = () => {
                 </View>
               </View>
               <TouchableOpacity
-                className="w-full bg-blue-500 p-4 rounded"
+                className="w-full bg-blue-500 p-3 rounded"
                 onPress={handleLogin}
               >
-                <Text className="text-center text-white font-bold">Login</Text>
+                <Text className="text-center text-lg text-white font-bold">Login</Text>
               </TouchableOpacity>
               <Text className="text-lg py-2 text-center">
-                Already have an account? <Text className="underline">Signup</Text>
+               Don't have an account? <Text className="underline">Signup</Text>
               </Text>
             </View>
           </View>
