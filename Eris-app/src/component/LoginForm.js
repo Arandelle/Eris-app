@@ -10,8 +10,12 @@ import {
   ToastAndroid,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from '@react-navigation/native';
 
-const LoginForm = ({ navigation}) => {
+const LoginForm = ({setAuth}) => {
+  
+  const navigation = useNavigation();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -26,6 +30,7 @@ const LoginForm = ({ navigation}) => {
       ToastAndroid.show('Login Successfully',
       ToastAndroid.SHORT,
       ToastAndroid.BOTTOM)
+      setAuth(true);
     }
   };
 
