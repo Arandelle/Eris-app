@@ -22,9 +22,10 @@ const LoginForm = ({ navigation}) => {
 
   const handleLogin = () => {
     if (username === "user@gmail.com" && password === "123456"){
-      navigation.navigate('Home');
+      navigation.navigate('TabNavigator');
       ToastAndroid.show('Login Successfully',
-      ToastAndroid.SHORT)
+      ToastAndroid.SHORT,
+      ToastAndroid.BOTTOM)
     }
   };
 
