@@ -47,13 +47,15 @@ const App = () => {
    <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuth ? (
-          <Stack.Screen name="TabNavigator" component={TabNavigator} />
+          <Stack.Screen name="TabNavigator">
+            {props => <TabNavigator {...props} setAuth={handleAuth} />}
+          </Stack.Screen>
         ) : (
           <>
             <Stack.Screen name="Login">
               {(props) => <LoginForm {...props} setAuth={handleAuth} />}
             </Stack.Screen>
-            <Stack.Screen name="Signup" component={SignupForm} />
+            <Stack.Screen name="Signup" component={SignupForm} options={{headerShown: true}} />
           </>
         )}
       </Stack.Navigator>

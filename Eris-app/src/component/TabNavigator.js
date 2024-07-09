@@ -3,10 +3,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
 import SignupForm from "./SignupForm";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Map from "./Map";
+import Notification from "./Notification";
+import More from "./More";
 
 const Tab = createBottomTabNavigator();
 
-const TabNavigator = () => {
+const TabNavigator = ({ setAuth }) => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -16,12 +19,16 @@ const TabNavigator = () => {
           let iconName;
           if (route.name === "Home") {
             iconName = "home";
-          } else if (route.name === "Signup") {
-            iconName = "person-add";
+          } else if (route.name === "Map") {
+            iconName = "map";
+          } else if (route.name === "Notification") {
+            iconName = "notifications";
+          } else if (route.name === "More") {
+            iconName = "more-horiz";
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#2196f3", 
+        tabBarActiveTintColor: "#2196f3",
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
           paddingBottom: 10,
@@ -35,13 +42,20 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={Home}
         options={{ title: "Home Page" }}
+      >
+        {props => <Home {...props} setAuth={setAuth} />}
+      </Tab.Screen>
+      <Tab.Screen name="Map" component={Map} />
+      <Tab.Screen
+        name="Notification"
+        component={Notification}
+        options={{ title: "Notification" }}
       />
       <Tab.Screen
-        name="Signup"
-        component={SignupForm}
-        options={{ title: "Signup Page" }}
+        name="More"
+        component={More}
+        options={{ title: "More" }}
       />
     </Tab.Navigator>
   );

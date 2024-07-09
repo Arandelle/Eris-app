@@ -8,12 +8,13 @@ import {
   ImageBackground,
   ScrollView,
   ToastAndroid,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from '@react-navigation/native';
 
 const LoginForm = ({setAuth}) => {
-  
+
   const navigation = useNavigation();
 
   const [username, setUsername] = useState("");
@@ -31,6 +32,15 @@ const LoginForm = ({setAuth}) => {
       ToastAndroid.SHORT,
       ToastAndroid.BOTTOM)
       setAuth(true);
+    } else {
+      Alert.alert('Invalid Credentials', 'Please try again', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
     }
   };
 
