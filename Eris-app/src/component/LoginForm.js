@@ -4,13 +4,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   Image,
   ImageBackground,
   ScrollView,
+  ToastAndroid,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { styled } from "nativewind";
 
 const LoginForm = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -22,10 +21,11 @@ const LoginForm = ({ navigation }) => {
   };
 
   const handleLogin = () => {
-    Alert.alert("Login Successfully", `Welcome ${username}`, [
-      { text: "Ok" },
-      { text: "Cancel" },
-    ]);
+    if (username === "user@gmail.com" && password === "123456"){
+      navigation.navigate('Signup');
+      ToastAndroid.show('Login Successfully',
+      ToastAndroid.SHORT)
+    }
   };
 
   return (
