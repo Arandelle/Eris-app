@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const LoginForm = ({ navigation }) => {
+const LoginForm = ({ navigation}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -22,7 +22,7 @@ const LoginForm = ({ navigation }) => {
 
   const handleLogin = () => {
     if (username === "user@gmail.com" && password === "123456"){
-      navigation.navigate('Signup');
+      navigation.navigate('Home');
       ToastAndroid.show('Login Successfully',
       ToastAndroid.SHORT)
     }
