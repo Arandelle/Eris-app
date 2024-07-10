@@ -5,40 +5,50 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Map from "./Map";
 import Notification from "./Notification";
 import More from "./More";
+import { Text, View } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({ setAuth }) => {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarIcon: ({ size, color }) => {
-          let iconName;
-          if (route.name === "Home") {
+    initialRouteName="Home"
+    screenOptions={({ route }) => ({
+      headerShown: false,
+      tabBarIcon: ({ focused, size, color }) => {
+        let iconName;
+        
+        switch(route.name){
+          case 'Home':
             iconName = "home";
-          } else if (route.name === "Map") {
+            break;
+          case 'Map':
             iconName = "map";
-          } else if (route.name === "Notification") {
+            break;
+          case 'Notification':
             iconName = "notifications";
-          } else if (route.name === "More") {
+            break;
+          case 'More':
             iconName = "more-horiz";
-          }
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "#2196f3",
-        tabBarInactiveTintColor: "gray",
-        tabBarStyle: {
+            break;
+          default:
+            break;
+        }
+        const iconSize = focused ? size + 8 : size + 5;
+        return <Icon name={iconName} size={iconSize} color={color} />;
+      },
+      tabBarActiveTintColor: "#2196f3",
+      tabBarInactiveTintColor: "gray",
+      tabBarStyle: {
           paddingBottom: 10,
           paddingTop: 10,
           height: 60,
         },
-        tabBarLabelStyle: {
-          paddingBottom: 5,
-        },
-      })}
-    >
+        tabBarAllowFontScaling: true,
+        tabBarHideOnKeyboard: true,
+      tabBarHideOnKeyboard: true,
+    })}
+  >
       <Tab.Screen
         name="Home"
         options={{ title: "Home Page" }}
@@ -49,7 +59,7 @@ const TabNavigator = ({ setAuth }) => {
       <Tab.Screen
         name="Notification"
         component={Notification}
-        options={{ title: "Notification" }}
+        options={{ title: "Notification",  tabBarBadge: 20, }}
       />
       <Tab.Screen
         name="More"

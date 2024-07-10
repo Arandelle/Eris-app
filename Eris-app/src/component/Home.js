@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SignupForm from './SignupForm';
 
 const Home = ({ setAuth }) => {
   const navigation = useNavigation();
@@ -19,9 +18,11 @@ const Home = ({ setAuth }) => {
 
   return (
     <View className="h-full flex items-center justify-center">
-      <Text>This is the home</Text>
-      <Button title='Logout' onPress={handleLogout} />
-      <Button title='Signup' onPress={()=> navigation.navigate('Signup')}/>
+      <Text className="mb-20">This is the home</Text>
+      <View className="flex flex-row w-60 justify-between">
+        <Button title='Logout' onPress={handleLogout} />
+        <Button title='Signup' onPress={()=> navigation.navigate('Signup')}/>
+      </View>
     </View>
   );
 };

@@ -6,7 +6,7 @@ import SignupForm from "./src/component/SignupForm";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
-import Map from "./src/component/Map";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -49,8 +49,8 @@ const App = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuth ? (
          <>
-            <Stack.Screen name="Home" options={{headerShown: true}} >
-              {props => <TabNavigator {...props} setAuth={handleAuth}/>}
+            <Stack.Screen name="HomeScreen" options={{headerShown: true}} >
+           {props => <TabNavigator {...props} setAuth={handleAuth}/>}
             </Stack.Screen>
             <Stack.Screen name="Signup" component={SignupForm} options={{headerShown: true}}/>
          </>
