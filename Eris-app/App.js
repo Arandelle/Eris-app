@@ -1,11 +1,10 @@
 import React, { useState,useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import LoginForm from "./src/component/LoginForm";
 import SignupForm from "./src/component/SignupForm";
-import TabNavigator from "./src/component/TabNavigator";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DrawerNavigator from "./src/component/DrawerNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -47,9 +46,11 @@ const App = () => {
    <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuth ? (
-          <Stack.Screen name="TabNavigator">
-            {props => <TabNavigator {...props} setAuth={handleAuth} />}
-          </Stack.Screen>
+         <>
+            <Stack.Screen name="DrawerWithTab">
+              {props => <DrawerNavigator {...props} setAuth={handleAuth} />}
+            </Stack.Screen>
+         </>
         ) : (
           <>
             <Stack.Screen name="Login">

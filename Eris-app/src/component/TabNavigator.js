@@ -1,7 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
-import SignupForm from "./SignupForm";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Map from "./Map";
 import Notification from "./Notification";
@@ -14,7 +13,7 @@ const TabNavigator = ({ setAuth }) => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={({ route }) => ({
-        headerShown: true,
+        headerShown: false,
         tabBarIcon: ({ size, color }) => {
           let iconName;
           if (route.name === "Home") {
