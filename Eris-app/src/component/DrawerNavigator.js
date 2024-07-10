@@ -9,7 +9,7 @@ const Drawer = createDrawerNavigator();
 const DrawerNavigator = ({setAuth}) => {
   return (
     <Drawer.Navigator>
-        <Drawer.Screen name="Home">
+        <Drawer.Screen name="Home Screen">
         {props => <TabNavigator {...props} setAuth={setAuth} />}
         </Drawer.Screen>
         <Drawer.Screen name="Signup" component={SignupForm} />
