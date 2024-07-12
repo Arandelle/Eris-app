@@ -10,7 +10,7 @@ const Home = ({ setAuth,badgeSize, setBadgeSize }) => {
     try {
       await AsyncStorage.removeItem('isAuth');
       setAuth(false);
-      navigation.navigate('LoginForm');
+      navigation.navigate('Login');
     } catch (e) {
       console.error(e);
     }

@@ -49,15 +49,14 @@ const LoginForm = ({setAuth}) => {
       source={require("../../assets/background.jpg")}
       className="flex-1"
     >
-      <View style={{ height: 56 }} />
-      <View className="flex items-center px-4 mt-4">
+      <View className="flex items-center mt-20">
         <View className="mb-5">
           <Image
             source={require("../../assets/logo.png")}
             className="h-24 w-24"
           />
         </View>
-        <View className="w-full max-w-md">
+        <View className="w-full max-w-sm">
           <Text className="text-center text-2xl mb-3">
             Welcome to Eris App!
           </Text>

@@ -47,7 +47,12 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{ headerShown: false}}
+        screenOptions={{ headerShown: false,
+        headerTitleAlign: "center",
+        headerTitleStyle: {
+          fontWeight: '900',
+          fontSize: 24,
+        }}}
       >
         {isAuth ? (
           <>
@@ -62,7 +67,7 @@ const App = () => {
           </>
         ) : (
           <>
-            <Stack.Screen name="LoginForm">
+            <Stack.Screen name="Login">
               {(props) => <LoginForm {...props} setAuth={handleAuth} />}
             </Stack.Screen>
             <Stack.Screen
@@ -70,7 +75,7 @@ const App = () => {
               component={SignupForm}
               options={{
                 headerShown: true,
-                headerTitleAlign: "center",
+                title: "Create your account"
               }}
             />
           </>

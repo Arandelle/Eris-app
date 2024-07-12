@@ -12,17 +12,8 @@ const SignupForm = ({navigation}) => {
   }
 
   return (
-    <View className="flex items-center px-4">
-    <View className="mb-5">
-      <Image
-        source={require("../../assets/logo.png")}
-        className="h-24 w-24"
-      />
-    </View>
-    <View className="w-full max-w-md">
-      <Text className="text-center text-2xl mb-3">
-        Create your account!
-      </Text>
+    <View className="flex items-center">
+    <View className="w-full max-w-sm mt-10">
       <View className="space-y-4">
         <View className="space-y-2">
           <Text className="text-lg">Email</Text>
@@ -74,7 +65,7 @@ const SignupForm = ({navigation}) => {
           </Text>
         </TouchableOpacity>
         <Text className="text-lg py-2 text-center">
-          <TouchableOpacity onPress={()=> navigation.navigate('LoginForm')}>
+          <TouchableOpacity onPress={()=> navigation.navigate('Login')}>
             <Text className="underline">Already have an accouont? Login</Text>
           </TouchableOpacity>
         </Text>
