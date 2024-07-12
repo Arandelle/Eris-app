@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Button, TextInput } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Text, Button, TextInput, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -22,7 +22,6 @@ const Home = ({ setAuth,badgeSize, setBadgeSize }) => {
 
   return (
     <View className="h-full flex items-center justify-center bg-gray-100">
-      <Text className="mb-20">This is the home</Text>
       <View className="flex flex-row w-60 justify-between">
         <Button title='Logout' onPress={handleLogout} />
         <Button title='Signup' onPress={()=> navigation.navigate('Signup')}/>

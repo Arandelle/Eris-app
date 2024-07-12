@@ -47,9 +47,10 @@ const LoginForm = ({setAuth}) => {
   return (
     <ImageBackground
       source={require("../../assets/background.jpg")}
-      className="flex-1 justify-center w-full"
+      className="flex-1"
     >
-      <View className="flex-1 justify-center items-center px-10">
+      <View style={{ height: 56 }} />
+      <View className="flex items-center px-4 mt-4">
         <View className="mb-5">
           <Image
             source={require("../../assets/logo.png")}
