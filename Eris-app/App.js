@@ -49,7 +49,7 @@ const App = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuth ? (
          <>
-            <Stack.Screen name="HomeScreen" options={{headerShown: true}} >
+            <Stack.Screen name="ERIS" options={{headerShown: true}} >
            {props => <TabNavigator {...props} setAuth={handleAuth}/>}
             </Stack.Screen>
             <Stack.Screen name="Signup" component={SignupForm} options={{headerShown: true}}/>

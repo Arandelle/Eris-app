@@ -3,7 +3,7 @@ import { View, Text, Button, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Home = ({ setAuth }) => {
+const Home = ({ setAuth,badgeSize, setBadgeSize }) => {
   const navigation = useNavigation();
 
   const handleLogout = async () => {
@@ -16,12 +16,17 @@ const Home = ({ setAuth }) => {
     }
   };
 
+  const handleBadgeSize =()=>{
+    setBadgeSize(badgeSize + 1);
+  }
+
   return (
-    <View className="h-full flex items-center justify-center">
+    <View className="h-full flex items-center justify-center bg-gray-100">
       <Text className="mb-20">This is the home</Text>
       <View className="flex flex-row w-60 justify-between">
         <Button title='Logout' onPress={handleLogout} />
         <Button title='Signup' onPress={()=> navigation.navigate('Signup')}/>
+        <Button title='Add Notification' onPress={handleBadgeSize}/>
       </View>
     </View>
   );

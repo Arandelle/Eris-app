@@ -1,15 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "./Map";
 import Notification from "./Notification";
-import More from "./More";
+import Profile from "./Profile";
+import SignupForm from "./SignupForm";
 import { View, Text } from "react-native";
+import { styled } from "nativewind";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({ setAuth }) => {
+  const [badgeSize, setBadgeSize] = useState(0);
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -20,61 +24,84 @@ const TabNavigator = ({ setAuth }) => {
 
           switch (route.name) {
             case 'Home':
-              iconName = "home";
+              iconName = "home-outline";
+              break;
+            case 'signup':
+              iconName = "map-marker-outline";
               break;
             case 'Map':
-              iconName = "map";
+              iconName = "plus";
               break;
             case 'Notification':
-              iconName = "notifications";
+              iconName = "bell-outline";
               break;
-            case 'More':
-              iconName = "more-horiz";
+            case 'Profile':
+              iconName = "account-circle-outline";
               break;
             default:
               break;
           }
 
-          const iconSize = focused ? size + 8 : size; // Adjust icon size based on focus
-          const labelSize = focused ? 14 : 12; // Adjust label size based on focus
+          const isMiddle = route.name === 'Map';
 
-          return (
+           return (
             <View className="items-center">
-              <Icon name={iconName} size={iconSize} color={color} />
-              <Text style={{ color, fontSize: labelSize, marginTop: 0 }}>
-                {route.name}
-              </Text>
+              <View className={`items-center justify-center`}
+               style={{ 
+                width: isMiddle ? 55 : null,
+                height: isMiddle ? 55 : null, 
+                bottom: isMiddle ? 25 : 0,
+                borderRadius: isMiddle ? 50 : 25, 
+                borderColor: isMiddle ? "white" : null,
+                borderWidth: isMiddle ? 3 : null,
+                backgroundColor: isMiddle ? '#42a5f5' : 'transparent', 
+                
+              }}>
+                <Icon name={iconName} size={isMiddle ? size : size + 4} color={isMiddle ? 'white' : color}
+                 />
+              </View>
             </View>
           );
         },
-        tabBarActiveTintColor: "#2196f3",
+        tabBarActiveTintColor: "#42a5f5",
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
           paddingBottom: 10,
           paddingTop: 10,
-          height: 60,
+          height: 70, 
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+          left: 16,
+          borderRadius: 10,
         },
-        tabBarLabel: () => null,
-        tabBarAllowFontScaling: true,
+        tabBarLabelStyle: {
+          fontSize: 15,
+        },
         tabBarHideOnKeyboard: true,
       })}
     >
       <Tab.Screen
         name="Home"
-        options={{ title: "Home Page" }}
       >
-        {props => <Home {...props} setAuth={setAuth} />}
+        {props => <Home {...props} setAuth={setAuth} badgeSize={badgeSize} setBadgeSize={setBadgeSize} />}
       </Tab.Screen>
+      <Tab.Screen
+        name="signup"
+        component={SignupForm}
+        options={{ title: "Signup"
+       }}  
+      />
       <Tab.Screen name="Map" component={Map} />
       <Tab.Screen
         name="Notification"
         component={Notification}
-        options={{ title: "Notification", tabBarBadge: 20 }}
+        options={{ title: "Notification", tabBarBadge: badgeSize === 0 ? null : badgeSize }}
       />
       <Tab.Screen
-        name="More"
-        component={More}
-        options={{ title: "More" }}
+        name="Profile"
+        component={Profile}
+        options={{ title: "Profile" }}
       />
     </Tab.Navigator>
   );
