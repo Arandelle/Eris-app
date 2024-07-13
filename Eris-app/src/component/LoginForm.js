@@ -114,7 +114,7 @@ const LoginForm = ({setAuth}) => {
             </TouchableOpacity>
             <Text className="text-lg py-2 text-center">
               <TouchableOpacity onPress={()=>navigation.navigate('Signup')}>
-                <Text className="underline">Don't have an account? Signup</Text>
+                <Text className="underline text-lg">Don't have an account? Signup</Text>
               </TouchableOpacity>
             </Text>
           </View>

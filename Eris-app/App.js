@@ -6,11 +6,22 @@ import SignupForm from "./src/component/SignupForm";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
-import { Button } from "react-native";
+import { Button,Text, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 
+const LoginButton = () => {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+      <Text className="text-blue-600 font-extrabold text-lg">Login</Text>
+    </TouchableOpacity>
+  );
+};
+
 const App = () => {
+
   const [isAuth, setAuth] = useState(false);
   const [isLoading, setLoading] = useState(true);
 
@@ -75,7 +86,8 @@ const App = () => {
               component={SignupForm}
               options={{
                 headerShown: true,
-                title: "Create your account"
+                title: "Create your account",
+                headerRight: ()=> <LoginButton />
               }}
             />
           </>
