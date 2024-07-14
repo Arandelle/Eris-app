@@ -6,7 +6,7 @@ const SignupForm = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [createType, setCreateType] = useState(false);
+  const [createType, setCreateType] = useState(true);
   const [isChecked, setChecked] = useState(false);
 
   const toggleCheckbox = () => {

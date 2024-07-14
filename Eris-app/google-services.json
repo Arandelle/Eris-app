@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "495460903256",
+    "project_id": "eris-app-cc463",
+    "storage_bucket": "eris-app-cc463.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495460903256:android:45f3216f01278a6d4ddd2d",
+        "android_client_info": {
+          "package_name": "com.mycorp.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrkkfs5GIMi1U4UwjLVtR8B9AJ4xZz8Uw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
