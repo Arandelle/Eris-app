@@ -27,25 +27,31 @@ const LoginForm = ({setAuth}) => {
     setShowPass(!showPass);
   };
 
-  const handleLogin = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, username, password);
-      const user = userCredential.user;
-      navigation.navigate('TabNavigator');
-      ToastAndroid.show('Login Successfully', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-      setAuth(true);
-    } catch (error) {
-      Alert.alert('Invalid Credentials', 'Please try again', [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: () => console.log('OK Pressed') },
-      ]);
+ const handleLogin = async () => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, username, password);
+    const user = userCredential.user;
+    if(user.emailVerified){
+    navigation.navigate('TabNavigator');
+    ToastAndroid.show('Login Successfully', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
+    setAuth(true);
     }
-  };
-  
+    else{
+      Alert.alert("Erro", "Email is not verified");
+      await auth.signOut();
+    }
+  } catch (error) {
+    Alert.alert('Invalid Credentials', 'Please try again', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      { text: 'OK', onPress: () => console.log('OK Pressed') },
+    ]);
+  }
+};
+
 
   return (
     <ImageBackground

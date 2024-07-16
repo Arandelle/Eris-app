@@ -34,7 +34,9 @@ const SignupForm = ({ navigation }) => {
       const user = userCredential.user;
       await sendEmailVerification(user);
       console.log("User created:", user.uid);
-      Alert.alert("Success", "User created")
+      Alert.alert("Success", "Please check your email for verification")
+      setEmail("")
+      setPassword("")
       // Handle navigation or other logic after successful signup
     } catch (error) {
       setError(error.message);
