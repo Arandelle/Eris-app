@@ -10,48 +10,71 @@ import {
   ToastAndroid,
   Alert,
 } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import {app, auth} from "./firebaseConfig"
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { app, auth } from "./firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import ForgotPass from './ForgotPass'
 
-const LoginForm = ({setAuth}) => {
-
+const LoginForm = ({ setAuth }) => {
   const navigation = useNavigation();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [isPromptVisible, setPromptVisible] = useState(false);
 
   const handleShowPass = () => {
     setShowPass(!showPass);
   };
 
- const handleLogin = async () => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, username, password);
-    const user = userCredential.user;
-    if(user.emailVerified){
-    navigation.navigate('TabNavigator');
-    ToastAndroid.show('Login Successfully', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-    setAuth(true);
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password
+      );
+      const user = userCredential.user;
+      if (user.emailVerified) {
+        navigation.navigate("TabNavigator");
+        ToastAndroid.show(
+          "Login Successfully",
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
+        setAuth(true);
+      } else {
+        Alert.alert("Erro", "Email is not verified");
+        await auth.signOut();
+      }
+    } catch (error) {
+      Alert.alert("Invalid Credentials", "Please try again", [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        { text: "OK", onPress: () => console.log("OK Pressed") },
+      ]);
     }
-    else{
-      Alert.alert("Erro", "Email is not verified");
-      await auth.signOut();
-    }
-  } catch (error) {
-    Alert.alert('Invalid Credentials', 'Please try again', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      { text: 'OK', onPress: () => console.log('OK Pressed') },
-    ]);
-  }
-};
+  };
 
+  const handleForgotPassword = () => {
+    setPromptVisible(true);
+  };
+
+  const handlePasswordReset = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert("Success", "Password reset email sent");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
 
   return (
     <ImageBackground
@@ -88,7 +111,9 @@ const LoginForm = ({setAuth}) => {
             <View className="space-y-2">
               <View className="flex flex-row items-center justify-between">
                 <Text className="text-lg">Password</Text>
-                <Text className="text-lg underline">Forget Password</Text>
+                <TouchableOpacity onPress={handleForgotPassword}>
+                  <Text className="text-lg underline">Forget Password</Text>
+                </TouchableOpacity>
               </View>
               <View className="relative z-10">
                 <View className="flex items-center absolute top-4 left-3 z-50">
@@ -122,13 +147,20 @@ const LoginForm = ({setAuth}) => {
               </Text>
             </TouchableOpacity>
             <Text className="text-lg py-2 text-center">
-              <TouchableOpacity onPress={()=>navigation.navigate('Signup')}>
-                <Text className="underline text-lg">Don't have an account? Signup</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text className="underline text-lg">
+                  Don't have an account? Signup
+                </Text>
               </TouchableOpacity>
             </Text>
           </View>
         </View>
       </View>
+      <ForgotPass
+        visible={isPromptVisible}
+        onClose={() => setPromptVisible(false)}
+        onSubmit={handlePasswordReset}
+      />
     </ImageBackground>
   );
 };
