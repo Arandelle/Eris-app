@@ -10,6 +10,8 @@ import {
   ToastAndroid,
   Alert,
 } from "react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import {app, auth} from "./firebaseConfig"
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from '@react-navigation/native';
 
@@ -25,24 +27,25 @@ const LoginForm = ({setAuth}) => {
     setShowPass(!showPass);
   };
 
-  const handleLogin = () => {
-    if (username === "user@gmail.com" && password === "123456"){
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      const user = userCredential.user;
       navigation.navigate('TabNavigator');
-      ToastAndroid.show('Login Successfully',
-      ToastAndroid.SHORT,
-      ToastAndroid.BOTTOM)
+      ToastAndroid.show('Login Successfully', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
       setAuth(true);
-    } else {
+    } catch (error) {
       Alert.alert('Invalid Credentials', 'Please try again', [
         {
           text: 'Cancel',
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel',
         },
-        {text: 'OK', onPress: () => console.log('OK Pressed')},
+        { text: 'OK', onPress: () => console.log('OK Pressed') },
       ]);
     }
   };
+  
 
   return (
     <ImageBackground
