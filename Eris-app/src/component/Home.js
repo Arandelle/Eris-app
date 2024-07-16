@@ -7,14 +7,15 @@ import { auth, database } from "./firebaseConfig";
 
 const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
   const navigation = useNavigation();
+  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [userData, setUserData] = useState(null);
-  const [email, setEmail] = useState("");
 
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("isAuth");
+      await AsyncStorage.removeItem("userData");
       setAuth(false);
       navigation.navigate("Login");
     } catch (e) {
@@ -36,6 +37,9 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
           age,
           email: user.email, // Add this line
         });
+        await update(userRef, updatedData);
+        await AsyncStorage.setItem("userData", JSON.stringify(updatedData));
+        setUserData(updatedData);
         Alert.alert("Success", "User info updated successfully");
       } catch (error) {
         Alert.alert("Error", error.message);
@@ -45,17 +49,34 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
     }
   };
 
+  const loadUserData = async () => {
+    try {
+      const savedUserData = await AsyncStorage.getItem("userData");
+      if (savedUserData) {
+        const parsedUserData = JSON.parse(savedUserData);
+        setUserData(parsedUserData);
+        setName(parsedUserData.name || "");
+        setAge(parsedUserData.age || "");
+        setEmail(parsedUserData.email || "");
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    }
+  };
+
   useEffect(() => {
+    loadUserData();
     const user = auth.currentUser;
     if (user) {
-      setEmail(user.email); // Set the email from the authenticated user
       const userRef = ref(database, `users/${user.uid}`);
-      const unsubscribe = onValue(userRef, (snapshot) => {
+      const unsubscribe = onValue(userRef, async (snapshot) => {
         const data = snapshot.val();
-        setUserData(data);
         if (data) {
+          setUserData(data);
           setName(data.name || "");
           setAge(data.age || "");
+          setEmail(data.email || "");
+          await AsyncStorage.setItem("userData", JSON.stringify(data));
         }
       });
 
@@ -66,9 +87,8 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
 
   return (
     <View className="h-full flex items-center justify-center bg-gray-100">
-      <View className="flex flex-row w-60 justify-between">
+      <View className="flex flex-row w-72 justify-between">
         <Button title="Logout" onPress={handleLogout} />
-        <Button title="Signup" onPress={() => navigation.navigate("Signup")} />
         <Button title="Add Notification" onPress={handleBadgeSize} />
         <Button title="Add Info" onPress={handleAddInfo} />
       </View>
