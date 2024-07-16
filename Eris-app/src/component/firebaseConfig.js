@@ -1,6 +1,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getDatabase} from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBrkkfs5GIMi1U4UwjLVtR8B9AJ4xZz8Uw",
@@ -8,7 +9,8 @@ const firebaseConfig = {
   projectId: "eris-app-cc463",
   storageBucket: "eris-app-cc463.appspot.com",
   messagingSenderId: "495460903256",
-  appId: "1:495460903256:android:45f3216f01278a6d4ddd2d"
+  appId: "1:495460903256:android:45f3216f01278a6d4ddd2d",
+  databaseURL: "https://eris-app-cc463-default-rtdb.firebaseio.com/"
 };
 
 // Initialize Firebase
@@ -24,4 +26,5 @@ const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
 
-export { app, auth };
+const database = getDatabase(app);
+export { app, auth, database };
