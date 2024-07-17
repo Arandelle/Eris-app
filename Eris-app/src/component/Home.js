@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, TextInput, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Button, TextInput, Alert, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, database } from "./firebaseConfig";
+import { AppState } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
   const navigation = useNavigation();
@@ -13,6 +15,74 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
   const [userData, setUserData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = async (uid) => {
+    setLoading(true);
+    const userRef = ref(database, `users/${uid}`);
+    try {
+      const snapshot = await new Promise((resolve, reject) => {
+        onValue(userRef, resolve, reject, { onlyOnce: true });
+      });
+      const data = snapshot.val();
+      if (data) {
+        setUserData(data);
+        setName(data.name || "");
+        setAge(data.age || "");
+        setEmail(data.email || "");
+        setIsProfileComplete(!!data.name && !!data.age);
+        
+        await AsyncStorage.setItem('userData', JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      Alert.alert("Error", "Failed to fetch user data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const cachedData = await AsyncStorage.getItem('userData');
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          setUserData(parsedData);
+          setName(parsedData.name || "");
+          setAge(parsedData.age || "");
+          setEmail(parsedData.email || "");
+          setIsProfileComplete(!!parsedData.name && !!parsedData.age);
+        }
+        fetchUserData(user.uid);
+      } else {
+        setAuth(false);
+        navigation.navigate("Login");
+      }
+    });
+
+    const subscription = AppState.addEventListener("change", nextAppState => {
+      if (nextAppState === "active") {
+        const user = auth.currentUser;
+        if (user) {
+          fetchUserData(user.uid);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (userData && (!userData.name || !userData.age)) {
+      setModalVisible(true);
+    } else {
+      setModalVisible(false);
+    }
+  }, [userData]);
 
   const handleLogout = async () => {
     try {
@@ -40,6 +110,7 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
       };
       try {
         await update(userRef, updatedData);
+        setUserData(updatedData)
         Alert.alert("Success", "User info updated successfully");
       } catch (error) {
         Alert.alert("Error", error.message);
@@ -49,33 +120,13 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
     }
   };
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      const userRef = ref(database, `users/${user.uid}`);
-      const unsubscribe = onValue(userRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          setUserData(data);
-          setName(data.name || "");
-          setAge(data.age || "");
-          setEmail(data.email || "");
-          setIsProfileComplete(!!data.name && !!data.age);
-        }
-      });
-
-      // Cleanup function
-      return () => unsubscribe();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userData && (!userData.name || !userData.age)) {
-      setModalVisible(true);
-    } else {
-      setModalVisible(false);
-    }
-  }, [userData]);
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View className="h-full flex items-center justify-center bg-gray-100">
@@ -122,7 +173,7 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(false);
-                  navigation.navigate('ProfileEdit'); // Assuming you have a ProfileEdit screen
+                  navigation.navigate('Profile'); // Assuming you have a ProfileEdit screen
                 }}
               >
                 <Text className="text-blue-600 text-lg">Update Profile</Text>
