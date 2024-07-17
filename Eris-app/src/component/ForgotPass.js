@@ -5,10 +5,9 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
-  StyleSheet,
 } from "react-native";
 
-const EmailPrompt = ({ visible, onClose, onSubmit }) => {
+const ForgotPass = ({ visible, onClose, onSubmit }) => {
   const [email, setEmail] = useState("");
 
   const handleEmailChange = (text) => {
@@ -27,30 +26,30 @@ const EmailPrompt = ({ visible, onClose, onSubmit }) => {
       transparent={true}
       animationType="slide"
     >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.title}>Reset Password</Text>
-          <Text style={styles.message}>Enter your email address</Text>
+      <View className="flex-1 justify-center items-center" style={{backgroundColor: "rgba(0,0,0,0.5)"}}>
+        <View className="w-72 p-4 bg-white rounded-md ">
+          <Text className="font-bold mb-3 text-lg">Reset Password</Text>
+          <Text className="font-thin mb-3 text-[16px]">Enter your email address</Text>
           <TextInput
-            style={styles.input}
+            className="w-full p-2 border border-gray-400 rounded-md mb-5"
             placeholder="Email"
             onChangeText={handleEmailChange}
             value={email}
             autoCapitalize="none"
             keyboardType="email-address"
           />
-          <View style={styles.buttonContainer}>
+          <View className="flex flex-row justify-between w-100">
             <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
+              className="flex-1 p-2.5 rounded-md items-center bg-gray-400 mr-2.5"
               onPress={onClose}
             >
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text className="text-white font-bold">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, styles.submitButton]}
+              className="flex-1 p-2.5 rounded-md items-center bg-blue-600"
               onPress={handleSubmit}
             >
-              <Text style={styles.buttonText}>OK</Text>
+              <Text className="font-bold text-white">Submit</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -59,60 +58,4 @@ const EmailPrompt = ({ visible, onClose, onSubmit }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  message: {
-    fontSize: 14,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  button: {
-    flex: 1,
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#ccc",
-    marginRight: 10,
-  },
-  submitButton: {
-    backgroundColor: "#007bff",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});
-
-export default EmailPrompt;
+export default ForgotPass;
