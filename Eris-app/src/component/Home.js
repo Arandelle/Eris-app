@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, TextInput, Alert } from "react-native";
+import { View, Text, Button, TextInput, Alert, Modal, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ref, update, onValue } from "firebase/database";
@@ -11,6 +11,9 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [userData, setUserData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
+
 
   const handleLogout = async () => {
     try {
@@ -31,15 +34,16 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
     const user = auth.currentUser;
     if (user) {
       const userRef = ref(database, `users/${user.uid}`);
+      const updatedData = { name, age, email: user.email };
       try {
-        await update(userRef, {
-          name,
-          age,
-          email: user.email, // Add this line
-        });
         await update(userRef, updatedData);
         await AsyncStorage.setItem("userData", JSON.stringify(updatedData));
         setUserData(updatedData);
+        
+        const isComplete = updatedData.name && updatedData.age;
+        setIsProfileComplete(isComplete);
+        await AsyncStorage.setItem("isProfileComplete", isComplete ? "true" : "false");
+        
         Alert.alert("Success", "User info updated successfully");
       } catch (error) {
         Alert.alert("Error", error.message);
@@ -48,10 +52,13 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
       Alert.alert("Error", "User not authenticated");
     }
   };
+  
 
   const loadUserData = async () => {
     try {
       const savedUserData = await AsyncStorage.getItem("userData");
+      const profileComplete = await AsyncStorage.getItem("isProfileComplete");
+      
       if (savedUserData) {
         const parsedUserData = JSON.parse(savedUserData);
         setUserData(parsedUserData);
@@ -59,6 +66,8 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
         setAge(parsedUserData.age || "");
         setEmail(parsedUserData.email || "");
       }
+      
+      setIsProfileComplete(profileComplete === "true");
     } catch (error) {
       console.error("Error loading user data:", error);
     }
@@ -77,13 +86,24 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
           setAge(data.age || "");
           setEmail(data.email || "");
           await AsyncStorage.setItem("userData", JSON.stringify(data));
+          
+          const isComplete = data.name && data.age;
+          setIsProfileComplete(isComplete);
+          await AsyncStorage.setItem("isProfileComplete", isComplete ? "true" : "false");
         }
       });
-
-      // Cleanup function
+       // Cleanup function
       return () => unsubscribe();
     }
   }, []);
+  
+  useEffect(() => {
+    if (!isProfileComplete && userData) {
+      setModalVisible(true);
+    }
+  }, [isProfileComplete, userData]);
+  
+
 
   return (
     <View className="h-full flex items-center justify-center bg-gray-100">
@@ -111,6 +131,33 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
         <Text>Name: {userData?.name}</Text>
         <Text>Age: {userData?.age}</Text>
       </View>
+
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <View className="flex-1 justify-center items-center bg-opacity-50" style={{backgroundColor: "rgba(0,0,0,0.5)"}}>
+    <View className="bg-white w-80 p-5 rounded-lg">
+      <Text className="text-lg mb-4"> To access certain features of the app, please update and verify your information.</Text>
+      <View className="flex-row justify-around">
+        <TouchableOpacity onPress={() => setModalVisible(false)}>
+          <Text className="text-gray-600 text-lg">Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => {
+            setModalVisible(false);
+            navigation.navigate('ProfileEdit'); // Assuming you have a ProfileEdit screen
+          }}
+        >
+          <Text className="text-blue-600 text-lg">Update Profile</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 };
