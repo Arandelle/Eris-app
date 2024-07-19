@@ -47,11 +47,13 @@ const Profile = () => {
 
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
+    const isProfileCompleted = name && age ? true : false
     if (user) {
       const updatedData = {
         name,
         age,
         email: user.email, // Maintain existing email
+        profileComplete: isProfileCompleted
       };
 
       const userRef = ref(database, `users/${user.uid}`);
