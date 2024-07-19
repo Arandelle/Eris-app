@@ -6,6 +6,8 @@ import {
   Button,
   Alert,
   ActivityIndicator,
+  ScrollView,
+  SafeAreaView
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
@@ -55,6 +57,7 @@ const Profile = ({ setIsProfileComplete }) => {
   const handleShowUpdateForm = () => {
     setShowUpdateForm(!showUpdateForm);
   };
+
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
     const isProfileCompleted =
@@ -87,9 +90,9 @@ const Profile = ({ setIsProfileComplete }) => {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -98,67 +101,65 @@ const Profile = ({ setIsProfileComplete }) => {
   };
 
   return (
-    <View className="h-full bg-blue-600">
-      <View className="bg-white space-y-1 h-70 mx-5 rounded-md p-8 mt-20">
-        <View className="space-y-2">
-          <Text className="text-3xl text-center font-bold">
-            {userData?.firstname} {userData?.lastname}
-          </Text>
-          <Text className="text-center font-bold text-lg">
-            {userData?.mobileNum}
-          </Text>
-        </View>
-        <Text className="text-lg text-gray-500 font-bold">Age: </Text>
-        <Text className="text-xl font-extrabold">{userData?.age}</Text>
-        <Text className="text-lg text-gray-500 font-bold">Email Address: </Text>
-        <Text className="text-xl font-extrabold">{userData?.email}</Text>
-        <Text className="text-lg text-gray-500 font-bold">
-          Current Address:{" "}
-        </Text>
-        <Text className="text-xl font-extrabold">{userData?.address}</Text>
-        <View>
-          <View className="mt-10">
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        <View style={{ flex: 1, backgroundColor: "#e0f7fa" }}>
+          <View style={{ backgroundColor: "#ffffff", margin: 16, borderRadius: 8, padding: 16 }}>
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
+                {userData?.firstname} {userData?.lastname}
+              </Text>
+              <Text style={{ fontSize: 18, textAlign: 'center', color: '#555' }}>
+                {userData?.mobileNum}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Age:</Text>
+            <Text style={{ fontSize: 20 }}>{userData?.age}</Text>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Email Address:</Text>
+            <Text style={{ fontSize: 20 }}>{userData?.email}</Text>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Current Address:</Text>
+            <Text style={{ fontSize: 20 }}>{userData?.address}</Text>
             <Button title="Update Profile" onPress={handleShowUpdateForm} />
           </View>
-        </View>
-      </View>
 
-      {showUpdateForm && (
-        <View>
-          <TextInput
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-            value={firstname}
-            onChangeText={setFirstName}
-            placeholder="Enter your firstname"
-          />
-          <TextInput
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-            value={lastname}
-            onChangeText={setLastName}
-            placeholder="Enter your lastname"
-          />
-          <TextInput
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-            value={mobileNum}
-            onChangeText={setMobileNum}
-            placeholder="Enter your mobile number"
-          />
-          <TextInput
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-            value={address}
-            onChangeText={setCurrentAddress}
-            placeholder="Enter your current address"
-          />
-          <TextInput
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-            value={age}
-            onChangeText={setAge}
-            placeholder="Enter your age"
-          />
-          <Button title="Update Profile" onPress={handleUpdateProfile} />
+          {showUpdateForm && (
+            <View style={{ margin: 16 }}>
+              <TextInput
+                style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+                value={firstname}
+                onChangeText={setFirstName}
+                placeholder="Enter your firstname"
+              />
+              <TextInput
+                style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+                value={lastname}
+                onChangeText={setLastName}
+                placeholder="Enter your lastname"
+              />
+              <TextInput
+                style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+                value={mobileNum}
+                onChangeText={setMobileNum}
+                placeholder="Enter your mobile number"
+              />
+              <TextInput
+                style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+                value={address}
+                onChangeText={setCurrentAddress}
+                placeholder="Enter your current address"
+              />
+              <TextInput
+                style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+                value={age}
+                onChangeText={setAge}
+                placeholder="Enter your age"
+              />
+              <Button title="Update Profile" onPress={handleUpdateProfile} />
+            </View>
+          )}
         </View>
-      )}
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
