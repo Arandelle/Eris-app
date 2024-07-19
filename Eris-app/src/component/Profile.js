@@ -12,7 +12,7 @@ import { ref, update, onValue } from "firebase/database";
 import { auth, database } from "./firebaseConfig"; // Adjust path as needed
 import { signOut, onAuthStateChanged } from "firebase/auth";
 
-const Profile = () => {
+const Profile = ({setIsProfileComplete}) => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [name, setName] = useState("");
@@ -60,6 +60,7 @@ const Profile = () => {
       try {
         await update(userRef, updatedData);
         setUserData(updatedData);
+        updateProfileStatus(isProfileCompleted);
         Alert.alert("Success", "Profile updated successfully!");
       } catch (error) {
         console.error("Error updating user data:", error);
@@ -77,6 +78,10 @@ const Profile = () => {
       </View>
     );
   }
+
+  const updateProfileStatus = (status) => {
+    setIsProfileComplete(status);
+  };
 
   return (
     <View className="h-full flex items-center justify-center bg-gray-100">

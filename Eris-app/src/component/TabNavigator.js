@@ -7,12 +7,12 @@ import Notification from "./Notification";
 import Profile from "./Profile";
 import SignupForm from "./SignupForm";
 import { View, Text } from "react-native";
-import { styled } from "nativewind";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({ setAuth }) => {
   const [badgeSize, setBadgeSize] = useState(0);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   return (
     <Tab.Navigator
@@ -23,42 +23,46 @@ const TabNavigator = ({ setAuth }) => {
           let iconName;
 
           switch (route.name) {
-            case 'Home':
+            case "Home":
               iconName = "home-outline";
               break;
-            case 'signup':
+            case "signup":
               iconName = "map-marker-outline";
               break;
-            case 'Map':
+            case "Map":
               iconName = "plus";
               break;
-            case 'Notification':
+            case "Notification":
               iconName = "bell-outline";
               break;
-            case 'Profile':
+            case "Profile":
               iconName = "account-circle-outline";
               break;
             default:
               break;
           }
 
-          const isMiddle = route.name === 'Map';
+          const isMiddle = route.name === "Map";
 
-           return (
+          return (
             <View className="items-center">
-              <View className={`items-center justify-center`}
-               style={{ 
-                width: isMiddle ? 55 : null,
-                height: isMiddle ? 55 : null, 
-                bottom: isMiddle ? 25 : 0,
-                borderRadius: isMiddle ? 50 : 25, 
-                borderColor: isMiddle ? "white" : null,
-                borderWidth: isMiddle ? 3 : null,
-                backgroundColor: isMiddle ? '#42a5f5' : 'transparent', 
-                
-              }}>
-                <Icon name={iconName} size={isMiddle ? size : size + 4} color={isMiddle ? 'white' : color}
-                 />
+              <View
+                className={`items-center justify-center`}
+                style={{
+                  width: isMiddle ? 55 : null,
+                  height: isMiddle ? 55 : null,
+                  bottom: isMiddle ? 25 : 0,
+                  borderRadius: isMiddle ? 50 : 25,
+                  borderColor: isMiddle ? "white" : null,
+                  borderWidth: isMiddle ? 3 : null,
+                  backgroundColor: isMiddle ? "#42a5f5" : "transparent",
+                }}
+              >
+                <Icon
+                  name={iconName}
+                  size={isMiddle ? size : size + 4}
+                  color={isMiddle ? "white" : color}
+                />
               </View>
             </View>
           );
@@ -68,7 +72,7 @@ const TabNavigator = ({ setAuth }) => {
         tabBarStyle: {
           paddingBottom: 10,
           paddingTop: 10,
-          height: 70, 
+          height: 70,
           position: "absolute",
           bottom: 16,
           right: 16,
@@ -81,28 +85,41 @@ const TabNavigator = ({ setAuth }) => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen
-        name="Home"
-      >
-        {props => <Home {...props} setAuth={setAuth} badgeSize={badgeSize} setBadgeSize={setBadgeSize} />}
+      <Tab.Screen name="Home">
+        {(props) => (
+          <Home
+            {...props}
+            setAuth={setAuth}
+            badgeSize={badgeSize}
+            setBadgeSize={setBadgeSize}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen
         name="signup"
         component={SignupForm}
-        options={{ title: "Signup"
-       }}  
+        options={{ title: "Signup" }}
       />
       <Tab.Screen name="Map" component={Map} />
       <Tab.Screen
         name="Notification"
         component={Notification}
-        options={{ title: "Notification", tabBarBadge: badgeSize === 0 ? null : badgeSize }}
+        options={{
+          title: "Notification",
+          tabBarBadge: badgeSize === 0 ? null : badgeSize,
+        }}
       />
       <Tab.Screen
         name="Profile"
-        component={Profile}
-        options={{ title: "Profile" }}
-      />
+        options={{
+          title: "Profile",
+          tabBarBadge: isProfileComplete ? null : true,
+        }}
+      >
+        {(props) => (
+          <Profile {...props} setIsProfileComplete={setIsProfileComplete} />
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
