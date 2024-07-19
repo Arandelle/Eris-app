@@ -65,7 +65,7 @@ const TabNavigator = ({ setAuth }) => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home" options={{title: "ERIS"}}>
+      <Tab.Screen name="Home">
         {(props) => (
           <Home
             {...props}

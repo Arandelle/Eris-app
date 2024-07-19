@@ -15,9 +15,13 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 const Profile = ({setIsProfileComplete}) => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
-  const [name, setName] = useState("");
+  const [mobileNum, setMobileNum] = useState("");
+  const [firstname, setFirstName] = useState("");
+  const [lastname, setLastName] = useState("");
   const [age, setAge] = useState("");
+  const [address, setCurrentAddress] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -30,8 +34,11 @@ const Profile = ({setIsProfileComplete}) => {
           });
           const data = snapshot.val();
           setUserData(data);
-          setName(data?.name || "");
+          setMobileNum(data?.mobileNum || "")
+          setFirstName(data?.firstname || "");
+          setLastName(data?.lastname || "");
           setAge(data?.age || "");
+          setCurrentAddress(data?.address || "");
           setLoading(false); // Set loading to false after data is fetched
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -45,14 +52,20 @@ const Profile = ({setIsProfileComplete}) => {
     return () => unsubscribeAuth();
   }, []);
 
+  const handleShowUpdateForm = () => {
+    setShowUpdateForm(!showUpdateForm);
+  }
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
-    const isProfileCompleted = name && age ? true : false
+    const isProfileCompleted = firstname && age ? true : false
     if (user) {
       const updatedData = {
-        name,
+        firstname,
+        lastname,
         age,
+        address,
         email: user.email, // Maintain existing email
+        mobileNum,
         profileComplete: isProfileCompleted
       };
 
@@ -84,21 +97,46 @@ const Profile = ({setIsProfileComplete}) => {
   };
 
   return (
-    <View className="h-full bg-gray-100">
-      <Text className="text-lg mb-2">Profile Information</Text>
-      <Text>Email: {userData?.email}</Text>
-      <Text>First Name: {userData?.firstname}</Text>
-      <Text>Last Name: {userData?.lastname}</Text>
-      <Text>Age: {userData?.age}</Text>
-      <Text>Gender: {userData?.gender}</Text>
-      <Text>Address: {userData?.address}</Text>
+    <View className="h-full bg-blue-600">
 
+        <View className="bg-white space-y-1 h-full p-8 mt-20">
+       <View className="space-y-2">
+          <Text className="text-3xl text-center font-bold">{userData?.firstname} {userData?.lastname}</Text>
+            <Text className="text-center font-bold text-lg">{userData?.mobileNum}</Text>
+       </View>
+        <Text className="text-lg text-gray-500 font-bold">Age: </Text> 
+        <Text className="text-xl font-extrabold">{userData?.age}</Text> 
+        <Text className="text-lg text-gray-500 font-bold">Email Address: </Text>
+        <Text className="text-xl font-extrabold">{userData?.email}</Text>
+        <Text className="text-lg text-gray-500 font-bold">Current Address: </Text>
+        <Text className="text-xl font-extrabold">{userData?.address}</Text>
+        <View><Button title="Update Profile" onPress={ handleShowUpdateForm} /></View>
+        </View>
 
+     {showUpdateForm && (<View> 
+     <TextInput
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+        value={firstname}
+        onChangeText={setFirstName}
+        placeholder="Enter your firstname"
+      />
       <TextInput
         className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
-        value={name}
-        onChangeText={setName}
-        placeholder="Enter your name"
+        value={lastname}
+        onChangeText={setLastName}
+        placeholder="Enter your lastname"
+      />
+      <TextInput
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+        value={mobileNum}
+        onChangeText={setMobileNum}
+        placeholder="Enter your mobile number"
+      />
+      <TextInput
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+        value={address}
+        onChangeText={setCurrentAddress}
+        placeholder="Enter your current address"
       />
       <TextInput
         className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
@@ -107,6 +145,7 @@ const Profile = ({setIsProfileComplete}) => {
         placeholder="Enter your age"
       />
       <Button title="Update Profile" onPress={handleUpdateProfile} />
+      </View>)}
     </View>
   );
 };
