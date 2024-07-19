@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "./Map";
+import Request from "./Request";
 import Notification from "./Notification";
 import Profile from "./Profile";
 import SignupForm from "./SignupForm";
@@ -18,45 +19,24 @@ const TabNavigator = ({ setAuth }) => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={({ route }) => ({
-        headerShown: false,
+        headerShown: true,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
 
-          switch (route.name) {
-            case "Home":
-              iconName = "home-outline";
-              break;
-            case "signup":
-              iconName = "map-marker-outline";
-              break;
-            case "Map":
-              iconName = "plus";
-              break;
-            case "Notification":
-              iconName = "bell-outline";
-              break;
-            case "Profile":
-              iconName = "account-circle-outline";
-              break;
-            default:
-              break;
+          const icons = {
+            Home: "home-outline",
+            Map: "map-marker-outline",
+            Request: "plus",
+            Notification: "bell-outline",
+            Profile: "account-circle-outline"
           }
 
-          const isMiddle = route.name === "Map";
+          const iconName = icons[route.name]
+          const isMiddle = route.name === "Request";
 
           return (
             <View className="items-center">
               <View
-                className={`items-center justify-center`}
-                style={{
-                  width: isMiddle ? 55 : null,
-                  height: isMiddle ? 55 : null,
-                  bottom: isMiddle ? 25 : 0,
-                  borderRadius: isMiddle ? 50 : 25,
-                  borderColor: isMiddle ? "white" : null,
-                  borderWidth: isMiddle ? 3 : null,
-                  backgroundColor: isMiddle ? "#42a5f5" : "transparent",
-                }}
+                className={`items-center justify-center ${isMiddle ? "h-[55px] w-[55px] bottom-[25px] rounded-full border-white border bg-blue-400" : "bg-transparent"}`}
               >
                 <Icon
                   name={iconName}
@@ -85,7 +65,7 @@ const TabNavigator = ({ setAuth }) => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home">
+      <Tab.Screen name="Home" options={{title: "ERIS"}}>
         {(props) => (
           <Home
             {...props}
@@ -96,11 +76,11 @@ const TabNavigator = ({ setAuth }) => {
         )}
       </Tab.Screen>
       <Tab.Screen
-        name="signup"
-        component={SignupForm}
-        options={{ title: "Signup" }}
+        name="Map"
+        component={Map}
+        options={{ title: "Map" }}
       />
-      <Tab.Screen name="Map" component={Map} />
+      <Tab.Screen name="Request" component={Request} />
       <Tab.Screen
         name="Notification"
         component={Notification}
@@ -113,6 +93,7 @@ const TabNavigator = ({ setAuth }) => {
         name="Profile"
         options={{
           title: "Profile",
+          headerShown: true,
           tabBarBadge: isProfileComplete ? null : true,
         }}
       >

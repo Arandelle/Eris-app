@@ -84,8 +84,16 @@ const Profile = ({setIsProfileComplete}) => {
   };
 
   return (
-    <View className="h-full flex items-center justify-center bg-gray-100">
+    <View className="h-full bg-gray-100">
       <Text className="text-lg mb-2">Profile Information</Text>
+      <Text>Email: {userData?.email}</Text>
+      <Text>First Name: {userData?.firstname}</Text>
+      <Text>Last Name: {userData?.lastname}</Text>
+      <Text>Age: {userData?.age}</Text>
+      <Text>Gender: {userData?.gender}</Text>
+      <Text>Address: {userData?.address}</Text>
+
+
       <TextInput
         className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
         value={name}
@@ -98,9 +106,6 @@ const Profile = ({setIsProfileComplete}) => {
         onChangeText={setAge}
         placeholder="Enter your age"
       />
-      <Text>Email: {userData?.email}</Text>
-      <Text>Name: {userData?.name}</Text>
-      <Text>Age: {userData?.age}</Text>
       <Button title="Update Profile" onPress={handleUpdateProfile} />
     </View>
   );

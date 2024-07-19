@@ -8,6 +8,7 @@ import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
 import { Button,Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import Profile from "./src/component/Profile";
 
 const Stack = createNativeStackNavigator();
 
@@ -67,14 +68,9 @@ const App = () => {
       >
         {isAuth ? (
           <>
-            <Stack.Screen name="ERIS" options={{ headerShown: true }}>
+            <Stack.Screen name="ERIS" options={{ headerShown: false }}>
               {(props) => <TabNavigator {...props} setAuth={handleAuth} />}
             </Stack.Screen>
-            <Stack.Screen
-              name="Signup"
-              component={SignupForm}
-              options={{ headerShown: true }}
-            />
           </>
         ) : (
           <>
