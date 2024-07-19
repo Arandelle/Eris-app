@@ -72,6 +72,7 @@ const TabNavigator = ({ setAuth }) => {
             setAuth={setAuth}
             badgeSize={badgeSize}
             setBadgeSize={setBadgeSize}
+            setIsProfileComplete={setIsProfileComplete}
           />
         )}
       </Tab.Screen>
@@ -94,7 +95,7 @@ const TabNavigator = ({ setAuth }) => {
         options={{
           title: "Profile",
           headerShown: true,
-          tabBarBadge: isProfileComplete ? null : true,
+          tabBarBadge: !isProfileComplete ? true : null,
         }}
       >
         {(props) => (

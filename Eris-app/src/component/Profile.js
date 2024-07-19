@@ -77,7 +77,7 @@ const Profile = ({ setIsProfileComplete }) => {
       try {
         await update(userRef, updatedData);
         setUserData(updatedData);
-        updateProfileStatus(isProfileCompleted);
+        setIsProfileComplete(isProfileCompleted);
         Alert.alert("Success", "Profile updated successfully!");
       } catch (error) {
         console.error("Error updating user data:", error);
@@ -95,10 +95,6 @@ const Profile = ({ setIsProfileComplete }) => {
       </SafeAreaView>
     );
   }
-
-  const updateProfileStatus = (status) => {
-    setIsProfileComplete(status);
-  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

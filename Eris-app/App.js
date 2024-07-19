@@ -6,9 +6,8 @@ import SignupForm from "./src/component/SignupForm";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
-import { Button,Text, TouchableOpacity } from "react-native";
+import {Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Profile from "./src/component/Profile";
 
 const Stack = createNativeStackNavigator();
 

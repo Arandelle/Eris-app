@@ -7,7 +7,7 @@ import { auth, database } from "./firebaseConfig";
 import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const FetchingData = () => {
+const FetchingData = ({setIsProfileComplete}) => {
   const [email, setEmail] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -23,8 +23,10 @@ const FetchingData = () => {
       const data = snapshot.val();
       if (data) {
         setEmail(data.email || "");    
-        setModalVisible(!data.profileComplete); // Update modal visibility
-        await AsyncStorage.setItem("userData", JSON.stringify(data));
+        const profileComplete = data.profileComplete || false;
+        setModalVisible(!profileComplete);
+        setIsProfileComplete(profileComplete);
+        // await AsyncStorage.setItem("userData", JSON.stringify(data));
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -37,14 +39,15 @@ const FetchingData = () => {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const cachedData = await AsyncStorage.getItem("userData");
-        if (cachedData) {
-          const parsedData = JSON.parse(cachedData);
-          setEmail(parsedData.email || "");
-          if (!parsedData.profileComplete) {
-            setModalVisible(true);
-          }
-        }
+        // const cachedData = await AsyncStorage.getItem("userData");
+        // if (cachedData) {
+        //   const parsedData = JSON.parse(cachedData);
+        //   setEmail(parsedData.email || "");
+        //   if (!parsedData.profileComplete) {
+        //     setModalVisible(true);
+        //     setIsProfileComplete(true)
+        //   }
+        // }
         fetchUserData(user.uid);
       } else {
         // setAuth(false); // Uncomment or define setAuth if necessary

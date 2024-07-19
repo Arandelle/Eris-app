@@ -6,7 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import FetchingData from "./FetchingData";
 
-const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
+const Home = ({ setAuth, badgeSize, setBadgeSize, setIsProfileComplete }) => {
   const navigation = useNavigation();
   const handleLogout = async () => {
     try {
@@ -25,7 +25,7 @@ const Home = ({ setAuth, badgeSize, setBadgeSize }) => {
 
   return (
     <View>
-      <FetchingData/>
+      <FetchingData setIsProfileComplete={setIsProfileComplete}/>
       <View className="h-full flex items-center justify-center bg-gray-100">
         <View className="flex flex-row w-72 justify-between">
           <Button title="Logout" onPress={handleLogout} />
