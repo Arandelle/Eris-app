@@ -1,16 +1,25 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getDatabase} from "firebase/database";
+import { getDatabase } from "firebase/database";
+import { 
+  API_KEY, 
+  AUTH_DOMAIN, 
+  PROJECT_ID, 
+  STORAGE_BUCKET, 
+  MESSAGING_SENDER_ID, 
+  APP_ID, 
+  DATABASE_URL 
+} from '@env';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBrkkfs5GIMi1U4UwjLVtR8B9AJ4xZz8Uw",
-  authDomain: "eris-app-cc463.firebaseapp.com",
-  projectId: "eris-app-cc463",
-  storageBucket: "eris-app-cc463.appspot.com",
-  messagingSenderId: "495460903256",
-  appId: "1:495460903256:android:45f3216f01278a6d4ddd2d",
-  databaseURL: "https://eris-app-cc463-default-rtdb.firebaseio.com/"
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
+  databaseURL: DATABASE_URL
 };
 
 // Initialize Firebase
