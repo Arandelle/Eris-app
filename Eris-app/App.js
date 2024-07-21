@@ -6,7 +6,7 @@ import SignupForm from "./src/component/SignupForm";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
-import {Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import UpdateProfile from "./src/component/UpdateProfile";
 
@@ -22,7 +22,6 @@ const LoginButton = () => {
 };
 
 const App = () => {
-
   const [isAuth, setAuth] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
@@ -60,23 +59,36 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{ headerShown: false,
-        headerTitleAlign: "center",
-        headerTitleStyle: {
-          fontWeight: '900',
-          fontSize: 24,
-        }}}
+        screenOptions={{
+          headerShown: false,
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontWeight: "900",
+            fontSize: 24,
+          },
+        }}
       >
         {isAuth ? (
           <>
             <Stack.Screen name="ERIS" options={{ headerShown: false }}>
               {(props) => <TabNavigator {...props} setAuth={handleAuth} />}
             </Stack.Screen>
-            <Stack.Screen name="UpdateProfile" options={{headerShown: true}}>
-            {(props) => <UpdateProfile {...props} setIsProfileComplete={setIsProfileComplete} />}
-            </Stack.Screen>
+            <Stack.Screen
+              name="UpdateProfile"
+              component={UpdateProfile}
+              options={({ navigation }) => ({
+                title: "Update your profile",
+                headerShown: true,
+                headerLeft: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Profile")}
+                  >
+                    <Text className="text-2xl">{`<`}</Text>
+                  </TouchableOpacity>
+                ),
+              })}
+            />
           </>
-         
         ) : (
           <>
             <Stack.Screen name="Login">
@@ -88,7 +100,7 @@ const App = () => {
               options={{
                 headerShown: true,
                 title: "Create your account",
-                headerRight: ()=> <LoginButton />
+                headerRight: () => <LoginButton />,
               }}
             />
           </>

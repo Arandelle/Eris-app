@@ -82,7 +82,7 @@ const FetchingData = ({ setIsProfileComplete }) => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View className="flex-1 justify-center items-center" style={{backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <View className="flex-1 justify-center items-center shadow-lg" style={{backgroundColor: 'rgba(0,0,0,0.5)' }}>
         <View className="bg-white w-80 p-5 rounded-md">
           <Text className="text-lg mb-4">
             To access certain features of the app, please update and verify your information.

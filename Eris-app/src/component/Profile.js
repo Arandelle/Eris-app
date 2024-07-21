@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, ActivityIndicator, ScrollView, SafeAreaView, Alert } from "react-native";
+import { View, Text, Button, ActivityIndicator, ScrollView, SafeAreaView, Alert, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
 import { auth, database } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 
-const Profile = ({setIsProfileComplete}) => {
+const Profile = ({ setIsProfileComplete }) => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,40 +44,51 @@ const Profile = ({setIsProfileComplete}) => {
       onProfileUpdated: (updatedData) => {
         setUserData(updatedData);
         const isProfileCompleted = updatedData.firstname && updatedData.lastname && updatedData.age && updatedData.address && updatedData.mobileNum;
-      setIsProfileComplete(isProfileCompleted);
+        setIsProfileComplete(isProfileCompleted);
       },
     });
   };
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <SafeAreaView className="flex-1">
+        <ActivityIndicator size="large" color="#007bff" />
       </SafeAreaView>
     );
   }
 
+  const renderPlaceholder = (value, placeholder) => {
+    return value ? (<Text className="text-xl text-gray-500">{value}</Text>) :
+     (<Text className="italic text-xl text-gray-900">{placeholder}</Text>);
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={{ flex: 1, backgroundColor: "#e0f7fa" }}>
-          <View style={{ backgroundColor: "#ffffff", margin: 16, borderRadius: 8, padding: 16 }}>
-            <View style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
-                {userData?.firstname} {userData?.lastname}
-              </Text>
-              <Text style={{ fontSize: 18, textAlign: 'center', color: '#555' }}>
-                {userData?.mobileNum}
-              </Text>
-            </View>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Age:</Text>
-            <Text style={{ fontSize: 20 }}>{userData?.age}</Text>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Email Address:</Text>
-            <Text style={{ fontSize: 20 }}>{userData?.email}</Text>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Current Address:</Text>
-            <Text style={{ fontSize: 20 }}>{userData?.address}</Text>
-            <Button title="Update Profile" onPress={handleShowUpdateForm} />
+    <SafeAreaView className="flex-1 bg-gray-200">
+      <ScrollView className="pb-5">
+        <View className="flex-1 bg-white rounded-lg m-4 p-5 shadow-md ">
+          <View className="items-center pb-5">
+            <Text className="text-2xl font-bold pb-2">
+            {userData?.firstname && userData?.lastname
+                ? `${userData.firstname} ${userData.lastname}`
+                : renderPlaceholder(null, "Your Name")}
+            </Text>
+            <Text className="text-lg text-white bg-sky-300 p-1 rounded-lg">
+              {userData?.mobileNum ? userData.mobileNum : renderPlaceholder(null, "Phone number")}
+            </Text>
           </View>
+          <View className="mb-5 space-y-8">
+           <View>
+            <Text className="text-xl font-bold mb-2 ">Age:  <Text className="text-lg text-gray-500 font-bold">{userData?.age ? userData?.age : renderPlaceholder(null,"Age")}</Text></Text></View>        
+           <View>
+              <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
+              <Text className="text-lg text-gray-500 font-bold">{userData?.email}</Text>
+           </View>
+           <View>
+              <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
+              <Text className="text-lg text-gray-500 font-bold">{userData?.address ? userData.address : renderPlaceholder(null, "House No. Street Barangay")}</Text>
+           </View>
+          </View>
+          <Button title="Update Profile" onPress={handleShowUpdateForm} color="#007bff" />
         </View>
       </ScrollView>
     </SafeAreaView>
