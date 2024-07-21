@@ -43,6 +43,8 @@ const Profile = ({setIsProfileComplete}) => {
     navigation.navigate("UpdateProfile", {
       onProfileUpdated: (updatedData) => {
         setUserData(updatedData);
+        const isProfileCompleted = updatedData.firstname && updatedData.lastname && updatedData.age && updatedData.address && updatedData.mobileNum;
+      setIsProfileComplete(isProfileCompleted);
       },
     });
   };

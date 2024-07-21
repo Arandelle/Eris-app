@@ -82,16 +82,14 @@ const FetchingData = ({ setIsProfileComplete }) => {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View
-        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}
-      >
-        <View style={{ backgroundColor: 'white', width: 320, padding: 20, borderRadius: 10 }}>
-          <Text style={{ fontSize: 18, marginBottom: 16 }}>
+      <View className="flex-1 justify-center items-center" style={{backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <View className="bg-white w-80 p-5 rounded-md">
+          <Text className="text-lg mb-4">
             To access certain features of the app, please update and verify your information.
           </Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          <View className=" flex-row justify-around">
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={{ color: 'gray', fontSize: 18 }}>Remind Me Later</Text>
+              <Text className="text-gray-500 text-lg">Remind Me Later</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -99,7 +97,7 @@ const FetchingData = ({ setIsProfileComplete }) => {
                 navigation.navigate("UpdateProfile", { onProfileUpdated: handleProfileUpdated });
               }}
             >
-              <Text style={{ color: 'blue', fontSize: 18 }}>Update Profile</Text>
+              <Text className="text-blue-600 text-lg" >Update Profile</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Alert, ScrollView, SafeAreaView, ActivityIndicator } from "react-native";
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  ScrollView,
+  SafeAreaView,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
-import { auth, database } from "./firebaseConfig"; 
+import { auth, database } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import CustomInput from "./CustomInput";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { onProfileUpdated } = route.params;
+  const { onProfileUpdated, setIsProfileComplete } = route.params;
   const [userData, setUserData] = useState(null);
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
@@ -48,7 +57,16 @@ const UpdateProfile = () => {
 
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
-    const isProfileCompleted = firstname && lastname && age && address && mobileNum;
+    const isProfileCompleted =
+      firstname && lastname && age && address && mobileNum;
+    // if (!firstname || !lastname || !age || !address || !mobileNum) {
+    //   Alert.alert(
+    //     "Validation Error",
+    //     "Please fill in all fields before updating your profile."
+    //   );
+    //   return; // Exit the function if any field is empty
+    // }
+
     if (user) {
       const updatedData = {
         firstname,
@@ -71,16 +89,19 @@ const UpdateProfile = () => {
             {
               text: "Cancel",
               onPress: () => console.log("Cancel Pressed"),
-              style: "cancel"
+              style: "cancel",
             },
-            { 
-              text: "OK", 
+            {
+              text: "OK",
               onPress: () => {
                 console.log("OK Pressed");
-                onProfileUpdated(updatedData);  // Notify parent component about the update
+                onProfileUpdated(updatedData); // Notify parent component about the update
+                if (setIsProfileComplete) {
+                  setIsProfileComplete(isProfileCompleted); // Update profile completion status
+                }
                 navigation.navigate("Profile");
-              }
-            }
+              },
+            },
           ],
           { cancelable: false }
         );
@@ -95,43 +116,43 @@ const UpdateProfile = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <SafeAreaView className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={{ flex: 1, backgroundColor: "#e0f7fa" }}>
+    <SafeAreaView className="flex-1">
+      <ScrollView>
+        <View className="flex-1">
           <View style={{ margin: 16 }}>
-            <TextInput
-              style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+            <CustomInput
+              label={"First Name"}
               value={firstname}
               onChangeText={setFirstName}
               placeholder="Enter your firstname"
             />
-            <TextInput
-              style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+            <CustomInput
+              label={"Last Name"}
               value={lastname}
               onChangeText={setLastName}
               placeholder="Enter your lastname"
             />
-            <TextInput
-              style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+            <CustomInput
+              label={"Mobile phone"}
               value={mobileNum}
               onChangeText={setMobileNum}
               placeholder="Enter your mobile number"
             />
-            <TextInput
-              style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+            <CustomInput
+              label={"Complete Address"}
               value={address}
               onChangeText={setCurrentAddress}
               placeholder="Enter your current address"
             />
-            <TextInput
-              style={{ backgroundColor: "#ffffff", borderColor: "#cccccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 }}
+            <CustomInput
+              label={"Age"}
               value={age}
               onChangeText={setAge}
               placeholder="Enter your age"
