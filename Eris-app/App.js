@@ -8,6 +8,7 @@ import DrawerNavigator from "./src/component/DrawerNavigator";
 import TabNavigator from "./src/component/TabNavigator";
 import {Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import UpdateProfile from "./src/component/UpdateProfile";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ const App = () => {
 
   const [isAuth, setAuth] = useState(false);
   const [isLoading, setLoading] = useState(true);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -70,7 +72,11 @@ const App = () => {
             <Stack.Screen name="ERIS" options={{ headerShown: false }}>
               {(props) => <TabNavigator {...props} setAuth={handleAuth} />}
             </Stack.Screen>
+            <Stack.Screen name="UpdateProfile" options={{headerShown: true}}>
+            {(props) => <UpdateProfile {...props} setIsProfileComplete={setIsProfileComplete} />}
+            </Stack.Screen>
           </>
+         
         ) : (
           <>
             <Stack.Screen name="Login">

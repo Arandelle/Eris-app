@@ -7,7 +7,7 @@ import { auth, database } from "./firebaseConfig";
 import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const FetchingData = ({setIsProfileComplete}) => {
+const FetchingData = ({ setIsProfileComplete }) => {
   const [email, setEmail] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,15 +39,6 @@ const FetchingData = ({setIsProfileComplete}) => {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // const cachedData = await AsyncStorage.getItem("userData");
-        // if (cachedData) {
-        //   const parsedData = JSON.parse(cachedData);
-        //   setEmail(parsedData.email || "");
-        //   if (!parsedData.profileComplete) {
-        //     setModalVisible(true);
-        //     setIsProfileComplete(true)
-        //   }
-        // }
         fetchUserData(user.uid);
       } else {
         // setAuth(false); // Uncomment or define setAuth if necessary
@@ -69,6 +60,12 @@ const FetchingData = ({setIsProfileComplete}) => {
       subscription.remove();
     };
   }, []);
+
+  const handleProfileUpdated = (updatedData) => {
+    // Handle the profile update
+    setEmail(updatedData.email || "");
+    setIsProfileComplete(updatedData.profileComplete || false);
+  };
 
   if (loading) {
     return (
@@ -94,12 +91,12 @@ const FetchingData = ({setIsProfileComplete}) => {
           </Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={{ color: 'gray', fontSize: 18 }}>Cancel</Text>
+              <Text style={{ color: 'gray', fontSize: 18 }}>Remind Me Later</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
-                navigation.navigate("Profile"); // Assuming you have a ProfileEdit screen
+                navigation.navigate("UpdateProfile", { onProfileUpdated: handleProfileUpdated });
               }}
             >
               <Text style={{ color: 'blue', fontSize: 18 }}>Update Profile</Text>
