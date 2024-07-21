@@ -15,8 +15,8 @@ const CustomInput = ({ label, value, onChangeText, placeholder, errorMessage }) 
         onChangeText={onChangeText}
         placeholder={placeholder}
         errorMessage={value.length === 0 ? null : <Text className="text-sm">{errorMessage}</Text>}
-        maxLength={(label === "Mobile phone" ? 11 : null, label === "Age" ? 2 : null)}
-        keyboardType={(label === "Mobile phone" || label === "Age" ? "phone-pad" : null )}
+        // maxLength={(label === "Mobile phone" ? 11 : label === "Age" ? 2 : null)}
+        keyboardType={(label === "Mobile phone" || label === "Age" ? "phone-pad" : "default" )}
       />
     </View>
   );

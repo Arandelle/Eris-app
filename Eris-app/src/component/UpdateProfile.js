@@ -25,6 +25,7 @@ const UpdateProfile = () => {
   const [age, setAge] = useState("");
   const [address, setCurrentAddress] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -122,6 +123,18 @@ const UpdateProfile = () => {
     );
   }
 
+  const handleChange = (value) => {
+    const regex = /^(09\d{9}|\+639\d{9})$/;
+
+    if (regex.test(value)) {
+      setError('');
+    } else {
+      setError('Please enter a valid PH contact number');
+    }
+
+    setMobileNum(value);
+  };
+
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="">
@@ -142,9 +155,9 @@ const UpdateProfile = () => {
             <CustomInput
               label={"Mobile phone"}
               value={mobileNum}
-              onChangeText={setMobileNum}
+              onChangeText={handleChange}
               placeholder="Enter your mobile number"
-              errorMessage={mobileNum.length < 11 ? "Enter 11 digits" : null}
+              errorMessage={error}
             />
             <CustomInput
               label={"Complete Address"}
