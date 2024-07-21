@@ -124,7 +124,7 @@ const UpdateProfile = () => {
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView>
+      <ScrollView className="">
         <View className="flex-1">
           <View style={{ margin: 16 }}>
             <CustomInput
@@ -144,6 +144,7 @@ const UpdateProfile = () => {
               value={mobileNum}
               onChangeText={setMobileNum}
               placeholder="Enter your mobile number"
+              errorMessage={mobileNum.length < 11 ? "Enter 11 digits" : null}
             />
             <CustomInput
               label={"Complete Address"}
@@ -156,6 +157,7 @@ const UpdateProfile = () => {
               value={age}
               onChangeText={setAge}
               placeholder="Enter your age"
+              errorMessage={age < 18 ? "User must be above 18 years old" : null}
             />
             <Button title="Update Profile" onPress={handleUpdateProfile} />
           </View>
