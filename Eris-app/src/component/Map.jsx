@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { OPENROUTE_API_KEY } from '@env'
+
+const openRouteKey = OPENROUTE_API_KEY;
 
 const ResponderMap = () => {
   const [responderPosition, setResponderPosition] = useState({
-    latitude: 14.33289,
-    longitude: 120.85065,
+    latitude: 14.334,
+    longitude: 120.85,
   });
   const targetPosition = { latitude: 14.3349, longitude: 120.851 };
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
+  const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -19,7 +23,6 @@ const ResponderMap = () => {
         console.error('Permission to access location was denied');
         return;
       }
-
       let location = await Location.getCurrentPositionAsync({});
       setResponderPosition({
         latitude: location.coords.latitude,
@@ -29,37 +32,35 @@ const ResponderMap = () => {
   }, []);
 
   useEffect(() => {
-    // Simple straight-line route
-    setRoute([responderPosition, targetPosition]);
-    
-    // Calculate distance
-    const dist = calculateDistance(responderPosition, targetPosition);
-    setDistance(dist);
+    fetchRoute();
   }, [responderPosition]);
 
-  const calculateDistance = (start, end) => {
-    const R = 6371; // Radius of the Earth in km
-    const dLat = deg2rad(end.latitude - start.latitude);
-    const dLon = deg2rad(end.longitude - start.longitude);
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(start.latitude)) * Math.cos(deg2rad(end.latitude)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    const d = R * c; // Distance in km
-    return d;
-  };
-
-  const deg2rad = (deg) => {
-    return deg * (Math.PI/180);
+  const fetchRoute = async () => {
+    try {
+      const response = await fetch(
+        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteKey}&start=${responderPosition.longitude},${responderPosition.latitude}&end=${targetPosition.longitude},${targetPosition.latitude}`
+      );
+      const data = await response.json();
+      if (data.features && data.features.length > 0) {
+        const coordinates = data.features[0].geometry.coordinates;
+        const formattedRoute = coordinates.map(coord => ({
+          latitude: coord[1],
+          longitude: coord[0]
+        }));
+        setRoute(formattedRoute);
+        setDistance(data.features[0].properties.summary.distance / 1000); // Convert meters to kilometers
+        setCurrentRouteIndex(0);
+      }
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
   };
 
   const simulateMovement = () => {
-    // Simulate movement towards the target
-    const newLat = responderPosition.latitude + (targetPosition.latitude - responderPosition.latitude) / 10;
-    const newLon = responderPosition.longitude + (targetPosition.longitude - responderPosition.longitude) / 10;
-    setResponderPosition({ latitude: newLat, longitude: newLon });
+    if (currentRouteIndex < route.length - 1) {
+      setResponderPosition(route[currentRouteIndex + 1]);
+      setCurrentRouteIndex(currentRouteIndex + 1);
+    }
   };
 
   return (
@@ -73,21 +74,9 @@ const ResponderMap = () => {
           longitudeDelta: 0.005,
         }}
       >
-        <Marker 
-          coordinate={responderPosition}
-          title="You (Responder)"
-          pinColor="blue"
-        />
-        <Marker
-          coordinate={targetPosition}
-          title="Target Location"
-          pinColor="red"
-        />
-        <Polyline
-          coordinates={route}
-          strokeColor="#FF0000"
-          strokeWidth={2}
-        />
+        <Marker coordinate={responderPosition} title="You (Responder)" pinColor="blue" />
+        <Marker coordinate={targetPosition} title="Target Location" pinColor="red" />
+        <Polyline coordinates={route} strokeColor="#FF0000" strokeWidth={2} />
       </MapView>
       <View style={styles.infoPanel}>
         <Text>Distance to target: {distance.toFixed(2)} km</Text>
