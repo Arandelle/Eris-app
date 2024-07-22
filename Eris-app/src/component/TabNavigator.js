@@ -79,7 +79,7 @@ const TabNavigator = ({ setAuth }) => {
       <Tab.Screen
         name="Map"
         component={Map}
-        options={{ title: "Map" }}
+        options={{ title: "Map", headerShown: false }}
       />
       <Tab.Screen name="Request" component={Request} />
       <Tab.Screen
