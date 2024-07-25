@@ -7,6 +7,9 @@ import {
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
@@ -24,8 +27,11 @@ const UpdateProfile = () => {
   const [lastname, setLastName] = useState("");
   const [age, setAge] = useState("");
   const [address, setCurrentAddress] = useState("");
+  const [selectedGender, setSelectedGender] = useState("Male");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  const genders = ["Male", "Female"];
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -42,6 +48,7 @@ const UpdateProfile = () => {
           setFirstName(data?.firstname || "");
           setLastName(data?.lastname || "");
           setAge(data?.age || "");
+          setSelectedGender(data?.gender || "")
           setCurrentAddress(data?.address || "");
           setLoading(false);
         } catch (error) {
@@ -59,7 +66,7 @@ const UpdateProfile = () => {
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
     const isProfileCompleted =
-      firstname && lastname && age && address && mobileNum;
+      firstname && lastname && age && address && mobileNum && selectedGender;
     // if (!firstname || !lastname || !age || !address || !mobileNum) {
     //   Alert.alert(
     //     "Validation Error",
@@ -76,6 +83,7 @@ const UpdateProfile = () => {
         address,
         email: user.email,
         mobileNum,
+        gender: selectedGender,
         profileComplete: isProfileCompleted,
       };
 
@@ -127,9 +135,9 @@ const UpdateProfile = () => {
     const regex = /^(09\d{9}|\+639\d{9})$/;
 
     if (regex.test(value)) {
-      setError('');
+      setError("");
     } else {
-      setError('Please enter a valid PH contact number');
+      setError("Please enter a valid PH contact number");
     }
 
     setMobileNum(value);
@@ -160,19 +168,42 @@ const UpdateProfile = () => {
               errorMessage={error}
             />
             <CustomInput
-              label={"Complete Address"}
-              value={address}
-              onChangeText={setCurrentAddress}
-              placeholder="Enter your current address"
-            />
-            <CustomInput
               label={"Age"}
               value={age}
               onChangeText={setAge}
               placeholder="Enter your age"
               errorMessage={age < 18 ? "User must be above 18 years old" : null}
             />
+
+            <View className="w-full mb-4">
+              <Text className="text-lg mb-1 text-sky-600 font-bold">Select Gender:</Text>
+              <View className="flex flex-row justify-around p-2">
+                {genders.map((gender) => (
+                  <TouchableOpacity
+                    key={gender}
+                    className={`flex flex-row items-center my-1`}
+                    onPress={() => setSelectedGender(gender)}
+                  >
+                    <View className="h-5 w-5 rounded-full border-2 border-blue-600 items-center justify-center">
+                      {selectedGender === gender && (
+                        <View className="h-3 w-3 rounded-full bg-blue-600" />
+                      )}
+                    </View>
+                    <Text className="ml-2 font-bold text-lg">{gender}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <CustomInput
+              label={"Complete Address"}
+              value={address}
+              onChangeText={setCurrentAddress}
+              placeholder="Enter your current address"
+            />
+
             <Button title="Update Profile" onPress={handleUpdateProfile} />
+
           </View>
         </View>
       </ScrollView>
@@ -180,4 +211,10 @@ const UpdateProfile = () => {
   );
 };
 
+const styles = StyleSheet.create({
+  radioButtonLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+  },
+});
 export default UpdateProfile;
