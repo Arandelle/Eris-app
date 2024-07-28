@@ -1,117 +1,76 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 const Request = () => {
-  const [emergencyType, setEmergencyType] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
+  const [emergencyType, setEmergencyType] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
 
   const handleSubmit = () => {
     // Here you would typically send the data to your backend
     // For now, we'll just show an alert
-    Alert.alert('Emergency Request Submitted', 'Help is on the way!');
+    Alert.alert("Emergency Request Submitted", "Help is on the way!");
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Emergency Request</Text>
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Emergency Type:</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={emergencyType}
-            onValueChange={(itemValue) => setEmergencyType(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select type" value="" />
-            <Picker.Item label="Medical" value="medical" />
-            <Picker.Item label="Fire" value="fire" />
-            <Picker.Item label="Police" value="police" />
-            <Picker.Item label="Natural Disaster" value="disaster" />
-          </Picker>
+    <ScrollView className="flex-1 p-5 bg-gray-100">
+      <Text className="font-bold text-xl text-center text-red-600 mb-5">
+        Emergency Request
+      </Text>
+
+      <View className="space-y-5">
+        <View className="">
+          <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>
+          <View className="border border-gray-300 rounded-md bg-white">
+            <Picker
+              selectedValue={emergencyType}
+              onValueChange={(itemValue) => setEmergencyType(itemValue)}
+              className="h-22"
+            >
+              <Picker.Item label="Select type" value="" />
+              <Picker.Item label="Medical" value="medical" />
+              <Picker.Item label="Fire" value="fire" />
+              <Picker.Item label="Police" value="police" />
+              <Picker.Item label="Natural Disaster" value="disaster" />
+            </Picker>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description:</Text>
-        <TextInput
-          style={styles.textInput}
-          multiline
-          numberOfLines={4}
-          onChangeText={setDescription}
-          value={description}
-          placeholder="Briefly describe the emergency"
-        />
-      </View>
+        <View>
+          <Text className="text-lg mb-1 text-gray-600">Description:</Text>
+          <TextInput
+            className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
+            multiline
+            numberOfLines={4}
+            onChangeText={setDescription}
+            value={description}
+            placeholder="Briefly describe the emergency"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Location:</Text>
-        <TextInput
-          style={styles.textInput}
-          onChangeText={setLocation}
-          value={location}
-          placeholder="Your current location"
-        />
+        <View>
+          <Text className="text-lg mb-1 text-gray-600">Location:</Text>
+          <TextInput
+            className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
+            onChangeText={setLocation}
+            value={location}
+            placeholder="Your current location"
+          />
+        </View>
+        <TouchableOpacity className="bg-red-600 p-3.5 rounded-md items-center" onPress={handleSubmit}>
+          <Text className="text-white text-lg font-bold">Submit Emergency Request</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit Emergency Request</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#d32f2f',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#333',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    backgroundColor: '#fff',
-  },
-  picker: {
-    height: 50,
-  },
-  button: {
-    backgroundColor: '#d32f2f',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
 
 export default Request;
