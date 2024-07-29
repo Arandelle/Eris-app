@@ -9,31 +9,15 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import {ref, serverTimestamp, push, get} from "firebase/database"
+import {ref, serverTimestamp, push} from "firebase/database"
+import {useFetchData } from "../hooks/useFetchData"
 
 const Request = () => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userRef = ref(database, `users/${user.uid}`);
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          setUserData(snapshot.val());
-        } else {
-          console.log("No user data available");
-        }
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
+  const {userData} = useFetchData();
+  
   const handleSubmit = async () => {
     const user = auth.currentUser
 
