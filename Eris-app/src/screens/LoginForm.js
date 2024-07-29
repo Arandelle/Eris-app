@@ -14,7 +14,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { app, auth } from "./firebaseConfig";
+import { app, auth } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from './ForgotPass'

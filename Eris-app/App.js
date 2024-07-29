@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginForm from "./src/component/LoginForm";
-import SignupForm from "./src/component/SignupForm";
+import LoginForm from "./src/screens/LoginForm";
+import SignupForm from "./src/screens/SignupForm";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import DrawerNavigator from "./src/component/DrawerNavigator";
-import TabNavigator from "./src/component/TabNavigator";
+import DrawerNavigator from "./src/navigation/DrawerNavigator";
+import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import UpdateProfile from "./src/component/UpdateProfile";
+import UpdateProfile from "./src/screens/UpdateProfile";
 
 const Stack = createNativeStackNavigator();
 
