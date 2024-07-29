@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import {
   View,
   Text,
@@ -8,16 +8,64 @@ import {
   Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { auth, database } from "../services/firebaseConfig";
+import {ref, serverTimestamp, push, get} from "firebase/database"
 
 const Request = () => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [userData, setUserData] = useState(null);
 
-  const handleSubmit = () => {
-    // Here you would typically send the data to your backend
-    // For now, we'll just show an alert
-    Alert.alert("Emergency Request Submitted", "Help is on the way!");
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          setUserData(snapshot.val());
+        } else {
+          console.log("No user data available");
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleSubmit = async () => {
+    const user = auth.currentUser
+
+    if(!user){
+      Alert.alert("Error", "No user is signed in.");
+      return
+    }
+    if(!emergencyType || !description || !location){
+      Alert.alert("Error", "Please fill in the fields")
+      return
+    }
+    try{
+      const newRequest = {
+        userId: user.uid,
+        timestamp: serverTimestamp(),
+        location,
+        type: emergencyType,
+        description,
+        status: 'pending',
+        name: `${userData.firstname} ${userData.lastname}`,
+      };
+
+      const emergencyRequestRef = ref(database, 'emergencyRequests');
+      await push(emergencyRequestRef, newRequest);
+      Alert.alert("Emergency Request Submitted", "Help is on the way!");
+      setEmergencyType("");
+      setDescription("");
+      setLocation("");
+    } catch(error){
+      console.error("Error submitting emergency request", error);
+      Alert.alert("Error", "Could not submit emergency request please try again");
+    }
   };
 
   return (
