@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
-import { auth, database } from "./firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import CustomInput from "./CustomInput";
+import CustomInput from "../component/CustomInput";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "./Home";
+import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Map from "./Map";
-import Request from "./Request";
-import Notification from "./Notification";
-import Profile from "./Profile";
-import SignupForm from "./SignupForm";
+import Map from "../screens/Map";
+import Request from "../screens/Request";
+import Notification from "../screens/Notification";
+import Profile from "../screens/Profile";
+import SignupForm from "../screens/SignupForm";
 import { View, Text } from "react-native";
 
 const Tab = createBottomTabNavigator();
@@ -21,22 +21,25 @@ const TabNavigator = ({ setAuth }) => {
       screenOptions={({ route }) => ({
         headerShown: true,
         tabBarIcon: ({ focused, color, size }) => {
-
           const icons = {
             Home: "home-outline",
             Map: "map-marker-outline",
             Request: "plus",
             Notification: "bell-outline",
-            Profile: "account-circle-outline"
-          }
+            Profile: "account-circle-outline",
+          };
 
-          const iconName = icons[route.name]
+          const iconName = icons[route.name];
           const isMiddle = route.name === "Request";
 
           return (
             <View className="items-center">
               <View
-                className={`items-center justify-center ${isMiddle ? "h-[55px] w-[55px] bottom-[25px] rounded-full border-white border bg-blue-400" : "bg-transparent"}`}
+                className={`items-center justify-center ${
+                  isMiddle
+                    ? "h-[55px] w-[55px] bottom-[25px] rounded-full border-white border bg-blue-400"
+                    : "bg-transparent"
+                }`}
               >
                 <Icon
                   name={iconName}
@@ -81,7 +84,11 @@ const TabNavigator = ({ setAuth }) => {
         component={Map}
         options={{ title: "Map", headerShown: false }}
       />
-      <Tab.Screen name="Request" component={Request} />
+      <Tab.Screen
+        name="Request"
+        component={Request}
+        options={{ title: "Request an emergency assistance" }}
+      />
       <Tab.Screen
         name="Notification"
         component={Notification}

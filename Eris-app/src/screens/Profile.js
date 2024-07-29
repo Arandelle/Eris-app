@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
-import { auth, database } from "./firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 
 const Profile = ({ setIsProfileComplete }) => {

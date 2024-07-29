@@ -3,8 +3,8 @@ import { View,Button,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { signOut } from "firebase/auth";
-import { auth } from "./firebaseConfig";
-import FetchingData from "./FetchingData";
+import { auth } from "../services/firebaseConfig";
+import FetchingData from "../services/FetchingData";
 
 const Home = ({ setAuth, badgeSize, setBadgeSize, setIsProfileComplete }) => {
   const navigation = useNavigation();
