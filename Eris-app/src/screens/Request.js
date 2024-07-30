@@ -11,12 +11,26 @@ import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
 import {ref, serverTimestamp, push} from "firebase/database"
 import {useFetchData } from "../hooks/useFetchData"
+import * as Location from "expo-location"
 
 const Request = () => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const {userData} = useFetchData();
+
+  useEffect(()=>{
+    (async ()=>{
+      let {status} = await Location.requestForegroundPermissionsAsync();
+      if(status !== 'granted'){
+        Alert.alert("Permission to access location denied");
+        return
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(`${loc.coords.latitude}, ${loc.coords.longitude}`)
+    })();
+  });
   
   const handleSubmit = async () => {
     const user = auth.currentUser
