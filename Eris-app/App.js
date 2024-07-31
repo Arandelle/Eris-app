@@ -9,6 +9,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import UpdateProfile from "./src/screens/UpdateProfile";
+import ResponderMap from "./src/screens/ResponderMap";
 
 const Stack = createNativeStackNavigator();
 
@@ -88,6 +89,7 @@ const App = () => {
                 ),
               })}
             />
+            <Stack.Screen name="ResponderMap" component={ResponderMap}/>
           </>
         ) : (
           <>
