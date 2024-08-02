@@ -7,6 +7,7 @@ import DrawerNavigator from "./src/navigation/DrawerNavigator";
 import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert} from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
+import ResponderMap from "./src/screens/ResponderMap";
 import { auth } from "./src/services/firebaseConfig";
 import {onAuthStateChanged} from "firebase/auth"
 import {get, getDatabase, ref} from "firebase/database"
@@ -91,6 +92,7 @@ const App = () => {
                 ),
               })}
             />
+            <Stack.Screen name="ResponderMap" component={ResponderMap} />
           </>
         ) : (
           <>
