@@ -29,14 +29,19 @@ const LoginForm = () => {
     }
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful");
-      ToastAndroid.show(
-        "Login Successfully",
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM
-      );
-      navigation.navigate("ERIS");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      if (user.emailVerified) {
+        navigation.navigate("TabNavigator");
+        ToastAndroid.show(
+          "Login Successfully",
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
+      } else {
+        Alert.alert("Error", "Email is not verified");
+        await auth.signOut();
+      }
     } catch (error) {
       Alert.alert("Login Error", error.message);
     } finally {
