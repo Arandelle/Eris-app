@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -6,12 +6,12 @@ import Map from "../screens/Map";
 import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
-import SignupForm from "../screens/SignupForm";
 import { View, Text } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
-const TabNavigator = ({ setAuth }) => {
+const TabNavigator = () => {
+
   const [badgeSize, setBadgeSize] = useState(0);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
@@ -20,7 +20,7 @@ const TabNavigator = ({ setAuth }) => {
       initialRouteName="Home"
       screenOptions={({ route }) => ({
         headerShown: true,
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ color, size }) => {
           const icons = {
             Home: "home-outline",
             Map: "map-marker-outline",
@@ -72,7 +72,6 @@ const TabNavigator = ({ setAuth }) => {
         {(props) => (
           <Home
             {...props}
-            setAuth={setAuth}
             badgeSize={badgeSize}
             setBadgeSize={setBadgeSize}
             setIsProfileComplete={setIsProfileComplete}

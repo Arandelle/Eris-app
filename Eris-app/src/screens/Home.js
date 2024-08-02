@@ -6,12 +6,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 import FetchingData from "../services/FetchingData";
 
-const Home = ({ setAuth, badgeSize, setBadgeSize, setIsProfileComplete }) => {
+const Home = ({  badgeSize, setBadgeSize, setIsProfileComplete }) => {
   const navigation = useNavigation();
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setAuth(false);
       navigation.navigate("Login");
     } catch (e) {
       console.error(e);

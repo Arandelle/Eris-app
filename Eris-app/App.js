@@ -3,13 +3,15 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginForm from "./src/screens/LoginForm";
 import SignupForm from "./src/screens/SignupForm";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import DrawerNavigator from "./src/navigation/DrawerNavigator";
 import TabNavigator from "./src/navigation/TabNavigator";
-import { Text, TouchableOpacity, Button } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Text, TouchableOpacity, View } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
 import ResponderMap from "./src/screens/ResponderMap";
+import { auth } from "./src/services/firebaseConfig";
+import {onAuthStateChanged} from "firebase/auth"
+import {get, getDatabase, ref} from "firebase/database"
+import {useNavigation} from "@react-navigation/native"
 
 const Stack = createNativeStackNavigator();
 
@@ -23,38 +25,41 @@ const LoginButton = () => {
 };
 
 const App = () => {
-  const [isAuth, setAuth] = useState(false);
-  const [isLoading, setLoading] = useState(true);
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isResponder, setIsResponder] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const value = await AsyncStorage.getItem("isAuth");
-        if (value !== null) {
-          setAuth(JSON.parse(value));
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        const db = getDatabase();
+        const adminRef = ref(db, `users/${user.uid}`);
+        
+        try {
+          const adminSnapshot = await get(adminRef);
+          console.log(`Admin snapshot exists: ${adminSnapshot.exists()}`);
+          setIsResponder(adminSnapshot.exists());
+        } catch (error) {
+          console.error('Error fetching admin data:', error);
+          Alert.alert("Error", "Account is not found")
         }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+      } else {
+        setUser(null);
+        setIsResponder(false);
       }
-    };
+      setLoading(false);
+    });
 
-    checkAuth();
+    return () => unsubscribe();
   }, []);
 
-  const handleAuth = async (auth) => {
-    try {
-      await AsyncStorage.setItem("isAuth", JSON.stringify(auth));
-      setAuth(auth);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  if (isLoading) {
-    return null; // or a loading spinner
+  if (loading) {
+    return (
+      <View className="flex w-full h-full items-center justify-center">
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return (
@@ -69,11 +74,9 @@ const App = () => {
           },
         }}
       >
-        {isAuth ? (
+        {isResponder && user ? (
           <>
-            <Stack.Screen name="ERIS" options={{ headerShown: false }}>
-              {(props) => <TabNavigator {...props} setAuth={handleAuth} />}
-            </Stack.Screen>
+            <Stack.Screen name="ERIS" options={{ headerShown: false }} component={TabNavigator} />
             <Stack.Screen
               name="UpdateProfile"
               component={UpdateProfile}
@@ -89,13 +92,11 @@ const App = () => {
                 ),
               })}
             />
-            <Stack.Screen name="ResponderMap" component={ResponderMap}/>
+            <Stack.Screen name="ResponderMap" component={ResponderMap} />
           </>
         ) : (
           <>
-            <Stack.Screen name="Login">
-              {(props) => <LoginForm {...props} setAuth={handleAuth} />}
-            </Stack.Screen>
+            <Stack.Screen name="Login" component={LoginForm} />
             <Stack.Screen
               name="Signup"
               component={SignupForm}
