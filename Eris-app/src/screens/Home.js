@@ -26,10 +26,9 @@ const Home = ({  badgeSize, setBadgeSize, setIsProfileComplete }) => {
     <View>
       <FetchingData setIsProfileComplete={setIsProfileComplete}/>
       <View className="h-full flex items-center justify-center bg-gray-100">
-        <View className="flex flex-row w-full justify-between">
+        <View className="flex flex-row w-full justify-around">
           <Button title="Logout" onPress={handleLogout} />
           <Button title="Add Notification" onPress={handleBadgeSize} />
-          <Button title="Go to Responder Screen" onPress={()=> navigation.navigate("ResponderMap")} />
         </View>
       </View>
     </View>
