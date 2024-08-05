@@ -14,7 +14,7 @@ import { useFetchData } from "../hooks/useFetchData";
 import * as Location from "expo-location";
 
 const Request = () => {
-  const [emergencyType, setEmergencyType] = useState("");
+  const [emergencyType, setEmergencyType] = useState(""); 
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const { userData } = useFetchData();
@@ -34,6 +34,10 @@ const Request = () => {
     })();
   }, []);
 
+  useEffect(()=>{
+    checkActiveRequest();
+  }, [userData])
+
   const checkActiveRequest = async () =>{
     const user = auth.currentUser;
 
@@ -43,7 +47,7 @@ const Request = () => {
       const userData = userSnapshot.val();
 
       if (userData && userData.activeEmergency){
-        const emergencyRef = ref(database, `emergencyRequests/${userData.activeEmegency.emergencyId}`);
+        const emergencyRef = ref(database, `emergencyRequests/${userData.activeEmergency.emergencyId}`);
         const emergencySnapshot = await get(emergencyRef);
         const emergencyData = emergencySnapshot.val();
         if(emergencyData && (emergencyData.status === "pending" || emergencyData.status === "inProgress")){
