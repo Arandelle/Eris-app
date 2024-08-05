@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push } from "firebase/database";
+import { ref, serverTimestamp, push, onValue, set, get } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import * as Location from "expo-location";
 
@@ -18,6 +18,7 @@ const Request = () => {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const { userData } = useFetchData();
+  const [hasActiveRequest, setHasActiveRequest] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +34,29 @@ const Request = () => {
     })();
   }, []);
 
+  const checkActiveRequest = async () =>{
+    const user = auth.currentUser;
+
+    if (user) {
+      const userRef = ref(database, `users/${user.uid}`);
+      const userSnapshot = await get(userRef);
+      const userData = userSnapshot.val();
+
+      if (userData && userData.activeEmergency){
+        const emergencyRef = ref(database, `emergencyRequests/${userData.activeEmegency.emergencyId}`);
+        const emergencySnapshot = await get(emergencyRef);
+        const emergencyData = emergencySnapshot.val();
+        if(emergencyData && (emergencyData.status === "pending" || emergencyData.status === "inProgress")){
+          setHasActiveRequest(true);
+        }else{
+          setHasActiveRequest(false);
+        }
+      }else{
+        setHasActiveRequest(false);
+      }
+    }
+  }
+
   const handleSubmit = async () => {
     const user = auth.currentUser;
 
@@ -42,6 +66,10 @@ const Request = () => {
     }
     if (!emergencyType || !description || !location) {
       Alert.alert("Error", "Please fill in all the fields");
+      return;
+    }
+    if (hasActiveRequest) {
+      Alert.alert("Active Request", "You have already submitted a request. Please wait until it's resolved.");
       return;
     }
     try {
@@ -60,7 +88,21 @@ const Request = () => {
       };
 
       const emergencyRequestRef = ref(database, "emergencyRequests");
-      await push(emergencyRequestRef, newRequest);
+      const newRequestRef = await push(emergencyRequestRef, newRequest);
+
+      const userRef = ref(database, `users/${user.uid}`);
+      
+      await set(userRef, {
+        ...userData,
+        activeEmergency: {
+          emergencyId: newRequestRef.key,
+          location: {
+            latitude: Number(latitude),
+            longitude: Number(longitude)
+          }
+        }
+      });
+      setHasActiveRequest(true);
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
@@ -76,7 +118,11 @@ const Request = () => {
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
         Emergency Request
       </Text>
-
+      {hasActiveRequest ? (
+        <Text className="text-lg text-center text-red-500 mb-5">
+          You have an active emergency request. Please wait for it to be resolved.
+        </Text>
+      ) : (
       <View className="space-y-5">
         <View>
           <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>
@@ -126,7 +172,7 @@ const Request = () => {
             Submit Emergency Request
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> )}
     </ScrollView>
   );
 };
