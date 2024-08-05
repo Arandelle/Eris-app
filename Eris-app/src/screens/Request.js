@@ -103,6 +103,7 @@ const Request = () => {
             numberOfLines={4}
             onChangeText={setDescription}
             value={description}
+            
             placeholder="Briefly describe the emergency"
           />
         </View>

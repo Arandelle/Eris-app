@@ -86,7 +86,7 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Request"
         component={Request}
-        options={{ title: "Request an emergency assistance" }}
+        // options={{ title: "Request an emergency assistance" }}
       />
       <Tab.Screen
         name="Notification"
