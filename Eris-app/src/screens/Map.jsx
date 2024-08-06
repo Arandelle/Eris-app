@@ -6,6 +6,7 @@ import {
   Dimensions,
   StyleSheet,
   Alert,
+  Image
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -13,6 +14,7 @@ import { OPENROUTE_API_KEY } from "@env";
 import { database } from "../services/firebaseConfig";
 import { ref, onValue, set, get } from "firebase/database";
 import { getAuth } from "firebase/auth";
+import Logo from "../../assets/logo.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
@@ -38,12 +40,12 @@ const Map = ({ isAdmin }) => {
         setEmergencyRequest(userData.activeRequest);
         setUserLocation({
           latitude: userData.activeRequest.location.latitude,
-          longitude: userData.activeRequest.location.longitude
+          longitude: userData.activeRequest.location.longitude,
         });
       } else {
         // Fallback to current location
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
+        if (status !== "granted") {
           console.error("Permission to access location was denied");
           Alert.alert("Permission denied", "Unable to access your location");
           return;
@@ -52,7 +54,7 @@ const Map = ({ isAdmin }) => {
         let location = await Location.getCurrentPositionAsync({});
         setUserLocation({
           latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          longitude: location.coords.longitude,
         });
       }
     };
@@ -73,7 +75,7 @@ const Map = ({ isAdmin }) => {
         const firstRequestId = Object.keys(requests)[0];
         setEmergencyRequest({
           id: firstRequestId,
-          ...requests[firstRequestId]
+          ...requests[firstRequestId],
         });
         setUserLocation(requests[firstRequestId].location);
       }
@@ -90,7 +92,7 @@ const Map = ({ isAdmin }) => {
       if (location) {
         setResponderLocation({
           latitude: location.latitude,
-          longitude: location.longitude
+          longitude: location.longitude,
         });
       }
     });
@@ -126,7 +128,12 @@ const Map = ({ isAdmin }) => {
   };
 
   if (!userLocation) {
-    return <View style={styles.container}><Text>Loading...</Text></View>;
+    return (
+      <View className="flex w-full h-full items-center justify-center">
+        <Image source={Logo} alt="Loading..." />
+        <Text>Loading please wait...</Text>
+      </View>
+    );
   }
 
   return (
@@ -157,16 +164,11 @@ const Map = ({ isAdmin }) => {
       </MapView>
 
       <View style={styles.footer}>
-        {emergencyRequest && (
-          <Text>Emergency Request Active</Text>
-        )}
+        {emergencyRequest && <Text>Emergency Request Active</Text>}
         {responderLocation && (
           <Text>Distance to responder: {distance.toFixed(2)} km</Text>
         )}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={fetchRoute}
-        >
+        <TouchableOpacity style={styles.button} onPress={fetchRoute}>
           <Text style={styles.buttonText}>Refresh Route</Text>
         </TouchableOpacity>
       </View>
@@ -184,18 +186,18 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
+    backgroundColor: "white",
+    alignItems: "center",
   },
   button: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 5,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
 });
 
