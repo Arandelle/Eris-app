@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Button,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
 import { ref, serverTimestamp, push, onValue, set, get, update} from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Request = () => {
   const [emergencyType, setEmergencyType] = useState(""); 
@@ -20,6 +22,13 @@ const Request = () => {
   const { userData } = useFetchData();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [newRequestKey, setNewRequestKey] = useState(null);
+  const [emergencyExpired, setEmergencyExpired] = useState(false);
+  const [showForm, setShowForm] = useState(true);
+
+  useEffect(() => {
+    // Load the persistent state when the component mounts
+    loadPersistentState();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -39,6 +48,29 @@ const Request = () => {
     checkActiveRequest();
   }, [userData])
 
+  const loadPersistentState = async () => {
+    try {
+      const persistedState = await AsyncStorage.getItem('emergencyRequestState');
+      if (persistedState !== null) {
+        const { emergencyExpired, showForm } = JSON.parse(persistedState);
+        setEmergencyExpired(emergencyExpired);
+        setShowForm(showForm);
+      }
+    } catch (error) {
+      console.error('Error loading persistent state:', error);
+    }
+  };
+
+  const savePersistentState = async (emergencyExpired, showForm) => {
+    try {
+      const stateToSave = JSON.stringify({ emergencyExpired, showForm });
+      await AsyncStorage.setItem('emergencyRequestState', stateToSave);
+    } catch (error) {
+      console.error('Error saving persistent state:', error);
+    }
+  };
+
+
   const checkActiveRequest = async () =>{
     const user = auth.currentUser;
 
@@ -53,6 +85,8 @@ const Request = () => {
         const emergencyData = emergencySnapshot.val();
         if(emergencyData && (emergencyData.status === "pending" || emergencyData.status === "inProgress")){
           setHasActiveRequest(true);
+          setShowForm(false);
+          savePersistentState(false, false);
         }else{
           setHasActiveRequest(false);
         }
@@ -89,6 +123,7 @@ const Request = () => {
         type: emergencyType,
         description,
         status: "pending",
+        expiresAt: new Date(Date.now() + 5000).toISOString(), //Add expiration time
         name: `${userData.firstname} ${userData.lastname}`,
       };
 
@@ -107,32 +142,52 @@ const Request = () => {
           }
         }
       });
-      setHasActiveRequest(true);
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
       setLocation("");
+
+      setHasActiveRequest(true);
+      setShowForm(false);
+      setEmergencyExpired(false);
+      savePersistentState(false, false);
     } catch (error) {
       console.error("Error submitting emergency request", error);
       Alert.alert("Error", "Could not submit emergency request, please try again");
     }
   };
 
-  useEffect(()=>{
-    if(newRequestKey){
-      const timer = setTimeout( async ()=>{
-       try{ await update(ref(database, `emergencyRequests/${newRequestKey}`), {status: "didn't response"});
-       console.log("Status will update in 5 seconds")
-       Alert.alert("Emergency Expired!", "Sorry your request didn't accepted");
-       setHasActiveRequest(false);
-      } catch(error){
-        console.error("Error updating status: ",error)
-      }
-      }, 5000);
-      return ()=> clearTimeout(timer);
-    }
-  }, [newRequestKey])
+  useEffect(() => {
+    if (newRequestKey) {
+      const timer = setTimeout(async () => {
+        try {
+          const emergencyRef = ref(database, `emergencyRequests/${newRequestKey}`);
+          const snapshot = await get(emergencyRef);
+          const emergencyData = snapshot.val();
 
+          if (emergencyData.status === "pending") {
+            await update(emergencyRef, { status: "expired" });
+            console.log("Status updated to expired after 5 seconds");
+            Alert.alert("Emergency Expired!", "Your request has expired without being accepted.");
+            setHasActiveRequest(false);
+            setEmergencyExpired(true);
+            setShowForm(false);
+            savePersistentState(true, false);
+          }
+        } catch (error) {
+          console.error("Error updating status: ", error);
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [newRequestKey]);
+
+  const handleNewEmergency = () => {
+    setShowForm(true);
+    setEmergencyExpired(false);
+    savePersistentState(false, true);
+  };
+  
   return (
     <ScrollView className="flex-1 p-5 bg-gray-100">
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
@@ -142,8 +197,16 @@ const Request = () => {
         <Text className="text-lg text-center text-red-500 mb-5">
           You have an active emergency request. Please wait for it to be resolved.
         </Text>
-      ) : (
-      <View className="space-y-5">
+      ) :  emergencyExpired && (
+        <View>
+          <Text className="text-lg text-center text-orange-500 mb-5">
+            Your last emergency request expired. You can submit a new one if needed.
+          </Text>
+          <Button title="Submit New Emergency" onPress={handleNewEmergency} />
+        </View>
+      )}
+      {showForm &&(
+        <View className="space-y-5">
         <View>
           <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>
           <View className="border border-gray-300 rounded-md bg-white">
@@ -192,7 +255,8 @@ const Request = () => {
             Submit Emergency Request
           </Text>
         </TouchableOpacity>
-      </View> )}
+      </View>
+      )}
     </ScrollView>
   );
 };
