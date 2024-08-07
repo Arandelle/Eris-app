@@ -6,7 +6,7 @@ import Map from "../screens/Map";
 import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
@@ -86,7 +86,13 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Request"
         component={Request}
-        // options={{ title: "Request an emergency assistance" }}
+        options={{ 
+           headerRight: ()=>(
+            <TouchableOpacity className="mr-4" onPress={()=>Alert.alert("History clicked")}>
+              <Icon name="clock-outline" size={25} />
+            </TouchableOpacity>
+           )
+        }}
       />
       <Tab.Screen
         name="Notification"
