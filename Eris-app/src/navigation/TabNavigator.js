@@ -14,6 +14,7 @@ const TabNavigator = () => {
 
   const [badgeSize, setBadgeSize] = useState(0);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [showHistory, setShowHistory] = useState(false)
 
   return (
     <Tab.Navigator
@@ -85,15 +86,17 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Request"
-        component={Request}
         options={{ 
            headerRight: ()=>(
-            <TouchableOpacity className="mr-4" onPress={()=>Alert.alert("History clicked")}>
+            <TouchableOpacity className="p-4" onPress={()=>  setShowHistory(!showHistory)
+            }>
               <Icon name="clock-outline" size={25} />
             </TouchableOpacity>
            )
         }}
-      />
+      >
+        {(props)=>(<Request {...props} showHistory={showHistory} setShowHistory={setShowHistory}/>)}
+      </Tab.Screen>
       <Tab.Screen
         name="Notification"
         component={Notification}
