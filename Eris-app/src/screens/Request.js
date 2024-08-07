@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, onValue, set, get, update } from "firebase/database";
+import { ref, serverTimestamp, push, onValue, set, get, update} from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import * as Location from "expo-location";
 
@@ -116,22 +116,22 @@ const Request = () => {
       console.error("Error submitting emergency request", error);
       Alert.alert("Error", "Could not submit emergency request, please try again");
     }
-   
   };
-  useEffect(() => {
-    if (newRequestKey) {
-      const timer = setTimeout(async () => {
-        try {
-          await update(ref(database, `emergencyRequests/${newRequestKey}`), {status: "didn't respond"});
-          console.log("Status updated after 2 seconds");
-        } catch (error) {
-          console.error("Error updating status", error);
-        }
-      }, 2000);
-  
-      return () => clearTimeout(timer);  // Clean up the timer if the component unmounts
+
+  useEffect(()=>{
+    if(newRequestKey){
+      const timer = setTimeout( async ()=>{
+       try{ await update(ref(database, `emergencyRequests/${newRequestKey}`), {status: "didn't response"});
+       console.log("Status will update in 5 seconds")
+       Alert.alert("Emergency Expired!", "Sorry your request didn't accepted");
+       setHasActiveRequest(false);
+      } catch(error){
+        console.error("Error updating status: ",error)
+      }
+      }, 5000);
+      return ()=> clearTimeout(timer);
     }
-  }, [newRequestKey]);
+  }, [newRequestKey])
 
   return (
     <ScrollView className="flex-1 p-5 bg-gray-100">
