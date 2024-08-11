@@ -11,28 +11,26 @@ import {
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
-import { database } from "../services/firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import { ref, onValue, set, get } from "firebase/database";
-import { getAuth } from "firebase/auth";
 import Logo from "../../assets/logo.png"
+import responderMarker from "../../assets/ambulance.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const Map = ({ isAdmin }) => {
+const Map = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [responderLocation, setResponderLocation] = useState(null);
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
   const [emergencyRequest, setEmergencyRequest] = useState(null);
-
-  const auth = getAuth();
-  const userId = auth.currentUser ? auth.currentUser.uid : null;
+  const [requestAccepted, setRequestAccepted] = useState(false);
 
   useEffect(() => {
-    if (!userId) return;
 
     const fetchUserData = async () => {
-      const userRef = ref(database, `users/${userId}`);
+      const user = auth.currentUser;
+      const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
       const userData = snapshot.val();
 
@@ -60,33 +58,13 @@ const Map = ({ isAdmin }) => {
     };
 
     fetchUserData();
-  }, [userId]);
-
-  useEffect(() => {
-    if (!isAdmin) return;
-
-    // Admin can see all active emergency requests
-    const emergencyRequestsRef = ref(database, "emergencyRequests");
-    const unsubscribe = onValue(emergencyRequestsRef, (snapshot) => {
-      const requests = snapshot.val();
-      if (requests) {
-        // For simplicity, we're just showing the first active request
-        // You might want to implement a way to switch between different requests
-        const firstRequestId = Object.keys(requests)[0];
-        setEmergencyRequest({
-          id: firstRequestId,
-          ...requests[firstRequestId],
-        });
-        setUserLocation(requests[firstRequestId].location);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [isAdmin]);
+  }, []);
 
   useEffect(() => {
     // Listen for responder's location updates
-    const responderRef = ref(database, "admins/responder1");
+    if (!emergencyRequest || !requestAccepted) return;
+
+    const responderRef = ref(database, `responders/${emergencyRequest.responderId}`);
     const unsubscribe = onValue(responderRef, (snapshot) => {
       const location = snapshot.val();
       if (location) {
@@ -98,13 +76,13 @@ const Map = ({ isAdmin }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [emergencyRequest, requestAccepted]);
 
   useEffect(() => {
-    if (userLocation && responderLocation) {
+    if (userLocation && responderLocation &&  requestAccepted) {
       fetchRoute();
     }
-  }, [userLocation, responderLocation]);
+  }, [userLocation, responderLocation, requestAccepted]);
 
   const fetchRoute = async () => {
     try {
@@ -137,9 +115,9 @@ const Map = ({ isAdmin }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <MapView
-        style={styles.map}
+      className="flex-1"
         initialRegion={{
           ...userLocation,
           latitudeDelta: 0.005,
@@ -151,54 +129,30 @@ const Map = ({ isAdmin }) => {
           title={emergencyRequest ? "Emergency Location" : "Your Location"}
           pinColor="#42a5f5"
         />
-        {responderLocation && (
+        {responderLocation && requestAccepted && (
           <Marker
             coordinate={responderLocation}
             title="Responder"
             pinColor="red"
-          />
+          >
+            <Image source={responderMarker} className="h-12 w-12" />
+          </Marker>
         )}
         {route.length > 0 && (
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
       </MapView>
-
-      <View style={styles.footer}>
+      {/* <View className="scroll-py-2.5 bg-white items-center absolute top-0 right-0">
         {emergencyRequest && <Text>Emergency Request Active</Text>}
         {responderLocation && (
           <Text>Distance to responder: {distance.toFixed(2)} km</Text>
         )}
-        <TouchableOpacity style={styles.button} onPress={fetchRoute}>
-          <Text style={styles.buttonText}>Refresh Route</Text>
+        <TouchableOpacity className="m-2.5 p-2.5 bg-blue-500 rounded-md" onPress={fetchRoute}>
+          <Text className="font-bold text-white">Refresh Route</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height * 0.8,
-  },
-  footer: {
-    padding: 10,
-    backgroundColor: "white",
-    alignItems: "center",
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});
 
 export default Map;
