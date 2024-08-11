@@ -230,10 +230,10 @@ const Request = ({ showHistory, setShowHistory }) => {
                 className="h-22"
               >
                 <Picker.Item label="Select type" value="" />
-                <Picker.Item label="Medical" value="medical" />
-                <Picker.Item label="Fire" value="fire" />
-                <Picker.Item label="Police" value="police" />
-                <Picker.Item label="Natural Disaster" value="disaster" />
+                <Picker.Item label="Medical Emergency" value="medical" />
+                <Picker.Item label="Crime" value="crime" />
+                <Picker.Item label="Noise Complaint" value="noise" />
+                <Picker.Item label="Public Safety Issue" value="disaster" />
               </Picker>
             </View>
           </View>
@@ -253,7 +253,7 @@ const Request = ({ showHistory, setShowHistory }) => {
           <View>
             <Text className="text-lg mb-1 text-gray-600">Location:</Text>
             <TextInput
-              className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
+              className="border p-2.5 rounded-md border-gray-300 bg-gray-300 text-sm"
               onChangeText={setLocation}
               value={location}
               placeholder="Your current location"
@@ -267,13 +267,6 @@ const Request = ({ showHistory, setShowHistory }) => {
             <Text className="text-white text-lg font-bold">Submit Request</Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          className="bg-blue-600 p-3.5 rounded-md items-center mt-5"
-          onPress={() => setShowHistory(true)}
-        >
-          <Text className="text-white text-lg font-bold">Show History</Text>
-        </TouchableOpacity>
       </>
 
       <Modal

@@ -90,7 +90,7 @@ const TabNavigator = () => {
            headerRight: ()=>(
             <TouchableOpacity className="p-4" onPress={()=>  setShowHistory(!showHistory)
             }>
-              <Icon name="clock-outline" size={25} />
+              <Icon name="history" size={25} />
             </TouchableOpacity>
            )
         }}
