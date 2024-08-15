@@ -8,16 +8,20 @@ import {
   SafeAreaView,
   Alert,
   StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const Profile = ({ setIsProfileComplete }) => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [logout, setLogout] = useState(false);
 
   const fetchUserData = async (uid) => {
     setLoading(true);
@@ -80,10 +84,23 @@ const Profile = ({ setIsProfileComplete }) => {
     );
   };
 
+  const handleLogoutModal = () => {
+    setLogout(!logout);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigation.navigate("Login");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
-      <ScrollView className="pb-5">
-        <View className="flex-1 bg-white rounded-lg m-4 p-5 shadow-md ">
+      <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
+        <View>
           <View className="items-center pb-5">
             <Text className="text-2xl font-bold pb-2">
               {userData?.firstname && userData?.lastname
@@ -132,13 +149,56 @@ const Profile = ({ setIsProfileComplete }) => {
               </Text>
             </View>
           </View>
-          <Button
-            title="Update Profile"
-            onPress={handleShowUpdateForm}
-            color="#007bff"
-          />
         </View>
-      </ScrollView>
+        <View className="mb-2 space-y-2.5">
+          <TouchableOpacity
+            className="p-3 bg-green-500 rounded-md"
+            onPress={handleShowUpdateForm}
+          >
+            <Text className="text-center text-lg text-white font-bold">
+              Update profile
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="p-3 bg-red-500 rounded-md"
+            onPress={handleLogoutModal}
+          >
+            <Text className="text-center text-lg text-white font-bold">
+              Logout
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={logout}
+        onRequestClose={() => setLogout(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setLogout(false)}>
+          <View
+            className="flex w-full h-full py-14 items-center justify-center"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <View className="h-60 p-5 items-center justify-center bg-white w-full absolute bottom-0 z-50 rounded-t-3xl">
+              <View className="space-y-5">
+                <Text className="text-sky-500 text-2xl text-center">
+                  Are you sure you want to logout?
+                </Text>
+                <View className="relative flex-row w-full items-center justify-between space-x-2">
+                    <TouchableOpacity className="p-3 flex-1 bg-red-500 rounded-md" onPress={handleLogout}>
+                      <Text className="text-white text-lg text-center font-bold">Confirm</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity className="p-3 flex-1 border border-gray-500 rounded-md" 
+                    onPress={handleLogoutModal}>
+                      <Text className="text-center text-lg font-bold text-gray-500">Cancel</Text>
+                    </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
