@@ -180,18 +180,18 @@ const Profile = ({ setIsProfileComplete }) => {
             className="flex w-full h-full py-14 items-center justify-center"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
           >
-            <View className="h-60 p-5 items-center justify-center bg-white w-full absolute bottom-0 z-50 rounded-t-3xl">
-              <View className="space-y-5">
-                <Text className="text-sky-500 text-2xl text-center">
+            <View className="h-56 justify-center bg-white w-full absolute bottom-0 rounded-t-xl">
+              <View className="space-y-3">
+                <Text className="text-gray-900 font-extrabold text-2xl text-center">
                   Are you sure you want to logout?
                 </Text>
-                <View className="relative flex-row w-full items-center justify-between space-x-2">
-                    <TouchableOpacity className="p-3 flex-1 bg-red-500 rounded-md" onPress={handleLogout}>
-                      <Text className="text-white text-lg text-center font-bold">Confirm</Text>
+                <View className="space-y-3 py-3 px-5">
+                    <TouchableOpacity className="p-3 w-full bg-blue-600 rounded-2xl" onPress={handleLogout}>
+                      <Text className="text-white text-lg text-center font-extrabold">Confirm</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className="p-3 flex-1 border border-gray-500 rounded-md" 
+                    <TouchableOpacity className="p-3 w-full border-2 border-blue-500 rounded-2xl" 
                     onPress={handleLogoutModal}>
-                      <Text className="text-center text-lg font-bold text-gray-500">Cancel</Text>
+                      <Text className="text-center text-lg font-extrabold text-blue-500">Cancel</Text>
                     </TouchableOpacity>
                 </View>
               </View>
