@@ -189,9 +189,7 @@ const Request = ({ showHistory, setShowHistory }) => {
           latitude: latitude,
           longitude: longitude,
         },
-        location: {
-          location
-        },
+        location: location,
         type: emergencyType,
         description,
         status: "pending",
@@ -211,9 +209,7 @@ const Request = ({ showHistory, setShowHistory }) => {
             latitude: latitude,
             longitude: longitude,
           },
-          location: {
-            location
-          },
+          location: location
         },
         [`emergencyHistory/${newRequestRef.key}`]: true,
       });
