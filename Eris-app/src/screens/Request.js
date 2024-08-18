@@ -339,7 +339,7 @@ const Request = ({ showHistory, setShowHistory }) => {
                       Description: {emergency.description}
                     </Text>
                     <Text className="text-sm text-gray-600">
-                      Location: {emergency.location.location}
+                      Location: {emergency.location}
                     </Text>
                     <Text className="text-sm text-gray-600">
                       Status: {emergency.status}
