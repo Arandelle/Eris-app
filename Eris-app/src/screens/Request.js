@@ -26,6 +26,9 @@ const Request = ({ showHistory, setShowHistory }) => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
   const { userData } = useFetchData();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [newRequestKey, setNewRequestKey] = useState(null);
@@ -34,6 +37,8 @@ const Request = ({ showHistory, setShowHistory }) => {
   const [emergencyHistory, setEmergencyHistory] = useState([]);
 
   useEffect(() => {
+    let locationSubscription;
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -41,10 +46,46 @@ const Request = ({ showHistory, setShowHistory }) => {
         return;
       }
 
-      let loc = await Location.getCurrentPositionAsync({});
-      const locString = `${loc.coords.latitude}, ${loc.coords.longitude}`;
-      setLocation(locString);
+      locationSubscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 10000,
+          distanceInterval: 10,
+        },
+        async (location) => {
+          try {
+            const { latitude, longitude } = location.coords;
+
+            // Update the latitude and longitude states
+            setLatitude(latitude);
+            setLongitude(longitude);
+
+            // Reverse geocoding to get the address
+            const reverseGeocode = await Location.reverseGeocodeAsync({
+              latitude,
+              longitude,
+            });
+
+            if (reverseGeocode.length > 0) {
+              const { name, city, region } = reverseGeocode[0];
+              const locString = `${name} - ${city}, ${region}`;
+              setLocation(locString);
+            } else {
+              setLocation("Location not found");
+            }
+          } catch (error) {
+            console.error(error);
+            setLocation("Error retrieving location");
+          }
+        }
+      );
     })();
+
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -141,15 +182,15 @@ const Request = ({ showHistory, setShowHistory }) => {
       return;
     }
     try {
-      const [latitude, longitude] = location
-        .split(", ")
-        .map((coord) => parseFloat(coord));
       const newRequest = {
         userId: user.uid,
         timestamp: serverTimestamp(),
+        locationCoords: {
+          latitude: latitude,
+          longitude: longitude,
+        },
         location: {
-          latitude: Number(latitude),
-          longitude: Number(longitude),
+          location
         },
         type: emergencyType,
         description,
@@ -166,9 +207,12 @@ const Request = ({ showHistory, setShowHistory }) => {
       await update(userRef, {
         activeRequest: {
           requestId: newRequestRef.key,
+          locationCoords: {
+            latitude: latitude,
+            longitude: longitude,
+          },
           location: {
-            latitude: Number(latitude),
-            longitude: Number(longitude),
+            location
           },
         },
         [`emergencyHistory/${newRequestRef.key}`]: true,
@@ -215,8 +259,8 @@ const Request = ({ showHistory, setShowHistory }) => {
         ) : (
           emergencyAccepted && (
             <Text className="text-lg text-center text-blue-500 italic mb-5">
-              Your last emergency request was accepted. You can submit a new one if
-              needed.
+              Your last emergency request was accepted. You can submit a new one
+              if needed.
             </Text>
           )
         )}
@@ -253,7 +297,7 @@ const Request = ({ showHistory, setShowHistory }) => {
           <View>
             <Text className="text-lg mb-1 text-gray-600">Location:</Text>
             <TextInput
-              className="border p-2.5 rounded-md border-gray-300 bg-gray-300 text-sm"
+              className="border p-2.5 rounded-md border-gray-300 bg-gray-300 text-lg text-gray-900"
               onChangeText={setLocation}
               value={location}
               placeholder="Your current location"
@@ -306,19 +350,24 @@ const Request = ({ showHistory, setShowHistory }) => {
                       Status: {emergency.status}
                     </Text>
                     <Text className="text-sm text-gray-600">
-                      Submitted: {new Date(emergency.timestamp).toLocaleString()}
+                      Submitted:{" "}
+                      {new Date(emergency.timestamp).toLocaleString()}
                     </Text>
                   </View>
                 ))
               ) : (
-                <Text className="text-center text-gray-500">No history found</Text>
+                <Text className="text-center text-gray-500">
+                  No history found
+                </Text>
               )}
             </ScrollView>
             <TouchableOpacity
               className="bg-gray-500 p-3.5 rounded-md items-center mt-5"
               onPress={() => setShowHistory(false)}
             >
-              <Text className="text-white text-lg font-bold">Close History</Text>
+              <Text className="text-white text-lg font-bold">
+                Close History
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
