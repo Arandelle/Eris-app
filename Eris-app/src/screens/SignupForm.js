@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { app, auth } from "../services/firebaseConfig";
@@ -12,6 +12,13 @@ const SignupForm = () => {
   const [showPass, setShowPass] = useState(false);
   const [createType, setCreateType] = useState(true);
   const [isChecked, setChecked] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(()=>{
+    const randomNumber = Math.floor(Math.random() * 5) + 1;
+    const url = `https://flowbite.com/docs/images/people/profile-picture-${randomNumber}.jpg`;
+    setImageUrl(url);
+  }, [])
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
@@ -40,6 +47,7 @@ const SignupForm = () => {
           email: user.email,
           profileComplete: false,
           createdAt: new Date().toISOString(),
+          img: imageUrl
         };
         const database = getDatabase(app);
         await set(ref(database, `users/${user.uid}`), userData);
