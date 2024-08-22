@@ -8,12 +8,14 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
@@ -24,6 +26,9 @@ const UpdateProfile = () => {
   const [age, setAge] = useState("");
   const [address, setCurrentAddress] = useState("");
   const [selectedGender, setSelectedGender] = useState("Male");
+  const [selectedProfile, setSelectedProfile] = useState(
+    "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -44,7 +49,8 @@ const UpdateProfile = () => {
           setFirstName(data?.firstname || "");
           setLastName(data?.lastname || "");
           setAge(data?.age || "");
-          setSelectedGender(data?.gender || "")
+          setSelectedGender(data?.gender || "");
+          setSelectedProfile(data?.img || "");
           setCurrentAddress(data?.address || "");
           setLoading(false);
         } catch (error) {
@@ -62,9 +68,23 @@ const UpdateProfile = () => {
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
     const isProfileCompleted =
-      firstname && lastname && age && address && mobileNum && selectedGender;
-      
-    if (!firstname || !lastname || !age || !address || !mobileNum) {
+      firstname &&
+      lastname &&
+      age &&
+      address &&
+      mobileNum &&
+      selectedGender &&
+      selectedProfile;
+
+    if (
+      !firstname ||
+      !lastname ||
+      !age ||
+      !address ||
+      !mobileNum ||
+      !selectedGender ||
+      !selectedProfile
+    ) {
       Alert.alert(
         "Validation Error",
         "Please fill in all fields before updating your profile."
@@ -79,6 +99,7 @@ const UpdateProfile = () => {
         age,
         address,
         email: user.email,
+        img: selectedProfile,
         mobileNum,
         gender: selectedGender,
         profileComplete: isProfileCompleted,
@@ -89,7 +110,7 @@ const UpdateProfile = () => {
         await update(userRef, updatedData);
         setUserData(updatedData);
 
-        navigation.setParams({updatedUserData: updatedData})
+        navigation.setParams({ updatedUserData: updatedData });
 
         Alert.alert(
           "Success",
@@ -139,11 +160,44 @@ const UpdateProfile = () => {
     setMobileNum(value);
   };
 
+  const ImageUrl = [
+    "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+    "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
+    "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
+    "https://flowbite.com/docs/images/people/profile-picture-4.jpg",
+    "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+  ];
+
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="">
         <View className="flex-1">
-          <View style={{ margin: 16 }}>
+          <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
+          <View className="flex flex-row space-x-3 justify-center">
+            {ImageUrl.map((url) => (
+              <TouchableOpacity
+                key={url}
+                onPress={() => setSelectedProfile(url)}
+                className="relative"
+              >
+                <Image
+                  source={{ uri: url }}
+                  className="h-[70px] w-[70px] rounded-full"
+                />
+
+                {selectedProfile === url && (
+                  <View className="absolute top-0 right-0 bg-white rounded-full">
+                    <Icon
+                      name="checkbox-marked-circle"
+                      size={20}
+                      color={"green"}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View className="m-4">
             <CustomInput
               label={"First Name"}
               value={firstname}
@@ -172,7 +226,9 @@ const UpdateProfile = () => {
             />
 
             <View className="w-full mb-4">
-              <Text className="text-lg mb-1 text-sky-600 font-bold">Select Gender:</Text>
+              <Text className="text-lg mb-1 text-sky-600 font-bold">
+                Select Gender:
+              </Text>
               <View className="flex flex-row justify-around p-2">
                 {genders.map((gender) => (
                   <TouchableOpacity
@@ -197,9 +253,14 @@ const UpdateProfile = () => {
               onChangeText={setCurrentAddress}
               placeholder="Enter your current address"
             />
-
-            <Button title="Update Profile" onPress={handleUpdateProfile} />
-
+            <TouchableOpacity
+              className="p-3 w-full bg-green-500 rounded-2xl"
+              onPress={handleUpdateProfile}
+            >
+              <Text className="text-center text-lg font-extrabold text-white">
+                Update Profile
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
