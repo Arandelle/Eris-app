@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   Image
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -41,6 +41,20 @@ const Profile = ({ setIsProfileComplete }) => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          fetchUserData(user.uid);
+        } else {
+          navigation.navigate("Login");
+        }
+      });
+
+      return () => unsubscribeAuth();
+    }, [navigation])
+  );
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -54,19 +68,7 @@ const Profile = ({ setIsProfileComplete }) => {
   }, []);
 
   const handleShowUpdateForm = () => {
-    navigation.navigate("UpdateProfile", {
-      onProfileUpdated: (updatedData) => {
-        setUserData(updatedData);
-        const isProfileCompleted =
-          updatedData.firstname &&
-          updatedData.lastname &&
-          updatedData.age &&
-          updatedData.gender &&
-          updatedData.address &&
-          updatedData.mobileNum;
-        setIsProfileComplete(isProfileCompleted);
-      },
-    });
+    navigation.navigate("UpdateProfile");
   };
 
   if (loading) {

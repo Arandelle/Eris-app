@@ -20,7 +20,6 @@ import CustomInput from "../component/CustomInput";
 const UpdateProfile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { onProfileUpdated, setIsProfileComplete } = route.params;
   const [userData, setUserData] = useState(null);
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
@@ -91,6 +90,9 @@ const UpdateProfile = () => {
       try {
         await update(userRef, updatedData);
         setUserData(updatedData);
+
+        navigation.setParams({updatedUserData: updatedData})
+
         Alert.alert(
           "Success",
           "Profile updated successfully!",
@@ -104,11 +106,7 @@ const UpdateProfile = () => {
               text: "OK",
               onPress: () => {
                 console.log("OK Pressed");
-                onProfileUpdated(updatedData); // Notify parent component about the update
-                if (setIsProfileComplete) {
-                  setIsProfileComplete(isProfileCompleted); // Update profile completion status
-                }
-                navigation.navigate("Profile");
+                navigation.goBack();
               },
             },
           ],
