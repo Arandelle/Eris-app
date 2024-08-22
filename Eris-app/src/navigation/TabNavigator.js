@@ -6,7 +6,7 @@ import Map from "../screens/Map";
 import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 
 const Tab = createBottomTabNavigator();
 

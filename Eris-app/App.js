@@ -12,6 +12,7 @@ import {onAuthStateChanged} from "firebase/auth"
 import {get, getDatabase, ref} from "firebase/database"
 import {useNavigation} from "@react-navigation/native"
 import Logo from "./assets/logo.png"
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const Stack = createNativeStackNavigator();
 
@@ -88,7 +89,7 @@ const App = () => {
                   <TouchableOpacity
                     onPress={() => navigation.navigate("Profile")}
                   >
-                    <Text className="text-2xl">{`<`}</Text>
+                    <Icon name="arrow-left-thick" size={25} color={"blue"}/>
                   </TouchableOpacity>
                 ),
               })}

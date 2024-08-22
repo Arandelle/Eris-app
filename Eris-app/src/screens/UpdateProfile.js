@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  TextInput,
   Button,
   Alert,
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
@@ -19,7 +17,6 @@ import CustomInput from "../component/CustomInput";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const route = useRoute();
   const [userData, setUserData] = useState(null);
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
@@ -66,13 +63,14 @@ const UpdateProfile = () => {
     const user = auth.currentUser;
     const isProfileCompleted =
       firstname && lastname && age && address && mobileNum && selectedGender;
-    // if (!firstname || !lastname || !age || !address || !mobileNum) {
-    //   Alert.alert(
-    //     "Validation Error",
-    //     "Please fill in all fields before updating your profile."
-    //   );
-    //   return; // Exit the function if any field is empty
-    // }
+      
+    if (!firstname || !lastname || !age || !address || !mobileNum) {
+      Alert.alert(
+        "Validation Error",
+        "Please fill in all fields before updating your profile."
+      );
+      return; // Exit the function if any field is empty
+    }
 
     if (user) {
       const updatedData = {
@@ -209,10 +207,4 @@ const UpdateProfile = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  radioButtonLabel: {
-    marginLeft: 8,
-    fontSize: 16,
-  },
-});
 export default UpdateProfile;
