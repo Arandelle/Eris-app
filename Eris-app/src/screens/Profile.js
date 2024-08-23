@@ -103,13 +103,14 @@ const Profile = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
-      <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
+      <ScrollView>
+        <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md">
           <View className="items-center border-b-2 border-b-gray-300">
             <View className="relative">
               {userData?.img ? (
                 <Image
                   source={{ uri: userData.img }}
-                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                  className="h-[100px] w-[100px] rounded-full"
                 />
               ) : (
                 <Text className="text-gray-900 text-lg">
@@ -129,10 +130,21 @@ const Profile = () => {
                 : renderPlaceholder(null, "Your Name")}
             </Text>
           </View>
-          <View className="mb-5 space-y-8">
-            <Text className="italic font-bold bg-gray-200 p-2 text-lg rounded-md">
+          <View className="mb-5 space-y-8 py-2">
+            <Text className="italic font-bold bg-blue-200 p-2 text-lg rounded-md">
               user id: {auth.currentUser.uid}
             </Text>
+            <View>
+              <Text className="text-xl font-bold mb-2 ">Contact:</Text>
+              <View className="flex flex-col justify-between space-y-1">
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData?.email}
+                </Text>
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData.mobileNum}
+                </Text>
+              </View>
+            </View>
             <View>
               <Text className="text-xl font-bold mb-2">
                 Age:{" "}
@@ -154,12 +166,6 @@ const Profile = () => {
               </Text>
             </View>
             <View>
-              <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.email}
-              </Text>
-            </View>
-            <View>
               <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
               <Text className="text-lg text-gray-500 font-bold">
                 {userData?.address
@@ -167,19 +173,26 @@ const Profile = () => {
                   : renderPlaceholder(null, "House No. Street Barangay")}
               </Text>
             </View>
-          </View>
+                        
+          {!userData.profileComplete && (
+            <View className="p-4 bg-red-100 rounded-md">
+            <Text className="text-gray-900">Please update your profile for security purposes</Text>
+            </View>
+          )}
 
-        <View className="mb-2 space-y-2.5">
-          <TouchableOpacity
-            className="p-3 bg-blue-400 rounded-full"
-            onPress={handleLogoutModal}
-          >
-            <Text className="text-center text-lg text-white font-bold">
-              Logout
-            </Text>
-          </TouchableOpacity>
+          </View>
+          <View className="mb-2 space-y-2.5">
+            <TouchableOpacity
+              className="p-3 bg-blue-500 rounded-full"
+              onPress={handleLogoutModal}
+            >
+              <Text className="text-center text-xl text-white font-bold">
+                Logout
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}

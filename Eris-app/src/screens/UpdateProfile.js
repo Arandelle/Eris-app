@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  TextInput
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue } from "firebase/database";
@@ -68,13 +69,13 @@ const UpdateProfile = () => {
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
     const isProfileCompleted =
-      firstname &&
+      Boolean(firstname &&
       lastname &&
       age &&
       address &&
       mobileNum &&
       selectedGender &&
-      selectedProfile;
+      selectedProfile)
 
     if (
       !firstname ||
@@ -160,43 +161,51 @@ const UpdateProfile = () => {
     setMobileNum(value);
   };
 
-  const ImageUrl = [
-    "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-4.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
-  ];
+  const flowbite = Array.from({length: 5},(_, i) =>
+  `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
+  );
+
+  const robohash = Array.from({length: 99},(_, i) =>
+  `https://robohash.org/${i + 1}.png`
+  );
+  const ImageUrl = [...flowbite, ...robohash]
 
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="">
         <View className="flex-1">
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
-          <View className="flex flex-row space-x-3 justify-center">
-            {ImageUrl.map((url) => (
-              <TouchableOpacity
-                key={url}
-                onPress={() => setSelectedProfile(url)}
-                className="relative"
-              >
-                <Image
-                  source={{ uri: url }}
-                  className="h-[70px] w-[70px] rounded-full"
-                />
-
-                {selectedProfile === url && (
-                  <View className="absolute top-0 right-0 bg-white rounded-full">
-                    <Icon
-                      name="checkbox-marked-circle"
-                      size={20}
-                      color={"green"}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <View className="flex flex-row space-x-3 justify-center">
+            <TouchableOpacity>
+              <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
+                <Icon name="plus" size={40} color={"gray"}/>
+              </View>
+            </TouchableOpacity>
+              {ImageUrl.map((url) => (
+                <TouchableOpacity
+                  key={url}
+                  onPress={() => setSelectedProfile(url)}
+                  className="relative"
+                >
+                  <Image
+                    source={{ uri: url }}
+                    className="h-[70px] w-[70px] rounded-full"
+                  />
+  
+                  {selectedProfile === url && (
+                    <View className="absolute top-0 right-0 bg-white rounded-full">
+                      <Icon
+                        name="checkbox-marked-circle"
+                        size={20}
+                        color={"green"}
+                      />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
           <View className="m-4">
             <CustomInput
               label={"First Name"}
@@ -224,7 +233,6 @@ const UpdateProfile = () => {
               placeholder="Enter your age"
               errorMessage={age < 18 ? "User must be above 18 years old" : null}
             />
-
             <View className="w-full mb-4">
               <Text className="text-lg mb-1 text-sky-600 font-bold">
                 Select Gender:
