@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { app, auth } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, push } from "firebase/database";
 
 const SignupForm = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +53,19 @@ const SignupForm = () => {
         await set(ref(database, `users/${user.uid}`), userData);
 
       console.log("User created:", user.uid);
-      Alert.alert("Success", "Please check your email for verification")
+      Alert.alert("Success", "Please check your email for verification");
+
+      const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
+      const notificationRef = ref(database, `admins/${adminId}/notifications`);
+      const newNotification = {
+        message: `A new user has registered with the email ${user.email}`,
+        isSeen: false,
+        date: new Date().toISOString(),
+        img: imageUrl
+      }
+
+      await push(notificationRef, newNotification);
+      
       setEmail("")
       setPassword("")
       // Handle navigation or other logic after successful signup
