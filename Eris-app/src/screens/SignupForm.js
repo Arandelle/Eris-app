@@ -3,9 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { app, auth } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { getDatabase, ref, set, push } from "firebase/database";
+import { getDatabase, ref, set, push, serverTimestamp } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
 
 const SignupForm = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -47,20 +49,34 @@ const SignupForm = () => {
           email: user.email,
           profileComplete: false,
           createdAt: new Date().toISOString(),
+          timestamp: serverTimestamp(),  // Add this line
           img: imageUrl
         };
         const database = getDatabase(app);
         await set(ref(database, `users/${user.uid}`), userData);
 
       console.log("User created:", user.uid);
-      Alert.alert("Success", "Please check your email for verification");
+      Alert.alert("Success", "Please check your email for verification",
+      [
+        {
+          text: "Cancel",
+          style:" cancel"
+        },
+        {
+          text: "OK",
+          onPress: ()=> navigation.goBack()
+        }
+      ]
+      );
 
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
-        message: `A new user has registered with the email ${user.email}`,
+        message: `A new user has registered with the email `,
+        email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
+        timestamp: serverTimestamp(),  // Add this line
         img: imageUrl
       }
 
