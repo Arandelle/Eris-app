@@ -8,7 +8,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert, Image} from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
 import { auth } from "./src/services/firebaseConfig";
-import {onAuthStateChanged} from "firebase/auth"
+import {onAuthStateChanged, signOut} from "firebase/auth"
 import {get, getDatabase, ref} from "firebase/database"
 import {useNavigation} from "@react-navigation/native"
 import Logo from "./assets/logo.png"
@@ -46,8 +46,10 @@ const App = () => {
           Alert.alert("Error", "Account is not found")
         }
       } else {
+        await signOut(auth);
         setUser(null);
         setIsResponder(false);
+        Alert.alert("Error", "Please verify your email before logging in.");
       }
       setLoading(false);
     });
@@ -76,7 +78,7 @@ const App = () => {
           },
         }}
       >
-        {isResponder && user ? (
+        {user && user.emailVerified && isResponder ? (
           <>
             <Stack.Screen name="ERIS" options={{ headerShown: false }} component={TabNavigator} />
             <Stack.Screen
