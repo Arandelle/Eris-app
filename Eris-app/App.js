@@ -5,13 +5,13 @@ import LoginForm from "./src/screens/LoginForm";
 import SignupForm from "./src/screens/SignupForm";
 import DrawerNavigator from "./src/navigation/DrawerNavigator";
 import TabNavigator from "./src/navigation/TabNavigator";
-import { Text, TouchableOpacity, View, Alert, Image} from "react-native";
+import { Text, TouchableOpacity, View, Alert, Image } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
-import { auth } from "./src/services/firebaseConfig";
-import {onAuthStateChanged, signOut} from "firebase/auth"
-import {get, getDatabase, ref} from "firebase/database"
-import {useNavigation} from "@react-navigation/native"
-import Logo from "./assets/logo.png"
+import { auth, database } from "./src/services/firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { get, getDatabase, ref } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
+import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const Stack = createNativeStackNavigator();
@@ -27,29 +27,31 @@ const LoginButton = () => {
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const [isResponder, setIsResponder] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        const db = getDatabase();
-        const adminRef = ref(db, `users/${user.uid}`);
-        
+      if (user && user.emailVerified) {
+        const userRef = ref(database, `users/${user.uid}`);
+
         try {
-          const adminSnapshot = await get(adminRef);
-          console.log(`Admin snapshot exists: ${adminSnapshot.exists()}`);
-          setIsResponder(adminSnapshot.exists());
+          const userSnapshot = await get(userRef);
+          console.log(`Admin snapshot exists: ${userSnapshot.exists()}`);
+          if (userSnapshot.exists()) {
+            setUser(user);
+          } else {
+            await signOut(auth);
+            setUser(null);
+            Alert.alert("Error", "User data not found");
+          }
         } catch (error) {
-          console.error('Error fetching admin data:', error);
-          Alert.alert("Error", "Account is not found")
+          console.error("Error fetching admin data:", error);
+          await signOut(auth);
+          setUser(null);
+          Alert.alert("Error", "Account is not found");
         }
       } else {
-        await signOut(auth);
         setUser(null);
-        setIsResponder(false);
-        Alert.alert("Error", "Please verify your email before logging in.");
       }
       setLoading(false);
     });
@@ -60,8 +62,8 @@ const App = () => {
   if (loading) {
     return (
       <View className="flex w-full h-full items-center justify-center">
-       <Image source={Logo} alt="Loading..."/>
-       <Text>Loading please wait...</Text>
+        <Image source={Logo} alt="Loading..." />
+        <Text>Loading please wait...</Text>
       </View>
     );
   }
@@ -78,26 +80,30 @@ const App = () => {
           },
         }}
       >
-        {user && user.emailVerified && isResponder ? (
-          <>
-            <Stack.Screen name="ERIS" options={{ headerShown: false }} component={TabNavigator} />
-            <Stack.Screen
-              name="UpdateProfile"
-              component={UpdateProfile}
-              options={({ navigation }) => ({
-                title: "Update your profile",
-                headerShown: true,
-                headerLeft: () => (
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Profile")}
-                  >
-                    <Icon name="arrow-left-thick" size={25} color={"blue"}/>
-                  </TouchableOpacity>
-                ),
-              })}
-            />
-          </>
-        ) : (
+        {user ? (
+            <>
+              <Stack.Screen
+                name="ERIS"
+                options={{ headerShown: false }}
+                component={TabNavigator}
+              />
+              <Stack.Screen
+                name="UpdateProfile"
+                component={UpdateProfile}
+                options={({ navigation }) => ({
+                  title: "Update your profile",
+                  headerShown: true,
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Profile")}
+                    >
+                      <Icon name="arrow-left-thick" size={25} color={"blue"} />
+                    </TouchableOpacity>
+                  ),
+                })}
+              />
+            </>
+          ) : (
           <>
             <Stack.Screen name="Login" component={LoginForm} />
             <Stack.Screen
