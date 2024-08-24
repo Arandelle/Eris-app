@@ -213,7 +213,21 @@ const Request = ({ showHistory, setShowHistory }) => {
         },
         [`emergencyHistory/${newRequestRef.key}`]: true,
       });
+      
+      const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
+      const notificationRef = ref(database, `admins/${adminId}/notifications`);
+      const newNotification = {
+        type: "request",
+        message: `User submit a emergency request`,
+        email: `${user.email}`,
+        isSeen: false,
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp(),  // Add this line
+        img:"https://flowbite.com/docs/images/people/profile-picture-1.jpg"
+      }
 
+      await push(notificationRef, newNotification);
+      
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
