@@ -21,6 +21,7 @@
     "@react-native-firebase/crashlytics": "^20.3.0",
     "@react-native-firebase/database": "^20.3.0",
     "@react-native-firebase/messaging": "^20.4.0",
+    "@react-native-firebase/storage": "^20.4.0",
     "@react-native-picker/picker": "2.7.5",
     "@react-navigation/bottom-tabs": "^6.6.0",
     "@react-navigation/drawer": "^6.7.0",

@@ -141,7 +141,7 @@ const Profile = () => {
                   {userData?.email}
                 </Text>
                 <Text className="text-lg text-gray-500 font-bold">
-                  {userData.mobileNum}
+                  {userData.mobileNum ? userData.mobileNum : "not yet set"}
                 </Text>
               </View>
             </View>

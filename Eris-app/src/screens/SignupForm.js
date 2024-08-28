@@ -82,14 +82,28 @@ const SignupForm = () => {
       }
 
       await push(notificationRef, newNotification);
+
+      const userId = user.uid;
+      const notificationUserRef = ref(database, `users/${userId}/notifications`);
+      const newUserNotification = {
+        type: "users",
+        message: `you have successfully created your account`,
+        email: `${user.email}`,
+        isSeen: false,
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp(),  // Add this line
+        img: imageUrl
+      }
+
+      await push(notificationUserRef, newUserNotification);
       
       setEmail("")
       setPassword("")
       // Handle navigation or other logic after successful signup
     } catch (error) {
+      Alert.alert("Error signing up", error.message);
       setError(error.message);
       console.error("Error signing up:", error);
-      Alert.alert("Error signing up", error)
     }
   };
 
