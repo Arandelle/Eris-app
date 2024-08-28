@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { auth, database } from "../services/firebaseConfig";
 import { onValue, ref } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"
+import { useNavigation } from "@react-navigation/native";
 
 const Notification = () => {
+  const navigation = useNavigation();
   const {userData} = useFetchData();
   const [notifications, setNotifications] = useState([]);
 
@@ -40,30 +43,40 @@ const Notification = () => {
   return (
     <ScrollView>
       <View className="h-full w-full">
+      <TouchableOpacity onPress={()=>{
+        if(userData.profileComplete){
+          navigation.navigate("Profile")
+        }else{
+          navigation.navigate("UpdateProfile")
+        }
+      }}>
         {notifications.map((notifications) => (
           <View key={notifications.id} className="flex flex-row justify-between p-4 bg-gray-50">
-            <View className="">
-              <Image
+            <View className="rounded-full w-14 bg-blue-500 flex items-center justify-center">
+              {/* <Image
                 source={{ uri: notifications.img }}
                 className="rounded-full h-12 w-12 border-4 border-blue-500"
-              />
+              /> */}
+              <Icon name={notifications.img} size={24} color={"white"} />
             </View>
-            <View className="pl-4 flex-1">
-              <View className="text-sm mb-1 text-gray-600 dark:text-gray-300">
-                <Text className="font-semibold text-lg text-gray-800 dark:text-white">
-                 Welcome {userData?.firstname}!
-                </Text>
-                <Text>{notifications.message.toUpperCase()}</Text>
+              <View className="pl-4 flex-1">
+                <View className="text-sm mb-1 text-gray-600 dark:text-gray-300">
+                  <Text className="font-semibold text-lg text-gray-800">
+                   Welcome {userData?.firstname}!
+                  </Text>
+                  <Text>{notifications.message.toUpperCase()}</Text>
+                </View>
+                <View className="flex flex-row justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <Text>{getTimeDifference(notifications.timestamp)}</Text>
+                  <Text className="text-blue-500 dark:text-green-400">
+                  {formatDate(notifications.date)}
+                  </Text>
+                </View>
               </View>
-              <View className="flex flex-row justify-between text-xs text-gray-500 dark:text-gray-400">
-                <Text>{getTimeDifference(notifications.timestamp)}</Text>
-                <Text className="text-blue-500 dark:text-green-400">
-                {formatDate(notifications.date)}
-                </Text>
-              </View>
-            </View>
+            
           </View>
         ))}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

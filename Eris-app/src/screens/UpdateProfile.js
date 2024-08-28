@@ -77,21 +77,21 @@ const UpdateProfile = () => {
       selectedGender &&
       selectedProfile)
 
-    if (
-      !firstname ||
-      !lastname ||
-      !age ||
-      !address ||
-      !mobileNum ||
-      !selectedGender ||
-      !selectedProfile
-    ) {
-      Alert.alert(
-        "Validation Error",
-        "Please fill in all fields before updating your profile."
-      );
-      return; // Exit the function if any field is empty
-    }
+    // if (
+    //   !firstname ||
+    //   !lastname ||
+    //   !age ||
+    //   !address ||
+    //   !mobileNum ||
+    //   !selectedGender ||
+    //   !selectedProfile
+    // ) {
+    //   Alert.alert(
+    //     "Validation Error",
+    //     "Please fill in all fields before updating your profile."
+    //   );
+    //   return; // Exit the function if any field is empty
+    // }
 
     if (user) {
       const updatedData = {

@@ -92,7 +92,7 @@ const SignupForm = () => {
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),  // Add this line
-        img: imageUrl
+        img: "account-check-outline"
       }
 
       await push(notificationUserRef, newUserNotification);
