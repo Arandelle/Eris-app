@@ -87,12 +87,13 @@ const SignupForm = () => {
       const notificationUserRef = ref(database, `users/${userId}/notifications`);
       const newUserNotification = {
         type: "users",
-        message: `you have successfully created your account`,
+        message: `You have successfully created your account`,
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),  // Add this line
-        img: "account-check-outline"
+        img: imageUrl,
+        icon: "account-alert"
       }
 
       await push(notificationUserRef, newUserNotification);
