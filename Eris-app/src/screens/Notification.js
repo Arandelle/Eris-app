@@ -46,28 +46,29 @@ const Notification = () => {
   return (
     <ScrollView>
       <View className="h-full w-full">
-        <TouchableOpacity
+     
+          {notifications.map((notifications) => (
+            <TouchableOpacity
           onPress={() => {
-            if (userData.profileComplete) {
+            if (userData?.profileComplete) {
               navigation.navigate("Profile");
             } else {
               navigation.navigate("UpdateProfile");
             }
           }}
         >
-          {notifications.map((notifications) => (
             <View
               key={notifications.id}
               className="flex flex-row justify-between p-4 bg-gray-50"
             >
               <View className="relative">
                 <Image
-                  source={{ uri: !userData.profileComplete ? notifications.img : userData.img}}
+                  source={{ uri: !userData?.profileComplete ? notifications.img : userData.img}}
                   className="rounded-full h-14 w-14 border-4 border-blue-500"
                 />
                 <View className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-1 border-2 border-white">
                   <Icon
-                    name={!userData.profileComplete ? notifications.icon : "account-check"}
+                    name={!userData?.profileComplete ? notifications.icon : "account-check"}
                     size={16}
                     color={"white"}
                   />
@@ -88,8 +89,8 @@ const Notification = () => {
                 </View>
               </View>
             </View>
+            </TouchableOpacity>
           ))}
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
