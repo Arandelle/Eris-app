@@ -139,7 +139,7 @@ const UpdateProfile = () => {
         );
         const newNotification = {
           type: "users",
-          message: `updated its profile`,
+          message: `updated ${userData?.gender === "Male" ? "his" : "her"} profile details`,
           email: `${user.email}`,
           isSeen: false,
           date: new Date().toISOString(),

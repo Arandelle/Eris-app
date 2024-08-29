@@ -8,16 +8,17 @@ import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
 import { View, TouchableOpacity } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
+import { useNotificationData } from "../hooks/useNotificationData";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
-  const {userData} = useFetchData();
-  const [badgeSize, setBadgeSize] = useState(0);
+  const { userData } = useFetchData();
+  const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
-  const [showHistory, setShowHistory] = useState(false)
+  const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(()=>{
-    if(userData){
+  useEffect(() => {
+    if (userData) {
       setIsProfileComplete(userData.profileComplete);
     }
   }, [userData]);
@@ -75,15 +76,7 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home">
-        {(props) => (
-          <Home
-            {...props}
-            badgeSize={badgeSize}
-            setBadgeSize={setBadgeSize}
-          />
-        )}
-      </Tab.Screen>
+      <Tab.Screen name="Home" component={Home} />
       <Tab.Screen
         name="Map"
         component={Map}
@@ -91,23 +84,31 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Request"
-        options={{ 
-           headerRight: ()=>(
-            <TouchableOpacity className="p-4" onPress={()=>  setShowHistory(!showHistory)
-            }>
+        options={{
+          headerRight: () => (
+            <TouchableOpacity
+              className="p-4"
+              onPress={() => setShowHistory(!showHistory)}
+            >
               <Icon name="history" size={25} />
             </TouchableOpacity>
-           )
+          ),
         }}
       >
-        {(props)=>(<Request {...props} showHistory={showHistory} setShowHistory={setShowHistory}/>)}
+        {(props) => (
+          <Request
+            {...props}
+            showHistory={showHistory}
+            setShowHistory={setShowHistory}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen
         name="Notification"
         component={Notification}
         options={{
           title: "Notification",
-          tabBarBadge: badgeSize === 0 ? null : badgeSize,
+          tabBarBadge: notificationsCount === 0 ? null : notificationsCount,
         }}
       />
       <Tab.Screen

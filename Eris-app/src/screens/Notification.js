@@ -1,48 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { auth, database } from "../services/firebaseConfig";
-import { onValue, ref } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
+import { useNotificationData } from "../hooks/useNotificationData";
 
 const Notification = () => {
   const navigation = useNavigation();
   const { userData } = useFetchData();
-  const [notifications, setNotifications] = useState([]);
+  const {notifications, handleSpecificNotification } = useNotificationData();
+  const [viewAll, setViewAll] = useState(false);
 
-  useEffect(() => {
-    const user = auth.currentUser;
-
-    if (user) {
-      const userNotificationRef = ref(
-        database,
-        `users/${user.uid}/notifications`
-      );
-
-      // Listen for changes in the notifications data
-      onValue(userNotificationRef, (snapshot) => {
-        const data = snapshot.val();
-        const notificationList = []
-
-        // Convert the data object to an array of notifications
-        if (data) {
-          const notificationList = Object.keys(data).map((key) => ({
-            id: key,
-            ...data[key],
-          })).sort((a, b) => new Date(b.date) - new Date(a.date));
-
-          // update the state with the fetched notificaitons
-          setNotifications(notificationList);
-        } else {
-          // handle the case where there are no notifications
-          setNotifications([]);
-        }
-      });
-    }
-  }, []);
+  const displayedNotifications = viewAll ? notifications : notifications.slice(0,7);
 
   const notificationData = {
     users: "bg-red-500",
@@ -52,10 +23,11 @@ const Notification = () => {
   return (
     <ScrollView>
       <View className="h-full w-full">
-        {notifications.map((notifications) => (
+        {notifications.map((notification) => (
           <TouchableOpacity
-            key={notifications.id}
+            key={notification.id}
             onPress={() => {
+              handleSpecificNotification(notification.id);
               if (userData?.profileComplete) {
                 navigation.navigate("Profile");
               } else {
@@ -63,33 +35,35 @@ const Notification = () => {
               }
             }}
           >
-            <View className="flex flex-row justify-between p-4 bg-gray-50">
+            <View
+              className={`flex flex-row justify-between p-4 ${
+                notification.isSeen ? "bg-gray-200" : "bg-white"
+              }`}
+            >
               <View className="relative">
-                <View className="">
-                  <Image
-                    source={{ uri: notifications.img }}
-                    className="rounded-full relative h-14 w-14 border-4 border-blue-500"
-                  />
-                  <View
-                    className={`absolute bottom-0 right-0 ${
-                      notificationData[notifications.type]
-                    } rounded-full p-1 border-2 border-white`}
-                  >
-                    <Icon name={notifications.icon} size={16} color={"white"} />
-                  </View>
+                <Image
+                  source={{ uri: notification.img }}
+                  className="rounded-full h-14 w-14 border-4 border-blue-500"
+                />
+                <View
+                  className={`absolute bottom-0 right-0 ${
+                    notificationData[notification.type]
+                  } rounded-full p-1 border-2 border-white`}
+                >
+                  <Icon name={notification.icon} size={16} color={"white"} />
                 </View>
               </View>
               <View className="pl-4 flex-1">
                 <View className="text-sm mb-1 text-gray-600 dark:text-gray-300">
                   <Text className="font-semibold text-lg text-gray-800">
-                    {notifications.title}
+                    {notification.title}
                   </Text>
-                  <Text>{notifications.message.toUpperCase()}</Text>
+                  <Text>{notification.message.toUpperCase()}</Text>
                 </View>
                 <View className="flex flex-row justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <Text>{getTimeDifference(notifications.timestamp)}</Text>
+                  <Text>{getTimeDifference(notification.timestamp)}</Text>
                   <Text className="text-blue-500 dark:text-green-400">
-                    {formatDate(notifications.date)}
+                    {formatDate(notification.date)}
                   </Text>
                 </View>
               </View>
