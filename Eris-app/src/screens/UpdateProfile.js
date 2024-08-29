@@ -17,10 +17,11 @@ import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useFetchData } from "../hooks/useFetchData";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
+  const {userData, setUserData} = useFetchData();
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");

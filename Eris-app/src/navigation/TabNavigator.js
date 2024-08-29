@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -7,14 +7,20 @@ import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
 import { View, TouchableOpacity } from "react-native";
-
-const Tab = createBottomTabNavigator();
+import { useFetchData } from "../hooks/useFetchData";
 
 const TabNavigator = () => {
-
+  const Tab = createBottomTabNavigator();
+  const {userData} = useFetchData();
   const [badgeSize, setBadgeSize] = useState(0);
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [showHistory, setShowHistory] = useState(false)
+
+  useEffect(()=>{
+    if(userData){
+      setIsProfileComplete(userData.profileComplete);
+    }
+  }, [userData]);
 
   return (
     <Tab.Navigator
@@ -75,7 +81,6 @@ const TabNavigator = () => {
             {...props}
             badgeSize={badgeSize}
             setBadgeSize={setBadgeSize}
-            setIsProfileComplete={setIsProfileComplete}
           />
         )}
       </Tab.Screen>
