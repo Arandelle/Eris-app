@@ -87,6 +87,7 @@ const SignupForm = () => {
       const notificationUserRef = ref(database, `users/${userId}/notifications`);
       const newUserNotification = {
         type: "users",
+        title: "Welcome!",
         message: `You have successfully created your account`,
         email: `${user.email}`,
         isSeen: false,

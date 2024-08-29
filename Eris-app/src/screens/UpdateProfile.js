@@ -9,10 +9,10 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  TextInput
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ref, update, onValue } from "firebase/database";
+import { ref, update, onValue, serverTimestamp, push } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
@@ -21,7 +21,7 @@ import { useFetchData } from "../hooks/useFetchData";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const {userData, setUserData} = useFetchData();
+  const { userData, setUserData } = useFetchData();
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
@@ -69,14 +69,15 @@ const UpdateProfile = () => {
 
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
-    const isProfileCompleted =
-      Boolean(firstname &&
-      lastname &&
-      age &&
-      address &&
-      mobileNum &&
-      selectedGender &&
-      selectedProfile)
+    const isProfileCompleted = Boolean(
+      firstname &&
+        lastname &&
+        age &&
+        address &&
+        mobileNum &&
+        selectedGender &&
+        selectedProfile
+    );
 
     // if (
     //   !firstname ||
@@ -113,6 +114,40 @@ const UpdateProfile = () => {
         setUserData(updatedData);
 
         navigation.setParams({ updatedUserData: updatedData });
+
+        const notificationUserRef = ref(
+          database,
+          `users/${user.uid}/notifications`
+        );
+        const newUserNotification = {
+          type: "updateProfile",
+          title: "Profile Updated!",
+          message: `Congratulations!, you have successfully update your profile information.`,
+          isSeen: false,
+          date: new Date().toISOString(),
+          timestamp: serverTimestamp(), // Add this line
+          img: selectedProfile,
+          icon: "account-check",
+        };
+
+        await push(notificationUserRef, newUserNotification);
+
+        const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
+        const notificationRef = ref(
+          database,
+          `admins/${adminId}/notifications`
+        );
+        const newNotification = {
+          type: "users",
+          message: `updated its profile`,
+          email: `${user.email}`,
+          isSeen: false,
+          date: new Date().toISOString(),
+          timestamp: serverTimestamp(), // Add this line
+          img: selectedProfile,
+        };
+
+        await push(notificationRef, newNotification);
 
         Alert.alert(
           "Success",
@@ -162,14 +197,17 @@ const UpdateProfile = () => {
     setMobileNum(value);
   };
 
-  const flowbite = Array.from({length: 5},(_, i) =>
-  `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
+  const flowbite = Array.from(
+    { length: 5 },
+    (_, i) =>
+      `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
   );
 
-  const robohash = Array.from({length: 99},(_, i) =>
-  `https://robohash.org/${i + 1}.png`
+  const robohash = Array.from(
+    { length: 99 },
+    (_, i) => `https://robohash.org/${i + 1}.png`
   );
-  const ImageUrl = [...flowbite, ...robohash]
+  const ImageUrl = [...flowbite, ...robohash];
 
   return (
     <SafeAreaView className="flex-1">
@@ -178,11 +216,11 @@ const UpdateProfile = () => {
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex flex-row space-x-3 justify-center">
-            <TouchableOpacity>
-              <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
-                <Icon name="plus" size={40} color={"gray"}/>
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity>
+                <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
+                  <Icon name="plus" size={40} color={"gray"} />
+                </View>
+              </TouchableOpacity>
               {ImageUrl.map((url) => (
                 <TouchableOpacity
                   key={url}
@@ -193,7 +231,7 @@ const UpdateProfile = () => {
                     source={{ uri: url }}
                     className="h-[70px] w-[70px] rounded-full"
                   />
-  
+
                   {selectedProfile === url && (
                     <View className="absolute top-0 right-0 bg-white rounded-full">
                       <Icon
