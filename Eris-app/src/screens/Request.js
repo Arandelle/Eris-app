@@ -218,7 +218,9 @@ const Request = ({ showHistory, setShowHistory }) => {
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
         type: "request",
-        message: `User submit an emergency request`,
+        message: `User submit an emergency request:`,
+        description: `${description}`,
+        location: `${location}`,
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),

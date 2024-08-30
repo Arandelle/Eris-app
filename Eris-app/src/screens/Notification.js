@@ -52,17 +52,19 @@ const Notification = () => {
                 }`}
               >
                 <View className="relative">
-                  <Image
-                    source={{ uri: notification.img }}
-                    className="rounded-full h-14 w-14 border-4 border-blue-500"
-                  />
-                  <View
-                    className={`absolute bottom-0 right-0 ${
-                      notificationData[notification.type]
-                    } rounded-full p-1 border-2 border-white`}
-                  >
-                    <Icon name={notification.icon} size={16} color={"white"} />
-                  </View>
+                 <View>
+                    <Image
+                      source={{ uri: notification.img }}
+                      className="rounded-full h-14 w-14 border-4 border-blue-500"
+                    />
+                    <View
+                      className={`absolute bottom-0 right-0 ${
+                        notificationData[notification.type]
+                      } rounded-full p-1 border-2 border-white`}
+                    >
+                      <Icon name={notification.icon} size={16} color={"white"} />
+                    </View>
+                 </View>
                 </View>
                 <View className="pl-4 flex-1">
                   <View className="text-sm mb-1 text-gray-600">
