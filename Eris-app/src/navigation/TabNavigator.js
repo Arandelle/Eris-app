@@ -32,7 +32,7 @@ const TabNavigator = () => {
           const icons = {
             Home: "home-outline",
             Map: "map-marker-outline",
-            Request: "plus",
+            Request: "hospital-box",
             Notification: "bell-outline",
             Profile: "account-circle-outline",
           };
@@ -44,10 +44,7 @@ const TabNavigator = () => {
             <View className="items-center">
               <View
                 className={`items-center justify-center ${
-                  isMiddle
-                    ? "h-[55px] w-[55px] bottom-[25px] rounded-full border-white border bg-blue-400"
-                    : "bg-transparent"
-                }`}
+                  isMiddle && "rounded-lg p-1 bg-red-500"}`}
               >
                 <Icon
                   name={iconName}

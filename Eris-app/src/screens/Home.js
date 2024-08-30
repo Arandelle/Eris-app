@@ -1,29 +1,16 @@
-import { View,Button} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { signOut } from "firebase/auth";
-import { auth } from "../services/firebaseConfig";
+import { View, Image, Text, ScrollView } from "react-native";
 import ProfileReminderModal from "../component/ProfileReminderModal";
+import Logo from "../../assets/logo.png";
 
 const Home = () => {
-  const navigation = useNavigation();
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigation.navigate("Login");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   return (
-    <View>
+    <ScrollView>
+      <View className="h-screen flex items-center justify-center bg-gray-100">
       <ProfileReminderModal />
-      <View className="h-full flex items-center justify-center bg-gray-100">
-        <View className="flex flex-row w-full justify-around">
-          <Button title="Logout" onPress={handleLogout} />
-        </View>
+        <Text className="text-xl font-bold">Welcome to Homepage</Text>
+        <Image source={Logo} className="h-30 w-30" />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

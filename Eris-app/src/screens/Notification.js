@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, Button } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
@@ -13,7 +13,7 @@ const Notification = () => {
   const {notifications, handleSpecificNotification } = useNotificationData();
   const [viewAll, setViewAll] = useState(false);
 
-  const displayedNotifications = viewAll ? notifications : notifications.slice(0,7);
+  const displayedNotifications = viewAll ? notifications : notifications.slice(0,6); // it's like telling viewAll is true? then show all notifications else slice it to 7
 
   const notificationData = {
     users: "bg-red-500",
@@ -21,9 +21,9 @@ const Notification = () => {
   };
 
   return (
-    <ScrollView>
+    <ScrollView className="bg-white">
       <View className="h-full w-full">
-        {notifications.map((notification) => (
+        {displayedNotifications.map((notification) => (
           <TouchableOpacity
             key={notification.id}
             onPress={() => {
@@ -37,7 +37,7 @@ const Notification = () => {
           >
             <View
               className={`flex flex-row justify-between p-4 ${
-                notification.isSeen ? "bg-gray-200" : "bg-white"
+                notification.isSeen ? "bg-blue-50" : "bg-white"
               }`}
             >
               <View className="relative">
@@ -54,15 +54,15 @@ const Notification = () => {
                 </View>
               </View>
               <View className="pl-4 flex-1">
-                <View className="text-sm mb-1 text-gray-600 dark:text-gray-300">
+                <View className="text-sm mb-1 text-gray-600">
                   <Text className="font-semibold text-lg text-gray-800">
                     {notification.title}
                   </Text>
                   <Text>{notification.message.toUpperCase()}</Text>
                 </View>
-                <View className="flex flex-row justify-between text-xs text-gray-500 dark:text-gray-400">
+                <View className="flex flex-row justify-between text-xs text-gray-500">
                   <Text>{getTimeDifference(notification.timestamp)}</Text>
-                  <Text className="text-blue-500 dark:text-green-400">
+                  <Text className="text-blue-500">
                     {formatDate(notification.date)}
                   </Text>
                 </View>
@@ -70,6 +70,16 @@ const Notification = () => {
             </View>
           </TouchableOpacity>
         ))}
+        {!viewAll && notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+              <TouchableOpacity
+                className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
+                onPress={() => setViewAll(true)}
+              >
+                <Text className="text-center text">
+                  See previous notification
+                </Text>
+              </TouchableOpacity>
+            )}
       </View>
     </ScrollView>
   );
