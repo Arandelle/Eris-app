@@ -36,9 +36,12 @@ const Notification = () => {
               key={notification.id}
               onPress={() => {
                 handleSpecificNotification(notification.id);
-                if (userData?.profileComplete) {
+                if (userData?.profileComplete && notification.type === "users") {
                   navigation.navigate("Profile");
-                } else {
+                } else if(notification.type === "request"){
+                  navigation.navigate("Map");
+                }
+                else {
                   navigation.navigate("UpdateProfile");
                 }
               }}

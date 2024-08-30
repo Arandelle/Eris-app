@@ -7,6 +7,7 @@ import DrawerNavigator from "./src/navigation/DrawerNavigator";
 import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert, Image } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
+import Map from "./src/screens/Map"
 import { auth, database } from "./src/services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { get, getDatabase, ref } from "firebase/database";

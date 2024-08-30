@@ -218,7 +218,7 @@ const Request = ({ showHistory, setShowHistory }) => {
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
         type: "request",
-        message: `User submit a emergency request`,
+        message: `User submit an emergency request`,
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
@@ -227,6 +227,21 @@ const Request = ({ showHistory, setShowHistory }) => {
       }
 
       await push(notificationRef, newNotification);
+
+      const notificationUserRef = ref(database, `users/${user.uid}/notifications`);
+      const newUserNotification = {
+        type: "request",
+        title: "Success!",
+        message: `You have successfully submitted an emergency assistance`,
+        email: `${user.email}`,
+        isSeen: false,
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp(),  // Add this line
+        img: userData.img,
+        icon: "hospital-box"
+      }
+
+      await push(notificationUserRef, newUserNotification);
       
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");

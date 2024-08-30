@@ -15,10 +15,12 @@ import { auth, database } from "../services/firebaseConfig";
 import { ref, onValue, set, get } from "firebase/database";
 import Logo from "../../assets/logo.png"
 import responderMarker from "../../assets/ambulance.png"
+import { useFetchData } from "../hooks/useFetchData";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
 const Map = () => {
+  const {userData} = useFetchData();
   const [userLocation, setUserLocation] = useState(null);
   const [responderLocation, setResponderLocation] = useState(null);
   const [route, setRoute] = useState([]);
@@ -29,16 +31,11 @@ const Map = () => {
   useEffect(() => {
 
     const fetchUserData = async () => {
-      const user = auth.currentUser;
-      const userRef = ref(database, `users/${user.uid}`);
-      const snapshot = await get(userRef);
-      const userData = snapshot.val();
-
-      if (userData && userData.activeRequest) {
+      if (userData?.activeRequest) {
         setEmergencyRequest(userData.activeRequest);
         setUserLocation({
-          latitude: userData.activeRequest.location.latitude,
-          longitude: userData.activeRequest.location.longitude,
+          latitude: userData.activeRequest.locationCoords.latitude,
+          longitude: userData.activeRequest.locationCoords.longitude,
         });
       } else {
         // Fallback to current location
