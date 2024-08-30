@@ -53,5 +53,17 @@ export const useNotificationData = () => {
     update(notificationUpdateRef, { isSeen: true });
   };
 
-  return { notificationsCount, notifications, handleSpecificNotification };
+ const markAllNotificationsAsRead = () => {
+    const user = auth.currentUser;
+
+    if(user){
+      notifications.forEach((notification)=> {
+        const notificationRef = ref(database, `users/${user.uid}/notifications/${notification.id}`);
+
+        update(notificationRef, {isSeen: true});
+      });
+    }
+  }
+
+  return { notificationsCount, notifications, handleSpecificNotification, markAllNotificationsAsRead };
 };
