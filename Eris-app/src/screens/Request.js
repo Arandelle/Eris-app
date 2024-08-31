@@ -6,162 +6,33 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Modal,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import {
-  ref,
-  serverTimestamp,
-  push,
-  onValue,
-  set,
-  get,
-  update,
-} from "firebase/database";
+import { ref, serverTimestamp, push, update } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
-import * as Location from "expo-location";
+import History from "./History";
+import useLocationTracking from "../hooks/useLocationTracking";
+import useActiveRequest from "../hooks/useActiveRequest";
+import useFetchHistory from "../hooks/useFetchHistory";
 
 const Request = ({ showHistory, setShowHistory }) => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
+  const [newRequestKey, setNewRequestKey] = useState(null);
 
   const { userData } = useFetchData();
-  const [hasActiveRequest, setHasActiveRequest] = useState(false);
-  const [newRequestKey, setNewRequestKey] = useState(null);
-  const [emergencyExpired, setEmergencyExpired] = useState(false);
-  const [emergencyAccepted, setEmergencyAccepted] = useState(false);
-  const [emergencyHistory, setEmergencyHistory] = useState([]);
-
-  useEffect(() => {
-    let locationSubscription;
-
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission to access location denied");
-        return;
-      }
-
-      locationSubscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000,
-          distanceInterval: 10,
-        },
-        async (location) => {
-          try {
-            const { latitude, longitude } = location.coords;
-
-            // Update the latitude and longitude states
-            setLatitude(latitude);
-            setLongitude(longitude);
-
-            // Reverse geocoding to get the address
-            const reverseGeocode = await Location.reverseGeocodeAsync({
-              latitude,
-              longitude,
-            });
-
-            if (reverseGeocode.length > 0) {
-              const { name, city, region } = reverseGeocode[0];
-              const locString = `${name} - ${city}, ${region}`;
-              setLocation(locString);
-            } else {
-              setLocation("Location not found");
-            }
-          } catch (error) {
-            console.error(error);
-            setLocation("Error retrieving location");
-          }
-        }
-      );
-    })();
-
-    return () => {
-      if (locationSubscription) {
-        locationSubscription.remove();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    checkActiveRequest();
-  }, [userData]);
-
-  useEffect(() => {
-    if (showHistory) {
-      fetchEmergencyHistory();
-    }
-  }, [showHistory]);
-
-  const checkActiveRequest = async () => {
-    const user = auth.currentUser;
-
-    if (user) {
-      const userRef = ref(database, `users/${user.uid}`);
-      const userSnapshot = await get(userRef);
-      const userData = userSnapshot.val();
-
-      if (userData && userData.activeRequest) {
-        const emergencyRef = ref(
-          database,
-          `emergencyRequest/${userData.activeRequest.requestId}`
-        );
-        const emergencySnapshot = await get(emergencyRef);
-        const emergencyData = emergencySnapshot.val();
-
-        if (emergencyData) {
-          const now = new Date().getTime();
-          const expiresAt = new Date(emergencyData.expiresAt).getTime();
-
-          if (now > expiresAt && emergencyData.status === "pending") {
-            await update(emergencyRef, { status: "expired" });
-            setEmergencyExpired(true);
-            setHasActiveRequest(false);
-            Alert.alert(
-              "Request Expired",
-              "Your last emergency request has expired"
-            );
-          } else if (emergencyData.status === "pending") {
-            setHasActiveRequest(true);
-          } else if (emergencyData.status === "accepted") {
-            setEmergencyAccepted(true);
-          } else {
-            setHasActiveRequest(false);
-          }
-        }
-      } else {
-        setHasActiveRequest(false);
-      }
-    }
-  };
-
-  const fetchEmergencyHistory = async () => {
-    const user = auth.currentUser;
-
-    if (user) {
-      const userRef = ref(database, `users/${user.uid}/emergencyHistory`);
-      const historySnapshot = await get(userRef);
-      const historyData = historySnapshot.val();
-
-      if (historyData) {
-        const emergencyPromises = Object.keys(historyData).map(async (key) => {
-          const emergencyRef = ref(database, `emergencyRequest/${key}`);
-          const emergencySnapshot = await get(emergencyRef);
-          return { id: key, ...emergencySnapshot.val() };
-        });
-
-        const emergencies = await Promise.all(emergencyPromises);
-        setEmergencyHistory(emergencies);
-      } else {
-        setEmergencyHistory([]);
-      }
-    }
-  };
+  const { location, setLocation, latitude, longitude } = useLocationTracking();
+  const {
+    checkActiveRequest,
+    emergencyExpired,
+    setEmergencyExpired,
+    emergencyAccepted,
+    setEmergencyAccepted,
+    hasActiveRequest,
+    setHasActiveRequest,
+  } = useActiveRequest(userData);
+  const { emergencyHistory } = useFetchHistory(showHistory);
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
@@ -209,11 +80,11 @@ const Request = ({ showHistory, setShowHistory }) => {
             latitude: latitude,
             longitude: longitude,
           },
-          location: location
+          location: location,
         },
         [`emergencyHistory/${newRequestRef.key}`]: true,
       });
-      
+
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
@@ -224,13 +95,16 @@ const Request = ({ showHistory, setShowHistory }) => {
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
-        timestamp: serverTimestamp(),  // Add this line
-        img:"https://flowbite.com/docs/images/people/profile-picture-1.jpg"
-      }
+        timestamp: serverTimestamp(), // Add this line
+        img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+      };
 
       await push(notificationRef, newNotification);
 
-      const notificationUserRef = ref(database, `users/${user.uid}/notifications`);
+      const notificationUserRef = ref(
+        database,
+        `users/${user.uid}/notifications`
+      );
       const newUserNotification = {
         type: "request",
         title: "Success!",
@@ -238,13 +112,13 @@ const Request = ({ showHistory, setShowHistory }) => {
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
-        timestamp: serverTimestamp(),  // Add this line
+        timestamp: serverTimestamp(), // Add this line
         img: userData.img,
-        icon: "hospital-box"
-      }
+        icon: "hospital-box",
+      };
 
       await push(notificationUserRef, newUserNotification);
-      
+
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
@@ -339,65 +213,11 @@ const Request = ({ showHistory, setShowHistory }) => {
           </TouchableOpacity>
         </View>
       </>
-
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={showHistory}
-        onRequestClose={() => {
-          setShowHistory(!showHistory);
-        }}
-      >
-        <View
-          className="flex w-full h-full py-14 px-5 items-center justify-center"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-        >
-          <View className="bg-white h-full p-2 w-full rounded-lg shadow-lg">
-            <Text className="text-2xl text-center py-3 text-gray-600 font-bold">
-              History
-            </Text>
-            <ScrollView>
-              {emergencyHistory.length > 0 ? (
-                emergencyHistory.map((emergency) => (
-                  <View
-                    key={emergency.id}
-                    className="mb-4 p-2 border-b border-gray-200"
-                  >
-                    <Text className="text-lg text-gray-800">
-                      Type: {emergency.type}
-                    </Text>
-                    <Text className="text-sm text-gray-600">
-                      Description: {emergency.description}
-                    </Text>
-                    <Text className="text-sm text-gray-600">
-                      Location: {emergency.location}
-                    </Text>
-                    <Text className="text-sm text-gray-600">
-                      Status: {emergency.status}
-                    </Text>
-                    <Text className="text-sm text-gray-600">
-                      Submitted:{" "}
-                      {new Date(emergency.timestamp).toLocaleString()}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <Text className="text-center text-gray-500">
-                  No history found
-                </Text>
-              )}
-            </ScrollView>
-            <TouchableOpacity
-              className="bg-gray-500 p-3.5 rounded-md items-center mt-5"
-              onPress={() => setShowHistory(false)}
-            >
-              <Text className="text-white text-lg font-bold">
-                Close History
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <History
+        showHistory={showHistory}
+        setShowHistory={setShowHistory}
+        emergencyHistory={emergencyHistory}
+      />
     </ScrollView>
   );
 };
