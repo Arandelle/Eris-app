@@ -30,8 +30,9 @@ const Notification = () => {
    )}
       <ScrollView className="bg-white">
         <View className="h-full w-full">
-  
-          {displayedNotifications.map((notification) => (
+    
+    {displayedNotifications.length > 0 ? (
+      displayedNotifications.map((notification) => (
             <TouchableOpacity
               key={notification.id}
               onPress={() => {
@@ -82,7 +83,13 @@ const Notification = () => {
                 </View>
               </View>
             </TouchableOpacity>
-          ))}
+          ))
+    ) : (
+     <View className="flex items-center justify-center mt-60"> 
+     <Text className="text-center text-xl text-gray-500">No notification found</Text>
+     </View>
+    )}
+        
           {!viewAll && notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
                 <TouchableOpacity
                   className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"

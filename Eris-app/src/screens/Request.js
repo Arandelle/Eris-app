@@ -9,12 +9,13 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, update } from "firebase/database";
+import { ref, serverTimestamp, push, update, get } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
 import History from "./History";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useActiveRequest from "../hooks/useActiveRequest";
 import useFetchHistory from "../hooks/useFetchHistory";
+import useResponderData from "../hooks/useResponderData"
 
 const Request = ({ showHistory, setShowHistory }) => {
   const [emergencyType, setEmergencyType] = useState("");
@@ -22,6 +23,7 @@ const Request = ({ showHistory, setShowHistory }) => {
   const [newRequestKey, setNewRequestKey] = useState(null);
 
   const { userData } = useFetchData("users");
+  const { responderData} = useResponderData();
   const { location, setLocation, latitude, longitude } = useLocationTracking();
   const {
     checkActiveRequest,
@@ -122,6 +124,24 @@ const Request = ({ showHistory, setShowHistory }) => {
       };
 
       await push(notificationUserRef, newUserNotification);
+
+      responderData.forEach(async (responder) =>{
+        if(responder.profileComplete){
+          const notificationResponderRef = ref(database, `responders/${responder.id}/notifications`);
+          const newResponderNotification = {
+            type: "request",
+            message: `User submit an emergency request:`,
+            description: `${description}`,
+            location: `${location}`,
+            email: `${user.email}`,
+            isSeen: false,
+            date: new Date().toISOString(),
+            timestamp: serverTimestamp(),
+            img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+          };
+            await push(notificationResponderRef, newResponderNotification);
+        }
+      });
 
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
