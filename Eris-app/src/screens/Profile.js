@@ -2,12 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  Button,
   ActivityIndicator,
   ScrollView,
   SafeAreaView,
   Alert,
-  StyleSheet,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,

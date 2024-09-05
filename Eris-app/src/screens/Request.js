@@ -32,6 +32,7 @@ const Request = ({ showHistory, setShowHistory }) => {
     hasActiveRequest,
     setHasActiveRequest,
   } = useActiveRequest(userData);
+  
   const { emergencyHistory } = useFetchHistory(showHistory);
 
   const handleSubmit = async () => {
@@ -55,6 +56,7 @@ const Request = ({ showHistory, setShowHistory }) => {
     try {
       const newRequest = {
         userId: user.uid,
+        date: new Date().toISOString(),
         timestamp: serverTimestamp(),
         locationCoords: {
           latitude: latitude,
@@ -167,7 +169,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         )}
         <View className="space-y-5">
           <View>
-            <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>
+            <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>            
             <View className="border border-gray-300 rounded-md bg-white">
               <Picker
                 selectedValue={emergencyType}

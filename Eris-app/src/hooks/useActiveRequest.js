@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, get, update } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
+import { Alert } from "react-native";
 
 const useActiveRequest = (userData) => {
   const [emergencyExpired, setEmergencyExpired] = useState(false);

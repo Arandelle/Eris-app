@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
-  TouchableOpacity,
-  Dimensions,
-  StyleSheet,
   Alert,
   Image
 } from "react-native";
