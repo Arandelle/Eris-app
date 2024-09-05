@@ -18,7 +18,7 @@ const Notification = () => {
   const notificationData = {
     users: "bg-red-500",
     updateProfile: "bg-blue-500",
-    request: "bg-orange-500 "
+    emergency: "bg-orange-500 "
   };
 
   return (
