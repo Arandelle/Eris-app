@@ -21,7 +21,7 @@ const Request = ({ showHistory, setShowHistory }) => {
   const [description, setDescription] = useState("");
   const [newRequestKey, setNewRequestKey] = useState(null);
 
-  const { userData } = useFetchData();
+  const { userData } = useFetchData("users");
   const { location, setLocation, latitude, longitude } = useLocationTracking();
   const {
     checkActiveRequest,
@@ -71,6 +71,9 @@ const Request = ({ showHistory, setShowHistory }) => {
       };
 
       const emergencyRequestRef = ref(database, "emergencyRequest");
+      const userHistoryRef = ref(database, `users/${user.uid}/emergencyHistory`);
+      await push(userHistoryRef, newRequest);
+      
       const newRequestRef = await push(emergencyRequestRef, newRequest);
       setNewRequestKey(newRequestRef.key);
       const userRef = ref(database, `users/${user.uid}`);
@@ -84,7 +87,6 @@ const Request = ({ showHistory, setShowHistory }) => {
           },
           location: location,
         },
-        [`emergencyHistory/${newRequestRef.key}`]: true,
       });
 
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
