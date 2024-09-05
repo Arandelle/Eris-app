@@ -106,7 +106,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         `users/${user.uid}/notifications`
       );
       const newUserNotification = {
-        type: "request",
+        type: "emergency",
         title: "Success!",
         message: `You have successfully submitted an emergency assistance`,
         email: `${user.email}`,

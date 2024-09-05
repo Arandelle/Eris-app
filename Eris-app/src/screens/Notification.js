@@ -38,7 +38,7 @@ const Notification = () => {
                 handleSpecificNotification(notification.id);
                 if (userData?.profileComplete && notification.type === "users") {
                   navigation.navigate("Profile");
-                } else if(notification.type === "request"){
+                } else if(notification.type === "emergency"){
                   navigation.navigate("Map");
                 }
                 else {
