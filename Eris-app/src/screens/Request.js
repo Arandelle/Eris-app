@@ -39,7 +39,7 @@ const Request = ({ showHistory, setShowHistory }) => {
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
-
+  
     if (!user) {
       Alert.alert("Error", "No user is signed in.");
       return;
@@ -68,21 +68,31 @@ const Request = ({ showHistory, setShowHistory }) => {
         type: emergencyType,
         description,
         status: "pending",
-        expiresAt: new Date(Date.now() + 30000).toISOString(), // Add expiration time
+        expiresAt: new Date(Date.now() + 30000).toISOString(),
         name: `${userData.firstname} ${userData.lastname}`,
       };
-
+  
+      // Create a new reference for the emergency request
       const emergencyRequestRef = ref(database, "emergencyRequest");
-      const userHistoryRef = ref(database, `users/${user.uid}/emergencyHistory`);
-      await push(userHistoryRef, newRequest);
-      
-      const newRequestRef = await push(emergencyRequestRef, newRequest);
-      setNewRequestKey(newRequestRef.key);
-      const userRef = ref(database, `users/${user.uid}`);
-
-      await update(userRef, {
+      const newRequestRef = push(emergencyRequestRef);
+      const newRequestKey = newRequestRef.key;
+  
+      // Add the key to the request object
+      newRequest.id = newRequestKey;
+  
+      // Update both the central emergencyRequest and the user's history with the same key
+      const updates = {};
+      updates[`emergencyRequest/${newRequestKey}`] = newRequest;
+      updates[`users/${user.uid}/emergencyHistory/${newRequestKey}`] = newRequest;
+  
+      await update(ref(database), updates);
+  
+      setNewRequestKey(newRequestKey);
+  
+      // Update user's active request
+      await update(ref(database, `users/${user.uid}`), {
         activeRequest: {
-          requestId: newRequestRef.key,
+          requestId: newRequestKey,
           locationCoords: {
             latitude: latitude,
             longitude: longitude,
@@ -90,7 +100,8 @@ const Request = ({ showHistory, setShowHistory }) => {
           location: location,
         },
       });
-
+  
+      // Send notifications
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
@@ -101,12 +112,12 @@ const Request = ({ showHistory, setShowHistory }) => {
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
-        timestamp: serverTimestamp(), // Add this line
+        timestamp: serverTimestamp(),
         img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
       };
-
+  
       await push(notificationRef, newNotification);
-
+  
       const notificationUserRef = ref(
         database,
         `users/${user.uid}/notifications`
@@ -118,15 +129,16 @@ const Request = ({ showHistory, setShowHistory }) => {
         email: `${user.email}`,
         isSeen: false,
         date: new Date().toISOString(),
-        timestamp: serverTimestamp(), // Add this line
+        timestamp: serverTimestamp(),
         img: userData.img,
         icon: "hospital-box",
       };
-
+  
       await push(notificationUserRef, newUserNotification);
-
-      responderData.forEach(async (responder) =>{
-        if(responder.profileComplete){
+  
+      // Notify responders
+      responderData.forEach(async (responder) => {
+        if (responder.profileComplete) {
           const notificationResponderRef = ref(database, `responders/${responder.id}/notifications`);
           const newResponderNotification = {
             type: "request",
@@ -139,15 +151,15 @@ const Request = ({ showHistory, setShowHistory }) => {
             timestamp: serverTimestamp(),
             img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
           };
-            await push(notificationResponderRef, newResponderNotification);
+          await push(notificationResponderRef, newResponderNotification);
         }
       });
-
+  
       Alert.alert("Emergency Request Submitted", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
       setLocation("");
-
+  
       setHasActiveRequest(true);
       setEmergencyExpired(false);
       setEmergencyAccepted(false);
