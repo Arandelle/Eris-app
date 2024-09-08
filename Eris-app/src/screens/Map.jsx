@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  Alert,
-  Image
-} from "react-native";
+import { Text, View, Alert, Image } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
 import { auth, database } from "../services/firebaseConfig";
 import { ref, onValue, set, get, update } from "firebase/database";
-import Logo from "../../assets/logo.png"
-import responderMarker from "../../assets/ambulance.png"
+import Logo from "../../assets/logo.png";
+import responderMarker from "../../assets/ambulance.png";
 import { useFetchData } from "../hooks/useFetchData";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
 const Map = () => {
-  const {userData} = useFetchData();
+  const { userData } = useFetchData();
   const [userLocation, setUserLocation] = useState(null);
   const [responderLocation, setResponderLocation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,15 +20,23 @@ const Map = () => {
   const [distance, setDistance] = useState(0);
 
   useEffect(() => {
-    const user = auth.currentUser
+    const user = auth.currentUser;
     const requestLocation = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
 
-        if (status !== 'granted') {
-          console.error('Permission to access location was denied');
-          Alert.alert('Eris says: ', 'Permission to access location was denied');
-          setUserLocation({ latitude: 14.33289, longitude: 120.85065 }); // fallback position
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
+          Alert.alert(
+            "Eris says: ",
+            "Permission to access location was denied"
+          );
+          const fallbackLocation = {latitude: 14.33289, longitude: 120.85065 };
+
+          const userRef = ref(database, `users/${user.uid}/location`);
+          update(userRef, fallbackLocation);
+
+          setUserLocation(fallbackLocation); // fallback position
           setLoading(false);
           return;
         }
@@ -53,12 +56,18 @@ const Map = () => {
         });
         setLoading(false);
       } catch (error) {
-        console.error('Location request failed: ', error);
+        console.error("Location request failed: ", error);
         Alert.alert(
-          'Location permission was denied',
-          'The app is using a default fallback location. Please enable location permissions in your device settings for accurate location tracking.'
+          "Location permission was denied",
+          "The app is using a default fallback location. Please enable location permissions in your device settings for accurate location tracking."
         );
-        setUserLocation({ latitude: 14.33289, longitude: 120.85065 }); // Fallback position
+        const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
+
+        // Update fallback location to Firebase
+        const userRef = ref(database, `users/${user.uid}/location`);
+        update(userRef, fallbackLocation);
+
+        setUserLocation(fallbackLocation); // Fallback position
         setLoading(false);
       }
     };
@@ -66,7 +75,7 @@ const Map = () => {
   }, [userData]);
 
   useEffect(() => {
-    const user = auth.currentUser
+    const user = auth.currentUser;
     const respondeRef = ref(database, `users/${user.uid}`);
     const unsubscribe = onValue(respondeRef, (snapshot) => {
       const responderData = snapshot.val();
@@ -82,19 +91,19 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    const user = auth.currentUser
+    const user = auth.currentUser;
     const respondeRef = ref(database, `users/${user.uid}/activeRequest`);
     const unsubscribe = onValue(respondeRef, (snapshot) => {
       const responderData = snapshot.val();
 
-      if (responderData && responderData.locationCoords) {
+      if (responderData && responderData.locationOfResponder) {
         setResponderLocation({
           latitude: responderData.locationOfResponder.latitude,
           longitude: responderData.locationOfResponder.longitude,
         });
       }
     });
-  
+
     return () => unsubscribe();
   }, []);
 
@@ -137,7 +146,7 @@ const Map = () => {
   return (
     <View className="flex-1">
       <MapView
-      className="flex-1"
+        className="flex-1"
         initialRegion={{
           ...userLocation,
           latitudeDelta: 0.005,
@@ -162,15 +171,11 @@ const Map = () => {
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
       </MapView>
-      {/* <View className="scroll-py-2.5 bg-white items-center absolute top-0 right-0">
-        {emergencyRequest && <Text>Emergency Request Active</Text>}
+      <View className="bg-gray-500 p-2">
         {responderLocation && (
-          <Text>Distance to responder: {distance.toFixed(2)} km</Text>
+          <Text className="text-white text-lg">Distance to responder: {distance.toFixed(2)} km</Text>
         )}
-        <TouchableOpacity className="m-2.5 p-2.5 bg-blue-500 rounded-md" onPress={fetchRoute}>
-          <Text className="font-bold text-white">Refresh Route</Text>
-        </TouchableOpacity>
-      </View> */}
+      </View>
     </View>
   );
 };
