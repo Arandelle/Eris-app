@@ -42,6 +42,9 @@ const History = ({showHistory, setShowHistory, emergencyHistory}) => {
                   Submitted:{" "}
                   {new Date(emergency.timestamp).toLocaleString()}
                 </Text>
+                {emergency.status === "accepted" && (
+                  <Text>accepted by: {emergency.acceptedBy}</Text>
+                )}
               </View>
             ))
           ) : (
