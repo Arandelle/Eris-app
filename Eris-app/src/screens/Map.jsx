@@ -9,7 +9,7 @@ import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, onValue, set, get } from "firebase/database";
+import { ref, onValue, set, get, update } from "firebase/database";
 import Logo from "../../assets/logo.png"
 import responderMarker from "../../assets/ambulance.png"
 import { useFetchData } from "../hooks/useFetchData";
@@ -20,26 +20,21 @@ const Map = () => {
   const {userData} = useFetchData();
   const [userLocation, setUserLocation] = useState(null);
   const [responderLocation, setResponderLocation] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
-  const [emergencyRequest, setEmergencyRequest] = useState(null);
-  const [requestAccepted, setRequestAccepted] = useState(false);
 
   useEffect(() => {
-
-    const fetchUserData = async () => {
-      if (userData?.activeRequest) {
-        setEmergencyRequest(userData.activeRequest);
-        setUserLocation({
-          latitude: userData.activeRequest.locationCoords.latitude,
-          longitude: userData.activeRequest.locationCoords.longitude,
-        });
-      } else {
-        // Fallback to current location
+    const user = auth.currentUser
+    const requestLocation = async () => {
+      try {
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.error("Permission to access location was denied");
-          Alert.alert("Permission denied", "Unable to access your location");
+
+        if (status !== 'granted') {
+          console.error('Permission to access location was denied');
+          Alert.alert('Eris says: ', 'Permission to access location was denied');
+          setUserLocation({ latitude: 14.33289, longitude: 120.85065 }); // fallback position
+          setLoading(false);
           return;
         }
 
@@ -48,35 +43,66 @@ const Map = () => {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+
+        Location.watchPositionAsync({ distanceInterval: 1 }, (newLocation) => {
+          const { latitude, longitude } = newLocation.coords;
+          setUserLocation({ latitude, longitude });
+
+          const responderRef = ref(database, `users/${user.uid}`);
+          update(responderRef, { location: { latitude, longitude } });
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error('Location request failed: ', error);
+        Alert.alert(
+          'Location permission was denied',
+          'The app is using a default fallback location. Please enable location permissions in your device settings for accurate location tracking.'
+        );
+        setUserLocation({ latitude: 14.33289, longitude: 120.85065 }); // Fallback position
+        setLoading(false);
       }
     };
-
-    fetchUserData();
-  }, []);
+    requestLocation();
+  }, [userData]);
 
   useEffect(() => {
-    // Listen for responder's location updates
-    if (!emergencyRequest || !requestAccepted) return;
+    const user = auth.currentUser
+    const respondeRef = ref(database, `users/${user.uid}`);
+    const unsubscribe = onValue(respondeRef, (snapshot) => {
+      const responderData = snapshot.val();
 
-    const responderRef = ref(database, `responders/${emergencyRequest.responderId}`);
-    const unsubscribe = onValue(responderRef, (snapshot) => {
-      const location = snapshot.val();
-      if (location) {
-        setResponderLocation({
-          latitude: location.latitude,
-          longitude: location.longitude,
+      if (responderData && responderData.locationCoords) {
+        setUserLocation({
+          latitude: responderData.locationCoords.latitude,
+          longitude: responderData.locationCoords.longitude,
         });
       }
     });
-
     return () => unsubscribe();
-  }, [emergencyRequest, requestAccepted]);
+  }, []);
 
   useEffect(() => {
-    if (userLocation && responderLocation &&  requestAccepted) {
+    const user = auth.currentUser
+    const respondeRef = ref(database, `users/${user.uid}/activeRequest`);
+    const unsubscribe = onValue(respondeRef, (snapshot) => {
+      const responderData = snapshot.val();
+
+      if (responderData && responderData.locationCoords) {
+        setResponderLocation({
+          latitude: responderData.locationOfResponder.latitude,
+          longitude: responderData.locationOfResponder.longitude,
+        });
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (userLocation && responderLocation) {
       fetchRoute();
     }
-  }, [userLocation, responderLocation, requestAccepted]);
+  }, [userLocation, responderLocation]);
 
   const fetchRoute = async () => {
     try {
@@ -120,10 +146,10 @@ const Map = () => {
       >
         <Marker
           coordinate={userLocation}
-          title={emergencyRequest ? "Emergency Location" : "Your Location"}
+          title={"Your Location"}
           pinColor="#42a5f5"
         />
-        {responderLocation && requestAccepted && (
+        {responderLocation && (
           <Marker
             coordinate={responderLocation}
             title="Responder"
