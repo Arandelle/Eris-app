@@ -171,11 +171,13 @@ const Map = () => {
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
       </MapView>
-      <View className="bg-gray-500 p-2">
+     
         {responderLocation && (
+          <View className="bg-gray-500 p-2">
           <Text className="text-white text-lg">Distance to responder: {distance.toFixed(2)} km</Text>
+          </View>
         )}
-      </View>
+      
     </View>
   );
 };

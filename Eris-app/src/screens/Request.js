@@ -29,8 +29,8 @@ const Request = ({ showHistory, setShowHistory }) => {
     checkActiveRequest,
     emergencyExpired,
     setEmergencyExpired,
-    emergencyAccepted,
-    setEmergencyAccepted,
+    emergencyDone,
+    setEmergencyDone,
     hasActiveRequest,
     setHasActiveRequest,
   } = useActiveRequest(userData);
@@ -162,7 +162,7 @@ const Request = ({ showHistory, setShowHistory }) => {
   
       setHasActiveRequest(true);
       setEmergencyExpired(false);
-      setEmergencyAccepted(false);
+      setEmergencyDone(false);
     } catch (error) {
       console.error("Error submitting emergency request", error);
       Alert.alert(
@@ -172,11 +172,6 @@ const Request = ({ showHistory, setShowHistory }) => {
     }
   };
 
-  useEffect(() => {
-    const checkExpiration = setInterval(checkActiveRequest, 5000);
-    return () => clearInterval(checkExpiration);
-  }, []);
-
   return (
     <ScrollView className="flex-1 p-5 bg-gray-100">
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
@@ -184,7 +179,7 @@ const Request = ({ showHistory, setShowHistory }) => {
       </Text>
       <>
         {hasActiveRequest ? (
-          <Text className="text-lg text-center text-green-600 mb-5">
+          <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
             You have an active emergency request. Please wait for it to be
             resolved.
           </Text>
@@ -194,13 +189,14 @@ const Request = ({ showHistory, setShowHistory }) => {
             needed.
           </Text>
         ) : (
-          emergencyAccepted && (
+          emergencyDone && (
             <Text className="text-lg text-center text-blue-500 italic mb-5">
-              Your last emergency request was accepted. You can submit a new one
+              Your last emergency request was resolve. You can submit a new one
               if needed.
             </Text>
           )
         )}
+
         <View className="space-y-5">
           <View>
             <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>            

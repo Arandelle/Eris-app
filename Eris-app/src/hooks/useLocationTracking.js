@@ -38,10 +38,10 @@ const useLocationTracking = () => {
                 });
     
                 if (reverseGeocode.length > 0) {
-                  const { name, city, region } = reverseGeocode[0];
-                  const locString = `${name} - ${city}, ${region}`;
-                  setLocation(locString);
-                } else {
+                  const { name, city, region, country } = reverseGeocode[0];
+                  const locString = `${name ? name : ''} - ${city}, ${region}, ${country}`;
+                  setLocation(locString.trim());
+                }  else {
                   setLocation("Location not found");
                 }
               } catch (error) {

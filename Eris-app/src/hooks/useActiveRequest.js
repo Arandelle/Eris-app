@@ -6,7 +6,7 @@ import { Alert } from "react-native";
 const useActiveRequest = (userData) => {
   const [emergencyExpired, setEmergencyExpired] = useState(false);
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
-  const [emergencyAccepted, setEmergencyAccepted] = useState(false);
+  const [emergencyDone, setEmergencyDone] = useState(false);
 
   useEffect(() => {
     checkActiveRequest();
@@ -21,9 +21,12 @@ const useActiveRequest = (userData) => {
       const userData = userSnapshot.val();
 
       if (userData && userData.activeRequest) {
+
+        const requetId = userData.activeRequest.requestId;
+
         const emergencyRef = ref(
           database,
-          `emergencyRequest/${userData.activeRequest.requestId}`
+          `emergencyRequest/${requetId}`
         );
         const emergencySnapshot = await get(emergencyRef);
         const emergencyData = emergencySnapshot.val();
@@ -33,17 +36,20 @@ const useActiveRequest = (userData) => {
           const expiresAt = new Date(emergencyData.expiresAt).getTime();
 
           if (now > expiresAt && emergencyData.status === "pending") {
+            const historyRef = ref(database, `users/${user.uid}/emergencyHistory/${requetId}`);
             await update(emergencyRef, { status: "expired" });
+            await update(historyRef, {status: "expired"})
             setEmergencyExpired(true);
             setHasActiveRequest(false);
             Alert.alert(
               "Request Expired",
               "Your last emergency request has expired"
             );
-          } else if (emergencyData.status === "pending") {
+          } else 
+          if (emergencyData.status === "pending") {
             setHasActiveRequest(true);
-          } else if (emergencyData.status === "accepted") {
-            setEmergencyAccepted(true);
+          } else if (emergencyData.status === "done") {
+            setEmergencyDone(true);
           } else {
             setHasActiveRequest(false);
           }
@@ -54,12 +60,18 @@ const useActiveRequest = (userData) => {
     }
   };
 
+  
+  useEffect(() => {
+    const checkExpiration = setInterval(checkActiveRequest, 5000);
+    return () => clearInterval(checkExpiration);
+  }, []);
+
   return {
     checkActiveRequest,
     emergencyExpired,
     setEmergencyExpired,
-    emergencyAccepted,
-    setEmergencyAccepted,
+    emergencyDone,
+    setEmergencyDone,
     hasActiveRequest,
     setHasActiveRequest,
   };
