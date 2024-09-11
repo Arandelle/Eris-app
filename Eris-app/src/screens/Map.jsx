@@ -47,12 +47,22 @@ const Map = () => {
           longitude: location.coords.longitude,
         });
 
-        Location.watchPositionAsync({ distanceInterval: 1 }, (newLocation) => {
+        Location.watchPositionAsync({ distanceInterval: 1 }, async (newLocation) => {
           const { latitude, longitude } = newLocation.coords;
           setUserLocation({ latitude, longitude });
 
-          const responderRef = ref(database, `users/${user.uid}`);
-          update(responderRef, { location: { latitude, longitude } });
+          const userLocationRef = ref(database, `users/${user.uid}/location`);
+          const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
+          const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+          try {
+            await update(userLocationRef, { latitude, longitude });
+            if (userData?.activeRequest) {
+              await update(userActiveRequest, { latitude, longitude });
+              await update(userEmergencyRequest, { latitude, longitude });
+            }
+          } catch (error) {
+            console.error("Failed to update location in Firebase: ", error);
+          }
         });
         setLoading(false);
       } catch (error) {
@@ -64,8 +74,8 @@ const Map = () => {
         const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
 
         // Update fallback location to Firebase
-        const userRef = ref(database, `users/${user.uid}/location`);
-        update(userRef, fallbackLocation);
+        const userLocationRef = ref(database, `users/${user.uid}/location`);
+        update(userLocationRef, fallbackLocation);
 
         setUserLocation(fallbackLocation); // Fallback position
         setLoading(false);
