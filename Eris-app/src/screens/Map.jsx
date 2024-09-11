@@ -37,11 +37,13 @@ const Map = () => {
         const userLocationRef = ref(database, `users/${user.uid}/location`);
         const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
         const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+        const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
         try {
           await update(userLocationRef, fallbackLocation);
           if (userData?.activeRequest) {
             await update(userActiveRequest, fallbackLocation);
             await update(userEmergencyRequest, fallbackLocation);
+            await update(responderLocation, fallbackLocation);
           }
         } catch (error) {
           console.error("Failed to update location in Firebase: ", error);
@@ -64,12 +66,14 @@ const Map = () => {
 
           const userLocationRef = ref(database, `users/${user.uid}/location`);
           const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
-          const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+          const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`);
+          const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
           try {
             await update(userLocationRef, { latitude, longitude });
             if (userData?.activeRequest) {
               await update(userActiveRequest, { latitude, longitude });
               await update(userEmergencyRequest, { latitude, longitude });
+              await update(responderLocation, {latitude, longitude});
             }
           } catch (error) {
             console.error("Failed to update location in Firebase: ", error);
@@ -87,11 +91,13 @@ const Map = () => {
         const userLocationRef = ref(database, `users/${user.uid}/location`);
         const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
         const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+        const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
         try {
           await update(userLocationRef, fallbackLocation);
           if (userData?.activeRequest) {
             await update(userActiveRequest, fallbackLocation);
             await update(userEmergencyRequest, fallbackLocation);
+            await update(responderLocation, fallbackLocation);
           }
         } catch (error) {
           console.error("Failed to update location in Firebase: ", error);
