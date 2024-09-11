@@ -33,8 +33,19 @@ const Map = () => {
           );
           const fallbackLocation = {latitude: 14.33289, longitude: 120.85065 };
 
-          const userRef = ref(database, `users/${user.uid}/location`);
-          update(userRef, fallbackLocation);
+         
+        const userLocationRef = ref(database, `users/${user.uid}/location`);
+        const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
+        const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+        try {
+          await update(userLocationRef, fallbackLocation);
+          if (userData?.activeRequest) {
+            await update(userActiveRequest, fallbackLocation);
+            await update(userEmergencyRequest, fallbackLocation);
+          }
+        } catch (error) {
+          console.error("Failed to update location in Firebase: ", error);
+        }
 
           setUserLocation(fallbackLocation); // fallback position
           setLoading(false);
@@ -73,9 +84,18 @@ const Map = () => {
         );
         const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
 
-        // Update fallback location to Firebase
         const userLocationRef = ref(database, `users/${user.uid}/location`);
-        update(userLocationRef, fallbackLocation);
+        const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
+        const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
+        try {
+          await update(userLocationRef, fallbackLocation);
+          if (userData?.activeRequest) {
+            await update(userActiveRequest, fallbackLocation);
+            await update(userEmergencyRequest, fallbackLocation);
+          }
+        } catch (error) {
+          console.error("Failed to update location in Firebase: ", error);
+        }
 
         setUserLocation(fallbackLocation); // Fallback position
         setLoading(false);
