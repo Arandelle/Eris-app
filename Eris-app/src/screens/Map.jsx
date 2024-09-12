@@ -22,20 +22,30 @@ const Map = () => {
   const updateLocation = async (latitude, longitude) => {
     const user = auth.currentUser;
     const userLocationRef = ref(database, `users/${user.uid}/location`);
-    const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
-    const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`);
-    const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
+    
     try {
+      // Always update the user's location
       await update(userLocationRef, { latitude, longitude });
-      if (userData?.activeRequest) {
-        await update(userActiveRequest, { latitude, longitude });
-        await update(userEmergencyRequest, { latitude, longitude });
-        await update(responderLocation, {latitude, longitude});
+  
+      // Check if the user has an active request
+      const userActiveRequestRef = ref(database, `users/${user.uid}/activeRequest`);
+      const activeRequestSnapshot = await get(userActiveRequestRef);
+  
+      if (activeRequestSnapshot.exists()) {
+        // User has an active request, update related locations
+        const activeRequest = activeRequestSnapshot.val();
+        const userActiveRequestLocationRef = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
+        const emergencyRequestLocationRef = ref(database, `emergencyRequest/${activeRequest.requestId}/locationCoords`);
+        const responderLocationRef = ref(database, `responders/${activeRequest.responderId}/pendingEmergency/locationCoords`);
+  
+        await update(userActiveRequestLocationRef, { latitude, longitude });
+        await update(emergencyRequestLocationRef, { latitude, longitude });
+        await update(responderLocationRef, { latitude, longitude });
       }
     } catch (error) {
       console.error("Failed to update location in Firebase: ", error);
     }
-  } 
+  }
 
   useEffect(() => {
 
@@ -105,16 +115,17 @@ const Map = () => {
     return () => unsubscribe();
   }, []);
 
+  // get the data of activeRequest
   useEffect(() => {
     const user = auth.currentUser;
-    const respondeRef = ref(database, `users/${user.uid}/activeRequest`);
-    const unsubscribe = onValue(respondeRef, (snapshot) => {
-      const responderData = snapshot.val();
+    const activeRequestRef = ref(database, `users/${user.uid}/activeRequest`);
+    const unsubscribe = onValue(activeRequestRef, (snapshot) => {
+      const activeRequestData = snapshot.val();
 
-      if (responderData && responderData.locationOfResponder) {
+      if (activeRequestData && activeRequestData.locationOfResponder) {
         setResponderLocation({
-          latitude: responderData.locationOfResponder.latitude,
-          longitude: responderData.locationOfResponder.longitude,
+          latitude: activeRequestData.locationOfResponder.latitude,
+          longitude: activeRequestData.locationOfResponder.longitude,
         });
       }
     });
