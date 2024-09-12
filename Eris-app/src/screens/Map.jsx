@@ -19,8 +19,26 @@ const Map = () => {
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
 
-  useEffect(() => {
+  const updateLocation = async (latitude, longitude) => {
     const user = auth.currentUser;
+    const userLocationRef = ref(database, `users/${user.uid}/location`);
+    const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
+    const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`);
+    const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
+    try {
+      await update(userLocationRef, { latitude, longitude });
+      if (userData?.activeRequest) {
+        await update(userActiveRequest, { latitude, longitude });
+        await update(userEmergencyRequest, { latitude, longitude });
+        await update(responderLocation, {latitude, longitude});
+      }
+    } catch (error) {
+      console.error("Failed to update location in Firebase: ", error);
+    }
+  } 
+
+  useEffect(() => {
+
     const requestLocation = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -32,23 +50,9 @@ const Map = () => {
             "Permission to access location was denied"
           );
           const fallbackLocation = {latitude: 14.33289, longitude: 120.85065 };
-
-         
-        const userLocationRef = ref(database, `users/${user.uid}/location`);
-        const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
-        const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
-        const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
-        try {
-          await update(userLocationRef, fallbackLocation);
-          if (userData?.activeRequest) {
-            await update(userActiveRequest, fallbackLocation);
-            await update(userEmergencyRequest, fallbackLocation);
-            await update(responderLocation, fallbackLocation);
-          }
-        } catch (error) {
-          console.error("Failed to update location in Firebase: ", error);
-        }
-
+          
+          await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
+          console.log("location update using fallbackpostiion")
           setUserLocation(fallbackLocation); // fallback position
           setLoading(false);
           return;
@@ -64,20 +68,8 @@ const Map = () => {
           const { latitude, longitude } = newLocation.coords;
           setUserLocation({ latitude, longitude });
 
-          const userLocationRef = ref(database, `users/${user.uid}/location`);
-          const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
-          const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`);
-          const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
-          try {
-            await update(userLocationRef, { latitude, longitude });
-            if (userData?.activeRequest) {
-              await update(userActiveRequest, { latitude, longitude });
-              await update(userEmergencyRequest, { latitude, longitude });
-              await update(responderLocation, {latitude, longitude});
-            }
-          } catch (error) {
-            console.error("Failed to update location in Firebase: ", error);
-          }
+          await updateLocation(latitude, longitude)
+          console.log("location update using real location")
         });
         setLoading(false);
       } catch (error) {
@@ -87,22 +79,9 @@ const Map = () => {
           "The app is using a default fallback location. Please enable location permissions in your device settings for accurate location tracking."
         );
         const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
-
-        const userLocationRef = ref(database, `users/${user.uid}/location`);
-        const userActiveRequest = ref(database, `users/${user.uid}/activeRequest/locationCoords`);
-        const userEmergencyRequest = ref(database, `emergencyRequest/${userData?.activeRequest.requestId}/locationCoords`)
-        const responderLocation = ref(database, `responders/${userData?.activeRequest.responderId}/pendingEmergency/locationCoords`);
-        try {
-          await update(userLocationRef, fallbackLocation);
-          if (userData?.activeRequest) {
-            await update(userActiveRequest, fallbackLocation);
-            await update(userEmergencyRequest, fallbackLocation);
-            await update(responderLocation, fallbackLocation);
-          }
-        } catch (error) {
-          console.error("Failed to update location in Firebase: ", error);
-        }
-
+        
+        await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
+        console.log("location update using fallbackpostiion")
         setUserLocation(fallbackLocation); // Fallback position
         setLoading(false);
       }
