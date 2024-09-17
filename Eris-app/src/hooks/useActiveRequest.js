@@ -62,7 +62,7 @@ const useActiveRequest = (userData) => {
 
   
   useEffect(() => {
-    const checkExpiration = setInterval(checkActiveRequest, 5000);
+    const checkExpiration = setInterval(checkActiveRequest, 60000);
     return () => clearInterval(checkExpiration);
   }, []);
 

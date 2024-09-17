@@ -70,6 +70,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         status: "pending",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
         name: `${userData.firstname} ${userData.lastname}`,
+        img: userData.img
       };
   
       // Create a new reference for the emergency request

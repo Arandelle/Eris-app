@@ -14,6 +14,8 @@ const useLocationTracking = () => {
           let { status } = await Location.requestForegroundPermissionsAsync();
           if (status !== "granted") {
             Alert.alert("Permission to access location denied");
+            setLatitude(14.33289);
+            setLongitude(120.85065);
             return;
           }
     
@@ -43,6 +45,8 @@ const useLocationTracking = () => {
                   setLocation(locString.trim());
                 }  else {
                   setLocation("Location not found");
+                  setLatitude(14.33289);
+                  setLongitude(120.85065);
                 }
               } catch (error) {
                 console.error(error);
