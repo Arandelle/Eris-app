@@ -44,7 +44,8 @@ const TabNavigator = () => {
             <View className="items-center">
               <View
                 className={`items-center justify-center ${
-                  isMiddle && "rounded-lg p-1 bg-red-500"}`}
+                  isMiddle && "rounded-lg p-1 bg-red-500"
+                }`}
               >
                 <Icon
                   name={iconName}
@@ -73,7 +74,14 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen
+        name="Home"
+        options={{
+          title: `Welcome ${userData?.firstname} ${userData?.lastname}!`,
+          tabBarLabel: "Home"
+        }}
+        component={Home}
+      />
       <Tab.Screen
         name="Map"
         component={Map}
@@ -82,6 +90,8 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Request"
         options={{
+          title: "Request Emergency Assistance",
+          tabBarLabel: "Request",
           headerRight: () => (
             <TouchableOpacity
               className="p-4"

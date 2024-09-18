@@ -114,7 +114,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),
-        img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+        img: userData.img,
         icon:"hospital-box",
       };
   
@@ -143,7 +143,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         if (responder.profileComplete) {
           const notificationResponderRef = ref(database, `responders/${responder.id}/notifications`);
           const newResponderNotification = {
-            type: "request",
+            type: "emergency",
             message: `User submit an emergency request:`,
             description: `${description}`,
             location: `${location}`,
@@ -151,7 +151,7 @@ const Request = ({ showHistory, setShowHistory }) => {
             isSeen: false,
             date: new Date().toISOString(),
             timestamp: serverTimestamp(),
-            img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+            img: userData.img,
             icon: "hospital-box"
           };
           await push(notificationResponderRef, newResponderNotification);
