@@ -3,6 +3,7 @@ import ProfileReminderModal from "../component/ProfileReminderModal";
 import Logo from "../../assets/logo.png";
 
 const Home = () => {
+
   return (
     <ScrollView contentContainerStyle={{flexGrow: 1}}>
       <View className="flex-1 justify-center items-center bg-gray-100">

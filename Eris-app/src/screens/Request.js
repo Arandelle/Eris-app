@@ -115,6 +115,7 @@ const Request = ({ showHistory, setShowHistory }) => {
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),
         img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+        icon:"hospital-box",
       };
   
       await push(notificationRef, newNotification);
@@ -151,6 +152,7 @@ const Request = ({ showHistory, setShowHistory }) => {
             date: new Date().toISOString(),
             timestamp: serverTimestamp(),
             img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+            icon: "hospital-box"
           };
           await push(notificationResponderRef, newResponderNotification);
         }
