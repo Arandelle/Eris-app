@@ -2,6 +2,15 @@ import { View, Text, ScrollView,TouchableOpacity, Modal } from "react-native";
 
 const History = ({showHistory, setShowHistory, emergencyHistory}) => {
 
+  emergencyHistory.sort((a,b) => new Date(b.date) - new Date(a.date))
+
+  const emergencyStatus = {
+    pending: "bg-yellow-300",
+    accepted: "bg-orange-300",
+    done: "bg-green-300",
+    expired: "bg-red-300"
+  }
+
   return (
     <Modal
     transparent={true}
@@ -12,53 +21,59 @@ const History = ({showHistory, setShowHistory, emergencyHistory}) => {
     }}
   >
     <View
-      className="flex w-full h-full py-14 px-5 items-center justify-center"
+      className="flex w-full h-full py-10 px-4 items-center justify-center"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
-      <View className="bg-white h-full p-2 w-full rounded-lg shadow-lg">
-        <Text className="text-2xl text-center py-3 text-gray-600 font-bold">
-          History
+      <View className="bg-white h-full p-1 w-full rounded-lg shadow-lg">
+        <Text className="text-xl text-center py-2 text-gray-600 font-bold">
+          Emergency Records
         </Text>
         <ScrollView>
           {emergencyHistory.length > 0 ? (
             emergencyHistory.map((emergency) => (
               <View
                 key={emergency.id}
-                className="mb-4 p-2 border-b border-gray-200"
+                className="p-2 pb-0"
               >
-                <Text className="text-lg text-gray-800">
-                  Type: {emergency.type}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Description: {emergency.description}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Location: {emergency.location}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Status: {emergency.status}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Submitted:{" "}
-                  {new Date(emergency.timestamp).toLocaleString()}
-                </Text>
-                {emergency.status === "accepted" && (
-                  <Text>accepted by: {emergency.acceptedBy}</Text>
-                )}
+                <View className={`flex flex-row justify-between p-1 border border-gray-500 ${emergencyStatus[emergency.status]}`}>
+                  <Text className="text-lg font-bold">Emergency ID:</Text>
+                  <Text className="text-lg">{emergency.id}</Text>
+                </View>
+              <View className="space-y-2 p-2 border border-t-0 border-gray-300">
+                  <Text className="text-lg font-bold">
+                    Type: {emergency.type}
+                  </Text>
+                  <Text className="text-lg">
+                    Description: {emergency.description}
+                  </Text>
+                  <Text className="text-lg">
+                    Location: {emergency.location}
+                  </Text>
+                  <Text className="text-lg ">
+                    Status: {emergency.status.toUpperCase()}
+                  </Text>
+                  <Text className="text-lg">
+                    Submitted:{" "}
+                    {new Date(emergency.timestamp).toLocaleString()}
+                  </Text>
+                  {emergency.acceptedBy && (
+                    <Text className="text-lg">Responder: {emergency.acceptedBy}</Text>
+                  )}
+              </View>
               </View>
             ))
           ) : (
             <Text className="text-center text-gray-500">
-              No history found
+              No records found
             </Text>
           )}
         </ScrollView>
         <TouchableOpacity
-          className="bg-gray-500 p-3.5 rounded-md items-center mt-5"
+          className="bg-gray-500 p-3 rounded-md items-center mt-5"
           onPress={() => setShowHistory(false)}
         >
           <Text className="text-white text-lg font-bold">
-            Close History
+            Close
           </Text>
         </TouchableOpacity>
       </View>
