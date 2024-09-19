@@ -35,17 +35,17 @@ const useActiveRequest = (userData) => {
           const now = new Date().getTime();
           const expiresAt = new Date(emergencyData.expiresAt).getTime();
 
-          if (now > expiresAt && emergencyData.status === "pending") {
-            const historyRef = ref(database, `users/${user.uid}/emergencyHistory/${requetId}`);
-            await update(emergencyRef, { status: "expired" });
-            await update(historyRef, {status: "expired"})
-            setEmergencyExpired(true);
-            setHasActiveRequest(false);
-            Alert.alert(
-              "Request Expired",
-              "Your last emergency request has expired"
-            );
-          } else 
+          // if (now > expiresAt && emergencyData.status === "pending") {
+          //   const historyRef = ref(database, `users/${user.uid}/emergencyHistory/${requetId}`);
+          //   await update(emergencyRef, { status: "expired" });
+          //   await update(historyRef, {status: "expired"})
+          //   setEmergencyExpired(true);
+          //   setHasActiveRequest(false);
+          //   Alert.alert(
+          //     "Request Expired",
+          //     "Your last emergency request has expired"
+          //   );
+          // } else 
           if (emergencyData.status === "pending") {
             setHasActiveRequest(true);
           } else if (emergencyData.status === "done") {
