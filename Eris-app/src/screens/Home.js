@@ -4,6 +4,7 @@ import ProfileReminderModal from "../component/ProfileReminderModal";
 import { ref, onValue } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { formatDate } from "../helper/FormatDate";
+import {getTimeDifference} from "../helper/getTimeDifference"
 import logo from "../../assets/logo.png";
 
 const Home = () => {
@@ -56,7 +57,10 @@ const Home = () => {
                 <View className="pt-2 flex flex-row items-center space-x-3">
                   <Image source={{uri : "https://flowbite.com/docs/images/people/profile-picture-5.jpg"}} 
                   className="h-10 w-10 rounded-full" />
-                  <Text className="font-bold text-blue-500">Admin</Text>
+                 <View>
+                    <Text className="font-bold text-blue-500">Admin</Text>
+                    <Text>{getTimeDifference(item.timestamp)}</Text>
+                 </View>
                 </View>
               </View>
             </View>
