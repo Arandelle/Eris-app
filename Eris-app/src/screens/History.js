@@ -37,7 +37,7 @@ const History = ({showHistory, setShowHistory, emergencyHistory}) => {
               >
                 <View className={`flex flex-row justify-between p-1 border border-gray-500 ${emergencyStatus[emergency.status]}`}>
                   <Text className="text-lg font-bold">Emergency ID:</Text>
-                  <Text className="text-lg">{emergency.id}</Text>
+                  <Text className="text-lg">{emergency.customId}</Text>
                 </View>
               <View className="space-y-2 p-2 border border-t-0 border-gray-300">
                   <Text className="text-lg font-bold">
@@ -49,7 +49,7 @@ const History = ({showHistory, setShowHistory, emergencyHistory}) => {
                   <Text className="text-lg">
                     Location: {emergency.location}
                   </Text>
-                  <Text className="text-lg ">
+                  <Text className="text-lg">
                     Status: {emergency.status.toUpperCase()}
                   </Text>
                   <Text className="text-lg">

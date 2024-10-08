@@ -16,6 +16,7 @@ import useLocationTracking from "../hooks/useLocationTracking";
 import useActiveRequest from "../hooks/useActiveRequest";
 import useFetchHistory from "../hooks/useFetchHistory";
 import useResponderData from "../hooks/useResponderData"
+import { generateUniqueBarangayID } from "../helper/generateID";
 
 const Request = ({ showHistory, setShowHistory }) => {
   const [emergencyType, setEmergencyType] = useState("");
@@ -56,6 +57,9 @@ const Request = ({ showHistory, setShowHistory }) => {
       return;
     }
     try {
+
+      const emergencyID = await generateUniqueBarangayID("emergency");
+
       const newRequest = {
         userId: user.uid,
         date: new Date().toISOString(),
@@ -67,10 +71,11 @@ const Request = ({ showHistory, setShowHistory }) => {
         location: location,
         type: emergencyType,
         description,
-        status: "pending",
+        status: "awaiting response",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
         name: `${userData.firstname} ${userData.lastname}`,
-        img: userData.img
+        img: userData.img,
+        customId: emergencyID
       };
   
       // Create a new reference for the emergency request
@@ -152,7 +157,7 @@ const Request = ({ showHistory, setShowHistory }) => {
             date: new Date().toISOString(),
             timestamp: serverTimestamp(),
             img: userData.img,
-            icon: "hospital-box"
+            icon: "hospital-box",
           };
           await push(notificationResponderRef, newResponderNotification);
         }

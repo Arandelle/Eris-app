@@ -34,7 +34,7 @@ const Home = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View className="flex-1 px-3 bg-white space-y-3">
+      <View className="flex-1 px-3 pb-3 bg-white space-y-3">
         <ProfileReminderModal />
 
         {announcement.length > 0 &&

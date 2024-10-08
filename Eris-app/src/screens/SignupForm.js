@@ -21,6 +21,7 @@ import {
   serverTimestamp,
 } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
+import { generateUniqueBarangayID } from "../helper/generateID";
 
 const SignupForm = () => {
   const navigation = useNavigation();
@@ -43,6 +44,7 @@ const SignupForm = () => {
     return regex.test(email);
   };
 
+
   const handleSignup = async () => {
     if (!validateEmail(email)) {
       setError("Please use a valid gmail.com email address.");
@@ -59,6 +61,8 @@ const SignupForm = () => {
       const user = userCredential.user;
       await sendEmailVerification(user);
 
+      const userId = await generateUniqueBarangayID("user");
+
       // Create a user document in the database
       const userData = {
         email: user.email,
@@ -66,11 +70,12 @@ const SignupForm = () => {
         createdAt: new Date().toISOString(),
         timestamp: serverTimestamp(), // Add this line
         img: imageUrl,
+        customId: userId
       };
       const database = getDatabase(app);
       await set(ref(database, `users/${user.uid}`), userData);
 
-      console.log("User created:", user.uid);
+      console.log("User created:", userId);
       Alert.alert("Success", "Please check your email for verification", [
         {
           text: "Cancel",
@@ -96,10 +101,9 @@ const SignupForm = () => {
 
       await push(notificationRef, newNotification);
 
-      const userId = user.uid;
       const notificationUserRef = ref(
         database,
-        `users/${userId}/notifications`
+        `users/${user.uid}/notifications`
       );
       const newUserNotification = {
         type: "users",
