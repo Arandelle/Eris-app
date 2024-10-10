@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginForm from "./src/screens/LoginForm";
@@ -7,13 +7,13 @@ import DrawerNavigator from "./src/navigation/DrawerNavigator";
 import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert, Image } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
-import Map from "./src/screens/Map"
 import { auth, database } from "./src/services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { get, getDatabase, ref } from "firebase/database";
+import { get, ref } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import TopBarNavigator from "./src/navigation/TopBarNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -87,6 +87,13 @@ const App = () => {
                 name="ERIS"
                 options={{ headerShown: false }}
                 component={TabNavigator}
+              />
+              <Stack.Screen
+                name="Emergency Records"
+                component={TopBarNavigator}
+                options={{
+                  headerShown: true
+                }}
               />
               <Stack.Screen
                 name="UpdateProfile"

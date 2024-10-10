@@ -1,33 +1,21 @@
-import { View, Text, ScrollView,TouchableOpacity, Modal } from "react-native";
+import { View, Text, ScrollView} from "react-native";
+import useFetchRecords from "../hooks/useFetchRecords";
 
-const History = ({showHistory, setShowHistory, emergencyHistory}) => {
+const Records = ({status}) => {
+
+  const {emergencyHistory} = useFetchRecords({status});
 
   emergencyHistory.sort((a,b) => new Date(b.date) - new Date(a.date))
 
   const emergencyStatus = {
-    pending: "bg-yellow-300",
-    accepted: "bg-orange-300",
-    done: "bg-green-300",
+    "awaiting response": "bg-yellow-300",
+    "on-going": "bg-orange-300",
+    resolved: "bg-green-300",
     expired: "bg-red-300"
   }
 
   return (
-    <Modal
-    transparent={true}
-    animationType="slide"
-    visible={showHistory}
-    onRequestClose={() => {
-      setShowHistory(!showHistory);
-    }}
-  >
-    <View
-      className="flex w-full h-full py-10 px-4 items-center justify-center"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    >
       <View className="bg-white h-full p-1 w-full rounded-lg shadow-lg">
-        <Text className="text-xl text-center py-2 text-gray-600 font-bold">
-          Emergency Records
-        </Text>
         <ScrollView>
           {emergencyHistory.length > 0 ? (
             emergencyHistory.map((emergency) => (
@@ -64,22 +52,12 @@ const History = ({showHistory, setShowHistory, emergencyHistory}) => {
             ))
           ) : (
             <Text className="text-center text-gray-500">
-              No records found
+              No records found on {status}
             </Text>
           )}
         </ScrollView>
-        <TouchableOpacity
-          className="bg-gray-500 p-3 rounded-md items-center mt-5"
-          onPress={() => setShowHistory(false)}
-        >
-          <Text className="text-white text-lg font-bold">
-            Close
-          </Text>
-        </TouchableOpacity>
       </View>
-    </View>
-  </Modal>
   )
 }
 
-export default History
+export default Records

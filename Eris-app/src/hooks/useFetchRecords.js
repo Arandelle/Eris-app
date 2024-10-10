@@ -3,10 +3,11 @@ import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { Alert } from "react-native";
 
-const useFetchHistory = (showHistory) => {
+const useFetchRecords = ({status}) => {
 
     const [emergencyHistory, setEmergencyHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    
     useEffect(() => {
       const user = auth.currentUser;
 
@@ -19,7 +20,7 @@ const useFetchHistory = (showHistory) => {
               const historyList = Object.keys(historyData).map((key) => ({
                 id: key,
                 ...historyData[key],
-              }));
+              })).filter((item) => item.status === status);
               setEmergencyHistory(historyList);
             } else{
               setEmergencyHistory([]);
@@ -34,9 +35,9 @@ const useFetchHistory = (showHistory) => {
 
         return ()=> unsubscribe();
       }
-    }, [showHistory])
+    }, [status])
 
   return {emergencyHistory}
 }
 
-export default useFetchHistory
+export default useFetchRecords

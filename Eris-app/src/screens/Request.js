@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -9,16 +9,14 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, update, get } from "firebase/database";
+import { ref, serverTimestamp, push, update } from "firebase/database";
 import { useFetchData } from "../hooks/useFetchData";
-import History from "./History";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useActiveRequest from "../hooks/useActiveRequest";
-import useFetchHistory from "../hooks/useFetchHistory";
 import useResponderData from "../hooks/useResponderData"
 import { generateUniqueBarangayID } from "../helper/generateID";
 
-const Request = ({ showHistory, setShowHistory }) => {
+const Request = () => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [newRequestKey, setNewRequestKey] = useState(null);
@@ -35,8 +33,6 @@ const Request = ({ showHistory, setShowHistory }) => {
     hasActiveRequest,
     setHasActiveRequest,
   } = useActiveRequest(userData);
-  
-  const { emergencyHistory } = useFetchHistory(showHistory);
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
@@ -253,11 +249,6 @@ const Request = ({ showHistory, setShowHistory }) => {
           </TouchableOpacity>
         </View>
       </>
-      <History
-        showHistory={showHistory}
-        setShowHistory={setShowHistory}
-        emergencyHistory={emergencyHistory}
-      />
     </ScrollView>
   );
 };

@@ -9,13 +9,14 @@ import Profile from "../screens/Profile";
 import { View, TouchableOpacity } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
+import { useNavigation } from "@react-navigation/native";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
+  const navigation = useNavigation();
   const { userData } = useFetchData();
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
-  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (userData) {
@@ -95,7 +96,7 @@ const TabNavigator = () => {
           headerRight: () => (
             <TouchableOpacity
               className="p-4"
-              onPress={() => setShowHistory(!showHistory)}
+              onPress={() => navigation.navigate("Emergency Records")}
             >
               <Icon name="history" size={25} />
             </TouchableOpacity>
@@ -104,9 +105,6 @@ const TabNavigator = () => {
       >
         {(props) => (
           <Request
-            {...props}
-            showHistory={showHistory}
-            setShowHistory={setShowHistory}
           />
         )}
       </Tab.Screen>
