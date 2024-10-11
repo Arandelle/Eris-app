@@ -4,10 +4,10 @@ import ProfileReminderModal from "../component/ProfileReminderModal";
 import { ref, onValue } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { formatDate } from "../helper/FormatDate";
-import {getTimeDifference} from "../helper/getTimeDifference"
+import { getTimeDifference } from "../helper/getTimeDifference";
 import logo from "../../assets/logo.png";
 
-const Home = ({setShowTabBar}) => {
+const Home = ({ setShowTabBar }) => {
   const [announcement, setAnnouncement] = useState([]);
   const [scrollOffset, setScrollOffset] = useState(0);
 
@@ -41,10 +41,11 @@ const Home = ({setShowTabBar}) => {
   }, []);
 
   return (
-    <ScrollView 
-     onScroll={handleScroll}
+    <ScrollView
+      onScroll={handleScroll}
       scrollEventThrottle={16} // Ensures smooth scrolling events
-    contentContainerStyle={{ flexGrow: 1 }}>
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
       <View className="flex-1 px-3 pb-3 bg-white space-y-3">
         <ProfileReminderModal />
 
@@ -64,14 +65,20 @@ const Home = ({setShowTabBar}) => {
                   {formatDate(item.startDate)}
                 </Text>
                 <Text className="font-bold text-lg">{item.title}</Text>
-                <Text className="text-gray-600 text-lg">{item.description}</Text>
+                <Text className="text-gray-600 text-lg">
+                  {item.description}
+                </Text>
                 <View className="pt-2 flex flex-row items-center space-x-3">
-                  <Image source={{uri : "https://flowbite.com/docs/images/people/profile-picture-5.jpg"}} 
-                  className="h-10 w-10 rounded-full" />
-                 <View>
+                  <Image
+                    source={{
+                      uri: "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+                    }}
+                    className="h-10 w-10 rounded-full"
+                  />
+                  <View>
                     <Text className="font-bold text-blue-500">Admin</Text>
                     <Text>{getTimeDifference(item.timestamp)}</Text>
-                 </View>
+                  </View>
                 </View>
               </View>
             </View>

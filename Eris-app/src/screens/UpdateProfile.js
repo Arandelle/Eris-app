@@ -112,6 +112,7 @@ const UpdateProfile = () => {
       try {
         await update(userRef, updatedData);
         setUserData(updatedData);
+        setLoading(true)
 
         navigation.setParams({ updatedUserData: updatedData });
 
@@ -171,6 +172,8 @@ const UpdateProfile = () => {
       } catch (error) {
         console.error("Error updating user data:", error);
         Alert.alert("Error", error.message);
+      } finally{
+        setLoading(false)
       }
     } else {
       Alert.alert("Error", "User not authenticated");
