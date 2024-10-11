@@ -32,7 +32,8 @@ const UpdateProfile = () => {
     "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
   );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [mobileError, setMobileError] = useState("");
+  const [ageError, setAgeError] = useState("");
 
   const genders = ["Male", "Female"];
 
@@ -188,17 +189,26 @@ const UpdateProfile = () => {
     );
   }
 
-  const handleChange = (value) => {
+  const handleChange = (field, value) => {
     const regex = /^(09\d{9}|\+639\d{9})$/;
 
-    if (regex.test(value)) {
-      setError("");
-    } else {
-      setError("Please enter a valid PH contact number");
+    if(field === "mobileNum"){
+      if (regex.test(value)) {
+        setMobileError("");
+      } else {
+        setMobileError("Please enter a valid PH contact number");
+      }
+      setMobileNum(value);
+    } else if (field === "age"){
+      if (value < 18) {
+        setAgeError("User must be 18 years old above");
+      } else {
+        setAgeError("");
+      }
+      setAge(value);
     }
-
-    setMobileNum(value);
-  };
+    }
+   
 
   const flowbite = Array.from(
     { length: 5 },
@@ -264,16 +274,16 @@ const UpdateProfile = () => {
             <CustomInput
               label={"Mobile phone"}
               value={mobileNum}
-              onChangeText={handleChange}
+              onChangeText={(value)=> handleChange('mobileNum', value)}
               placeholder="Enter your mobile number"
-              errorMessage={error}
+              errorMessage={mobileError}
             />
             <CustomInput
               label={"Age"}
               value={age}
-              onChangeText={setAge}
+              onChangeText={(value) => handleChange('age', value)}
               placeholder="Enter your age"
-              errorMessage={age < 18 ? "User must be above 18 years old" : null}
+              errorMessage={ageError}
             />
             <View className="w-full mb-4">
               <Text className="text-lg mb-1 text-sky-600 font-bold">
