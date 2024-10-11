@@ -7,8 +7,16 @@ import { formatDate } from "../helper/FormatDate";
 import {getTimeDifference} from "../helper/getTimeDifference"
 import logo from "../../assets/logo.png";
 
-const Home = () => {
+const Home = ({setShowTabBar}) => {
   const [announcement, setAnnouncement] = useState([]);
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  const handleScroll = (event) => {
+    let currentOffset = event.nativeEvent.contentOffset.y;
+    const direction = currentOffset > scrollOffset ? "down" : "up";
+    setScrollOffset(currentOffset);
+    setShowTabBar(direction === "up");
+  };
 
   useEffect(() => {
     const announcementRef = ref(database, `announcement`);
@@ -33,7 +41,10 @@ const Home = () => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <ScrollView 
+     onScroll={handleScroll}
+      scrollEventThrottle={16} // Ensures smooth scrolling events
+    contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 px-3 pb-3 bg-white space-y-3">
         <ProfileReminderModal />
 

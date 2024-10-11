@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {Animated, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "../screens/Map";
@@ -10,6 +10,7 @@ import { View, TouchableOpacity } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
 import { useNavigation } from "@react-navigation/native";
+import colors from "../constant/colors"
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -17,12 +18,27 @@ const TabNavigator = () => {
   const { userData } = useFetchData();
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
+  const [dayTime, setDayTime] = useState("");
+  const [showTabBar, setShowTabBar] = useState(true);
 
   useEffect(() => {
     if (userData) {
       setIsProfileComplete(userData.profileComplete);
     }
   }, [userData]);
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+
+    if(hour >= 5 && hour < 12){
+      setDayTime("Good morning")
+    } else if(hour >=12 && hour < 18){
+      setDayTime("Good afternoon")
+    } else{
+      setDayTime("Good evening")
+    }
+  }, []);
+
 
   return (
     <Tab.Navigator
@@ -59,7 +75,8 @@ const TabNavigator = () => {
         },
         tabBarActiveTintColor: "#42a5f5",
         tabBarInactiveTintColor: "gray",
-        tabBarStyle: {
+        tabBarStyle: 
+          {
           paddingBottom: 10,
           paddingTop: 10,
           height: 70,
@@ -68,21 +85,26 @@ const TabNavigator = () => {
           // right: 16,
           // left: 16,
           // borderRadius: 10,
+          display: showTabBar ? "block" : "none",
+          backgroundColor: colors.gray[100]
         },
         tabBarLabelStyle: {
           fontSize: 15,
         },
         tabBarHideOnKeyboard: true,
+
       })}
     >
       <Tab.Screen
-        name="Home"
-        options={{
-          title: `Welcome ${userData?.firstname} ${userData?.lastname}!`,
-          tabBarLabel: "Home"
-        }}
-        component={Home}
-      />
+  name="Home"
+  options={{
+    title: `${dayTime} ${userData?.firstname || ''} ${userData?.lastname || ''}!`,
+    tabBarLabel: "Home",
+  }}
+>
+  {(props) => <Home {...props} setShowTabBar={setShowTabBar} />}
+</Tab.Screen>
+
       <Tab.Screen
         name="Map"
         component={Map}
