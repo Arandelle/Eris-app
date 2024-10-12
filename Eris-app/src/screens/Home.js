@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
-import { View, Image, Text, ScrollView, Alert, RefreshControl, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Image,
+  Text,
+  ScrollView,
+  Alert,
+  RefreshControl,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import ProfileReminderModal from "../component/ProfileReminderModal";
 import { ref, onValue } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
-import ImageViewer from 'react-native-image-zoom-viewer'
+import ImageViewer from "react-native-image-zoom-viewer";
 
 const Home = ({ setShowTabBar }) => {
   const [announcement, setAnnouncement] = useState([]);
@@ -20,13 +29,12 @@ const Home = ({ setShowTabBar }) => {
     setScrollOffset(currentOffset);
     setShowTabBar(direction === "up");
   };
-      // Function to handle pulling down to refresh
-      const handleRefresh = () => {
-        setRefreshing(true); // Set refreshing to true
-        fetchAnnouncements(); // Reload announcements
-      };
+  // Function to handle pulling down to refresh
+  const handleRefresh = () => {
+    setRefreshing(true); // Set refreshing to true
+    fetchAnnouncements(); // Reload announcements
+  };
 
-      
   const fetchAnnouncements = () => {
     const announcementRef = ref(database, `announcement`);
     onValue(announcementRef, (snapshot) => {
@@ -40,7 +48,7 @@ const Home = ({ setShowTabBar }) => {
           setAnnouncement(announcementList);
         } catch (error) {
           console.error("Error: ", error);
-          Alert.alert(`Error ${error}`)
+          Alert.alert(`Error ${error}`);
         }
       } else {
         Alert.alert("Notice", "No announcement yet");
@@ -53,29 +61,27 @@ const Home = ({ setShowTabBar }) => {
     fetchAnnouncements(); // Load announcements when the component mounts
   }, []);
 
-    const handleImageClick = (imageUri) => {
-      setSelectedImageUri(imageUri);
-      setIsImageModalVisible(true); // Show the image modal
-    };
+  const handleImageClick = (imageUri) => {
+    setSelectedImageUri(imageUri);
+    setIsImageModalVisible(true); // Show the image modal
+  };
 
   return (
     <>
-       {/* Image Viewer Modal */}
-       {isImageModalVisible && (
-        <Modal
-          visible={isImageModalVisible}
-          transparent={true}
-          onRequestClose={() => setIsImageModalVisible(false)} // Close modal when back button is pressed
-        >
-             <ImageViewer
-                imageUrls={[{ url: selectedImageUri }]} // Use selected image URL for viewing
-                onSwipeDown={() => setIsImageModalVisible(false)} // Close modal on swipe down
-                enableSwipeDown={true}
-                renderIndicator={() => null} // Hide the pagination
-                backgroundColor='rgba(0,0,0,0.8)'
-              />
-        </Modal>
-      )}
+      <Modal
+        visible={isImageModalVisible}
+        transparent={true}
+        onRequestClose={() => setIsImageModalVisible(false)} // Close modal when back button is pressed
+      >
+        <ImageViewer
+          imageUrls={[{ url: selectedImageUri }]} // Use selected image URL for viewing
+          onSwipeDown={() => setIsImageModalVisible(false)} // Close modal on swipe down
+          enableSwipeDown={true}
+          renderIndicator={() => null} // Hide the pagination
+          backgroundColor="rgba(0,0,0,0.8)"
+        />
+      </Modal>
+
       <ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16} // Ensures smooth scrolling events
@@ -89,20 +95,22 @@ const Home = ({ setShowTabBar }) => {
       >
         <View className="flex-1 px-3 pb-3 bg-white space-y-3">
           <ProfileReminderModal />
-  
+
           {announcement.length > 0 &&
             announcement.map((item, key) => (
               <View
                 key={key}
                 className="rounded-lg bg-white border-0.5 border-gray-800 shadow-2xl"
               >
-               <TouchableOpacity onPress={() => handleImageClick(item.imageUrl)}>
+                <TouchableOpacity
+                  onPress={() => handleImageClick(item.imageUrl)}
+                >
                   <Image
                     source={{ uri: item.imageUrl }}
                     className=" h-52 rounded-t-lg"
                     resizeMode="cover"
                   />
-               </TouchableOpacity>
+                </TouchableOpacity>
                 <View className="p-4 space-y-2">
                   <Text className="font-bold text-blue-500">
                     {formatDate(item.startDate)}
