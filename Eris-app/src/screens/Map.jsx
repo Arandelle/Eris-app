@@ -1,19 +1,35 @@
-import React, { useEffect } from "react";
-import { Text, View, Image } from "react-native";
+import { useState } from "react";
+import { Text, View, Image, ScrollView, RefreshControl } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import Logo from "../../assets/logo.png";
 import responderMarker from "../../assets/ambulance.png";
 import useLocationTracking from "../hooks/useLocationTracking";
 
 const Map = ({ userData }) => {
-  const { location, latitude, longitude, geoCodeLocation, responderLocation } = useLocationTracking(userData);
+  const [refreshing, setRefreshing] = useState(false); // To track refresh state
+  const { latitude, longitude, responderLocation, trackUserLocation } = useLocationTracking(userData, setRefreshing);
+
+  const handleRefresh = () => {
+    setRefreshing(true); // Set refreshing to true
+    trackUserLocation();
+  };
 
   if (!latitude || !longitude) {
     return (
-      <View className="flex w-full h-full items-center justify-center">
-        <Image source={Logo} alt="Loading..." />
-        <Text>Loading please wait...</Text>
-      </View>
+     <ScrollView 
+     refreshControl={
+      <RefreshControl
+       refreshing={refreshing}
+       onRefresh={handleRefresh} 
+       />
+     }
+     contentContainerStyle={{ flexGrow: 1 }}
+     >
+        <View className="flex w-full h-full items-center justify-center">
+          <Image source={Logo} alt="Loading..." />
+          <Text>Loading please wait...</Text>
+        </View>
+     </ScrollView>
     );
   }
 

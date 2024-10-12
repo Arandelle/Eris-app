@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
@@ -20,10 +21,11 @@ const Request = () => {
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const [newRequestKey, setNewRequestKey] = useState(null);
+  const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
   const { userData } = useFetchData("users");
   const { responderData } = useResponderData();
-  const { location, latitude, longitude, geoCodeLocation } = useLocationTracking();
+  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } = useLocationTracking(userData, setRefreshing);
   const {
     checkActiveRequest,
     emergencyExpired,
@@ -33,6 +35,11 @@ const Request = () => {
     hasActiveRequest,
     setHasActiveRequest,
   } = useActiveRequest(userData);
+  
+  const handleRefresh = () => {
+    setRefreshing(true); // Set refreshing to true
+    trackUserLocation();
+  };
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
@@ -154,7 +161,13 @@ const Request = () => {
   };
 
   return (
-    <ScrollView className="flex-1 p-5 bg-gray-100">
+    <ScrollView className="flex-1 p-5 bg-gray-100"
+    refreshControl={
+      <RefreshControl 
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+      />
+    }>
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
         Emergency Form
       </Text>
