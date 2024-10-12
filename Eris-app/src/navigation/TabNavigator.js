@@ -112,15 +112,16 @@ const TabNavigator = () => {
         name="Request"
         component={Request}
         options={{
-          title: "Request Emergency Assistance",
+          title: "Submit Emergency Assistance",
           tabBarLabel: "Request",
           headerRight: () => (
-            <TouchableOpacity
-              className="p-4"
-              onPress={() => navigation.navigate("Emergency Records")}
-            >
-              <Icon name="history" size={25} />
-            </TouchableOpacity>
+                <TouchableOpacity
+                  className="m-4"
+                  onPress={() => navigation.navigate("Emergency Records")}
+                >
+                    <View className="absolute top-0 z-50 left-0 w-3 h-3 bg-red-500 rounded-full"></View>
+                    <Icon name="history" size={25} />
+                </TouchableOpacity>
           ),
         }}
       />

@@ -15,7 +15,7 @@ const Records = ({status}) => {
   }
 
   return (
-      <View className="bg-white h-full p-1 w-full rounded-lg shadow-lg">
+      <View className="bg-white h-full w-full rounded-lg shadow-lg">
         <ScrollView>
           {emergencyHistory.length > 0 ? (
             emergencyHistory.map((emergency) => (

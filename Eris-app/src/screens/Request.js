@@ -48,7 +48,7 @@ const Request = () => {
     if (hasActiveRequest) {
       Alert.alert(
         "Active Request",
-        "You have already submitted a request. Please wait until it's resolved."
+        "You have already submitted a emergency. Please wait until it's resolved."
       );
       return;
     }
@@ -179,7 +179,7 @@ const Request = () => {
   return (
     <ScrollView className="flex-1 p-5 bg-gray-100">
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
-        Emergency Request
+        Emergency Form
       </Text>
       <>
         {hasActiveRequest ? (
@@ -245,7 +245,7 @@ const Request = () => {
             className="bg-red-600 p-3.5 rounded-md items-center"
             onPress={handleSubmit}
           >
-            <Text className="text-white text-lg font-bold">Submit Request</Text>
+            <Text className="text-white text-lg font-bold">Submit Emergency</Text>
           </TouchableOpacity>
         </View>
       </>
