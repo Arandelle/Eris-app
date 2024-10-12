@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
-  Button,
   Alert,
   ScrollView,
   SafeAreaView,
@@ -9,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, update, onValue, serverTimestamp, push } from "firebase/database";

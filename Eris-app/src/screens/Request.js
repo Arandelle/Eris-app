@@ -66,15 +66,10 @@ const Request = () => {
       const newRequest = {
         userId: user.uid,
         timestamp: serverTimestamp(),
-        location,
-        latitude,
-        longitude,
         type: emergencyType,
         description,
         status: "awaiting response",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
-        name: `${userData.firstname} ${userData.lastname}`,
-        img: userData.img,
         customId: emergencyID,
       };
 
@@ -96,7 +91,6 @@ const Request = () => {
       await update(ref(database, `users/${user.uid}`), {
         activeRequest: {
           requestId: newRequestKey,
-          location,
           latitude,
           longitude,
         },
@@ -105,15 +99,12 @@ const Request = () => {
       // Notify admins
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const adminNotification = {
+        userId: user.uid,
         type: "request",
         message: `User ${user.email} submitted an emergency: ${emergencyType}`,
-        email: `${user.email}`,
-        location,
-        description,
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),
-        img: userData.img,
         icon: "hospital-box",
       };
       await push(ref(database, `admins/${adminId}/notifications`), adminNotification);
@@ -125,7 +116,6 @@ const Request = () => {
         message: `You successfully submitted an emergency.`,
         isSeen: false,
         timestamp: serverTimestamp(),
-        img: userData.img,
         icon: "hospital-box",
       };
       await push(ref(database, `users/${user.uid}/notifications`), userNotification);
@@ -134,13 +124,11 @@ const Request = () => {
       responderData.forEach(async (responder) => {
         if (responder.profileComplete) {
           const responderNotification = {
+            userId: user.uid,
             type: "emergency",
             message: `New emergency request from ${user.email}: ${emergencyType}`,
-            location,
-            description,
             isSeen: false,
             timestamp: serverTimestamp(),
-            img: userData.img,
             icon: "hospital-box",
           };
           await push(ref(database, `responders/${responder.id}/notifications`), responderNotification);
