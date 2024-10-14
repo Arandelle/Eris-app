@@ -71,6 +71,11 @@ const Request = () => {
         status: "awaiting response",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
         customId: emergencyID,
+        location: {
+          latitude,
+          longitude,
+          address: geoCodeLocation
+        }
       };
 
       // Generate a new key for the emergency request

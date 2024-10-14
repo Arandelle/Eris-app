@@ -4,7 +4,6 @@ import useFetchRecords from "../hooks/useFetchRecords";
 const Records = ({status}) => {
 
   const {emergencyHistory} = useFetchRecords({status});
-
   emergencyHistory.sort((a,b) => new Date(b.date) - new Date(a.date))
 
   const emergencyStatus = {
@@ -35,7 +34,7 @@ const Records = ({status}) => {
                     Description: {emergency.description}
                   </Text>
                   <Text className="text-lg">
-                    Location: {emergency.location}
+                    Location: {emergency.location.address}
                   </Text>
                   <Text className="text-lg">
                     Status: {emergency.status.toUpperCase()}

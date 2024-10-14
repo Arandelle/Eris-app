@@ -138,9 +138,9 @@ const UpdateProfile = () => {
           `admins/${adminId}/notifications`
         );
         const newNotification = {
+          userId: user.uid,
           type: "users",
           message: `updated ${userData?.gender === "Male" ? "his" : "her"} profile details`,
-          email: `${user.email}`,
           isSeen: false,
           date: new Date().toISOString(),
           timestamp: serverTimestamp(), // Add this line
