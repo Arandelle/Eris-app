@@ -70,7 +70,8 @@ const Request = () => {
         description,
         status: "awaiting response",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
-        customId: emergencyID,
+        date: new Date().toISOString(),
+        emergencyId: emergencyID,
         location: {
           latitude,
           longitude,
@@ -107,6 +108,7 @@ const Request = () => {
         userId: user.uid,
         type: "request",
         message: `User ${user.email} submitted an emergency: ${emergencyType}`,
+        description,
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),
@@ -119,9 +121,11 @@ const Request = () => {
         type: "emergency",
         title: "Success!",
         message: `You successfully submitted an emergency.`,
+        description,
         isSeen: false,
         timestamp: serverTimestamp(),
         icon: "hospital-box",
+        date: new Date().toISOString()
       };
       await push(ref(database, `users/${user.uid}/notifications`), userNotification);
 
@@ -132,6 +136,7 @@ const Request = () => {
             userId: user.uid,
             type: "emergency",
             message: `New emergency request from ${user.email}: ${emergencyType}`,
+            description,
             isSeen: false,
             timestamp: serverTimestamp(),
             icon: "hospital-box",

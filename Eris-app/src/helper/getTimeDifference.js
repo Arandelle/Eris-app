@@ -9,12 +9,12 @@ export const getTimeDifference = (timestamp) =>{
   const diffInMonths = now.getMonth() -addedTime.getMonth() + 12 * (now.getFullYear() - addedTime.getFullYear());
   const diffInYears = now.getFullYear() - addedTime.getFullYear();
 
-  if (diffInSeconds < 60 ) return `just now`; // if value of seconds is greater than 59 this will bypass
+  if (diffInSeconds < 60 ) return `Just now`; // if value of seconds is greater than 59 this will bypass
   if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
   if (diffInHours < 24) return `${diffInHours} hours ago`
-  if (diffInDays === 1) return "yesterday"
+  if (diffInDays === 1) return "Yesterday"
   if (diffInDays < 30) return `${diffInDays} days ago`;
-  if (diffInMonths === 1) return `last month`;
+  if (diffInMonths === 1) return `Last month`;
   if (diffInMonths < 12 ) return `${diffInMonths} months ago`
 
   return `${diffInYears} years ago`
