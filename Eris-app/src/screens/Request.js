@@ -140,6 +140,7 @@ const Request = () => {
             isSeen: false,
             timestamp: serverTimestamp(),
             icon: "hospital-box",
+            date: new Date().toISOString(),
           };
           await push(ref(database, `responders/${responder.id}/notifications`), responderNotification);
         }

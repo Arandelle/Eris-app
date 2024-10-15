@@ -125,8 +125,7 @@ const UpdateProfile = () => {
           message: `Congratulations!, you have successfully update your profile information.`,
           isSeen: false,
           date: new Date().toISOString(),
-          timestamp: serverTimestamp(), // Add this line
-          img: selectedProfile,
+          timestamp: serverTimestamp(),
           icon: "account-check",
         };
 
@@ -144,7 +143,6 @@ const UpdateProfile = () => {
           isSeen: false,
           date: new Date().toISOString(),
           timestamp: serverTimestamp(), // Add this line
-          img: selectedProfile,
         };
 
         await push(notificationRef, newNotification);
