@@ -1,53 +1,73 @@
 import { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity, Button } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Button,
+} from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useNotificationData } from "../hooks/useNotificationData";
-import  useResponderData  from "../hooks/useResponderData";
+import useResponderData from "../hooks/useResponderData";
 
 const Notification = () => {
-
-  const {notificationsCount,notifications, handleSpecificNotification, markAllNotificationsAsRead } = useNotificationData();
+  const {
+    notificationsCount,
+    notifications,
+    handleSpecificNotification,
+    markAllNotificationsAsRead,
+  } = useNotificationData();
   const [viewAll, setViewAll] = useState(false);
 
-  const displayedNotifications = viewAll ? notifications : notifications.slice(0,6); // it's like telling viewAll is true? then show all notifications else slice it to 7
+  const displayedNotifications = viewAll
+    ? notifications
+    : notifications.slice(0, 6); // it's like telling viewAll is true? then show all notifications else slice it to 7
 
   return (
-   <>
-   {notificationsCount !== 0 && (
-    <TouchableOpacity className="sticky" onPress={markAllNotificationsAsRead}>
-      <Text className="bg-white p-2 text-center text-lg text-blue-500 rounded-md">Mark all as read</Text>
-    </TouchableOpacity>
-   )}
+    <>
+      {notificationsCount !== 0 && (
+        <TouchableOpacity
+          className="sticky"
+          onPress={markAllNotificationsAsRead}
+        >
+          <Text className="bg-white p-2 text-center text-lg text-blue-500 rounded-md">
+            Mark all as read
+          </Text>
+        </TouchableOpacity>
+      )}
       <ScrollView className="bg-white">
         <View className="h-full w-full">
-    
-    {displayedNotifications.length > 0 ? (
-      displayedNotifications.map((notification) => (
-          <NotificationItem notification={notification} />
-          ))
-    ) : (
-     <View className="flex items-center justify-center mt-60"> 
-     <Text className="text-center text-xl text-gray-500">No notification found</Text>
-     </View>
-    )}
-        
-          {!viewAll && notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
-                <TouchableOpacity
-                  className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
-                  onPress={() => setViewAll(true)}
-                >
-                  <Text className="text-center text">
-                    See previous notification
-                  </Text>
-                </TouchableOpacity>
-              )}
+          {displayedNotifications.length > 0 ? (
+            displayedNotifications.map((notification) => (
+              <NotificationItem notification={notification} />
+            ))
+          ) : (
+            <View className="flex items-center justify-center mt-60">
+              <Text className="text-center text-xl text-gray-500">
+                No notification found
+              </Text>
+            </View>
+          )}
+
+          {!viewAll &&
+            notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+              <TouchableOpacity
+                className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
+                onPress={() => setViewAll(true)}
+              >
+                <Text className="text-center text">
+                  See previous notification
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
       </ScrollView>
-   </>
+    </>
   );
 };
 
@@ -61,14 +81,15 @@ const NotificationItem = ({ notification }) => {
   const notificationData = {
     users: "bg-red-500",
     updateProfile: "bg-blue-500",
-    emergency: "bg-orange-500"
+    emergency: "bg-orange-500",
   };
 
   const notificationType = {
     users: userData?.img,
     updateProfile: userData?.img,
-    responder: responderData.find(responder => responder.id === responderID)?.img,
-    emergency: userData?.img
+    responder: responderData.find((responder) => responder.id === responderID)
+      ?.img,
+    emergency: userData?.img,
   };
 
   useEffect(() => {
@@ -127,6 +148,5 @@ const NotificationItem = ({ notification }) => {
     </TouchableOpacity>
   );
 };
-
 
 export default Notification;

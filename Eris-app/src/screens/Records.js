@@ -1,52 +1,20 @@
-import { View, Text, ScrollView} from "react-native";
+import { View, Text, ScrollView, Image } from "react-native";
 import useFetchRecords from "../hooks/useFetchRecords";
+import useResponderData from "../hooks/useResponderData";
+import { formatDateWithTime } from "../helper/FormatDate";
 
-const Records = ({status}) => {
-
-  const {emergencyHistory} = useFetchRecords({status});
-  emergencyHistory.sort((a,b) => new Date(b.date) - new Date(a.date))
-
-  const emergencyStatus = {
-    "awaiting response": "bg-yellow-300",
-    "on-going": "bg-orange-300",
-    resolved: "bg-green-300",
-    expired: "bg-red-300"
-  }
+const Records = ({ status }) => {
+  const { emergencyHistory } = useFetchRecords({ status });
+  emergencyHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-      <View className="bg-white h-full w-full rounded-lg shadow-lg">
-        <ScrollView>
+    <View className="p-2 bg-white">
+      <ScrollView>
+        <View className="space-y-2">
           {emergencyHistory.length > 0 ? (
             emergencyHistory.map((emergency) => (
-              <View
-                key={emergency.id}
-                className="p-2 pb-0"
-              >
-                <View className={`flex flex-row justify-between p-1 border border-gray-500 ${emergencyStatus[emergency.status]}`}>
-                  <Text className="text-lg font-bold">Emergency ID:</Text>
-                  <Text className="text-lg">{emergency.customId}</Text>
-                </View>
-              <View className="space-y-2 p-2 border border-t-0 border-gray-300">
-                  <Text className="text-lg font-bold">
-                    Type: {emergency.type}
-                  </Text>
-                  <Text className="text-lg">
-                    Description: {emergency.description}
-                  </Text>
-                  <Text className="text-lg">
-                    Location: {emergency.location.address}
-                  </Text>
-                  <Text className="text-lg">
-                    Status: {emergency.status.toUpperCase()}
-                  </Text>
-                  <Text className="text-lg">
-                    Submitted:{" "}
-                    {new Date(emergency.timestamp).toLocaleString()}
-                  </Text>
-                  {emergency.acceptedBy && (
-                    <Text className="text-lg">Responder: {emergency.acceptedBy}</Text>
-                  )}
-              </View>
+              <View className="space-y-2">
+                <RecordItem emergency={emergency} />
               </View>
             ))
           ) : (
@@ -54,9 +22,103 @@ const Records = ({status}) => {
               No records found on {status}
             </Text>
           )}
-        </ScrollView>
-      </View>
-  )
-}
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
 
-export default Records
+const RecordItem = ({ emergency }) => {
+  const { responderData } = useResponderData();
+  const responderID = "LmDRYHsGOHWi8Lk6K1YbvrJ5Vq02"; // Example responder ID
+  const responder = responderData.find(
+    (responder) => responder.id === responderID
+  );
+
+  const emergencyStatus = {
+    "awaiting response": "bg-orange-100 text-orange-600",
+    "on-going": "bg-blue-100 text-blue-600",
+    resolved: "bg-green-100 text-green-600",
+    expired: "bg-red-300",
+  };
+
+  return (
+    <View className="border border-gray-300 rounded-lg">
+      <View className="flex flex-row space-x-2 p-4">
+        {emergency.status !== "awaiting response" && (
+          <>
+            <Image
+              source={{ uri: responder?.img }}
+              className="h-12 w-12 rounded-full"
+            />
+            <View>
+              <Text className="text-lg font-bold">
+                {`${responder?.firstname} ${responder?.lastname}` ||
+                  "Loading..."}
+              </Text>
+              <Text className="text-sm text-gray-400">
+                {responder?.customId}
+              </Text>
+            </View>
+          </>
+        )}
+      </View>
+
+      <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
+        <Text
+          className={`font-bold ${
+            emergencyStatus[emergency.status]
+          } py-1 px-3 rounded-lg self-start`}
+        >
+          {emergency.status.toUpperCase()}
+        </Text>
+
+        <View className="space-y-2 p-1">
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">
+              Emergency type:
+            </Text>
+            <Text className="flex-1 font-bold">
+              {emergency.type.toUpperCase()}
+            </Text>
+          </View>
+
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">Description:</Text>
+            <Text className="flex-1 font-bold">{emergency.description}</Text>
+          </View>
+
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">Location:</Text>
+            <Text className="flex-1 font-bold">
+              {emergency.location.address}
+            </Text>
+          </View>
+
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">Reported At:</Text>
+            <Text className="flex-1 font-bold">
+              {formatDateWithTime(emergency.date)}
+            </Text>
+          </View>
+
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">
+              Response Time:
+            </Text>
+            <Text className="flex-1 font-bold">
+              {formatDateWithTime(emergency.dateAccepted)}
+            </Text>
+          </View>
+
+          <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>
+            <Text className="flex-1 font-bold">{emergency?.customId}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default Records;
