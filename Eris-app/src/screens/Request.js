@@ -119,8 +119,8 @@ const Request = () => {
       // Notify user
       const userNotification = {
         type: "emergency",
-        title: "Success!",
-        message: `You successfully submitted an emergency.`,
+        title: "Emergency Reported!",
+        message: `You have successfully reported an emergency.`,
         description,
         isSeen: false,
         timestamp: serverTimestamp(),
@@ -135,7 +135,7 @@ const Request = () => {
           const responderNotification = {
             userId: user.uid,
             type: "emergency",
-            message: `New emergency request from ${user.email}: ${emergencyType}`,
+            message: `New emergency reported from ${user.email}: ${emergencyType}`,
             description,
             isSeen: false,
             timestamp: serverTimestamp(),
@@ -146,7 +146,7 @@ const Request = () => {
         }
       });
 
-      Alert.alert("Emergency Request Submitted", "Help is on the way!");
+      Alert.alert("Emergency reported", "Help is on the way!");
       setEmergencyType("");
       setDescription("");
       setHasActiveRequest(true);
@@ -155,7 +155,7 @@ const Request = () => {
 
     } catch (error) {
       console.error("Error submitting emergency request", error);
-      Alert.alert("Error", "Could not submit emergency request, please try again");
+      Alert.alert("Error", "Could not submit emergency report, please try again");
     }
   };
 
@@ -173,16 +173,16 @@ const Request = () => {
 
       {hasActiveRequest ? (
         <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
-          You have an active emergency request. Please wait for it to be resolved.
+          You have an active emergency report. Please wait for it to be resolved.
         </Text>
       ) : emergencyExpired ? (
         <Text className="text-lg text-center text-red-600 italic mb-5">
-          Your last emergency request expired. You can submit a new one if needed.
+          Your last emergency report expired. You can submit a new one if needed.
         </Text>
       ) : (
         emergencyDone && (
           <Text className="text-lg text-center text-blue-500 italic mb-5">
-            Your last emergency request was resolved. You can submit a new one if needed.
+            Your last emergency report was resolved. You can submit a new one if needed.
           </Text>
         )
       )}

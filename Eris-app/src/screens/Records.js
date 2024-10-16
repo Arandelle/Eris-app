@@ -101,19 +101,30 @@ const RecordItem = ({ emergency }) => {
               {formatDateWithTime(emergency.date)}
             </Text>
           </View>
-
-          <View className="flex flex-row">
+          {emergency.responseTime && (
+            <View className="flex flex-row">
             <Text className="w-1/3 font-bold text-gray-500">
               Response Time:
             </Text>
             <Text className="flex-1 font-bold">
-              {formatDateWithTime(emergency.dateAccepted)}
+              {formatDateWithTime(emergency.responseTime)}
             </Text>
           </View>
+          )}
+          {emergency.dateResolved && (
+            <View className="flex flex-row">
+            <Text className="w-1/3 font-bold text-gray-500">
+              Date Resolved:
+            </Text>
+            <Text className="flex-1 font-bold">
+              {formatDateWithTime(emergency.dateResolved)}
+            </Text>
+          </View>
+          )}
 
           <View className="flex flex-row">
             <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>
-            <Text className="flex-1 font-bold">{emergency?.customId}</Text>
+            <Text className="flex-1 font-bold">{emergency?.emergencyId}</Text>
           </View>
         </View>
       </View>

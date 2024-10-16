@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
-  Button,
 } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
@@ -84,17 +83,13 @@ const NotificationItem = ({ notification }) => {
     emergency: "bg-orange-500",
   };
 
-  const notificationType = {
+  const notificationImg = {
     users: userData?.img,
     updateProfile: userData?.img,
     responder: responderData.find((responder) => responder.id === responderID)
       ?.img,
     emergency: userData?.img,
   };
-
-  useEffect(() => {
-    console.log(responderData);
-  }, [responderData]);
 
   return (
     <TouchableOpacity
@@ -118,7 +113,7 @@ const NotificationItem = ({ notification }) => {
         <View className="relative">
           <View>
             <Image
-              source={{ uri: notificationType[notification.type] }}
+              source={{ uri: notificationImg[notification.type] }}
               className="rounded-full h-14 w-14 border-4 border-blue-500"
             />
             <View

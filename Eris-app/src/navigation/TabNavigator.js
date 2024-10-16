@@ -48,13 +48,13 @@ const TabNavigator = () => {
           const icons = {
             Home: "home-outline",
             Map: "map-marker-outline",
-            Request: "hospital-box",
+            Report: "hospital-box",
             Notification: "bell-outline",
             Profile: "account-circle-outline",
           };
 
           const iconName = icons[route.name];
-          const isMiddle = route.name === "Request";
+          const isMiddle = route.name === "Report";
 
           return (
             <View className="items-center">
@@ -109,11 +109,11 @@ const TabNavigator = () => {
         options={{ title: "Map", headerShown: false }}
       ></Tab.Screen>
       <Tab.Screen
-        name="Request"
+        name="Report"
         component={Request}
         options={{
           title: "Submit Emergency Assistance",
-          tabBarLabel: "Request",
+          tabBarLabel: "Report",
           headerRight: () => (
                 <TouchableOpacity
                   className="m-4"
