@@ -18,7 +18,6 @@ const Notification = () => {
   const {
     notificationsCount,
     notifications,
-    handleSpecificNotification,
     markAllNotificationsAsRead,
   } = useNotificationData();
   const [viewAll, setViewAll] = useState(false);
@@ -74,13 +73,16 @@ const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
   const { userData } = useFetchData();
   const { responderData } = useResponderData();
+  const {handleSpecificNotification} = useNotificationData()
 
   const responderID = "LmDRYHsGOHWi8Lk6K1YbvrJ5Vq02"; // Example responder ID
 
   const notificationData = {
-    users: "bg-red-500",
-    updateProfile: "bg-blue-500",
-    emergency: "bg-orange-500",
+    "account-check": "bg-blue-500",
+    "account-alert": "bg-red-500",
+    "hospital-box": "bg-orange-500",
+    "shield-check" : "bg-green-500",
+    "car-emergency" : "bg-red-500"
   };
 
   const notificationImg = {
@@ -118,7 +120,7 @@ const NotificationItem = ({ notification }) => {
             />
             <View
               className={`absolute bottom-0 right-0 ${
-                notificationData[notification.type]
+                notificationData[notification.icon]
               } rounded-full p-1 border-2 border-white`}
             >
               <Icon name={notification.icon} size={16} color={"white"} />
@@ -130,11 +132,11 @@ const NotificationItem = ({ notification }) => {
             <Text className="font-semibold text-lg text-gray-800">
               {notification.title}
             </Text>
-            <Text>{notification.message.toUpperCase()}</Text>
+            <Text className="font-semibold text-gray-500">{notification.message}</Text>
           </View>
           <View className="flex flex-row justify-between text-xs text-gray-500">
-            <Text>{getTimeDifference(notification.timestamp)}</Text>
-            <Text className="text-blue-500">
+            <Text className="text-blue-500">{getTimeDifference(notification.timestamp)}</Text>
+            <Text className="text-gray-500">
               {formatDate(notification.date)}
             </Text>
           </View>
