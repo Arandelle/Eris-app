@@ -75,7 +75,14 @@ const NotificationItem = ({ notification }) => {
   const { responderData } = useResponderData();
   const {handleSpecificNotification} = useNotificationData()
 
-  const responderID = "LmDRYHsGOHWi8Lk6K1YbvrJ5Vq02"; // Example responder ID
+  const responderDetails = responderData.find((responder) => responder.id === notification.responderId);
+
+  const notificationImg = {
+    users: userData?.img,
+    updateProfile: userData?.img,
+    responder: responderDetails?.img,
+    emergency: userData?.img,
+  };
 
   const notificationData = {
     "account-check": "bg-blue-500",
@@ -83,14 +90,6 @@ const NotificationItem = ({ notification }) => {
     "hospital-box": "bg-orange-500",
     "shield-check" : "bg-green-500",
     "car-emergency" : "bg-red-500"
-  };
-
-  const notificationImg = {
-    users: userData?.img,
-    updateProfile: userData?.img,
-    responder: responderData.find((responder) => responder.id === responderID)
-      ?.img,
-    emergency: userData?.img,
   };
 
   return (
