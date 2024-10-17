@@ -22,9 +22,11 @@ import {
 } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import { generateUniqueBarangayID } from "../helper/generateID";
+import useFetchAdmin from "../hooks/useFetchAdmin";
 
 const SignupForm = () => {
   const navigation = useNavigation();
+  const {adminData} = useFetchAdmin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -90,7 +92,6 @@ const SignupForm = () => {
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
-        type: "users",
         message: `A new user has registered with the email `,
         email: `${user.email}`,
         isSeen: false,
@@ -106,7 +107,6 @@ const SignupForm = () => {
         `users/${user.uid}/notifications`
       );
       const newUserNotification = {
-        type: "users",
         title: "Welcome!",
         message: `You have successfully created your account`,
         email: `${user.email}`,

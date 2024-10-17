@@ -97,12 +97,22 @@ const NotificationItem = ({ notification }) => {
       key={notification.id}
       onPress={() => {
         handleSpecificNotification(notification.id);
-        if (userData?.profileComplete && notification.type === "users") {
-          navigation.navigate("Profile");
-        } else if (notification.type === "emergency") {
-          navigation.navigate("Map");
-        } else {
-          navigation.navigate("UpdateProfile");
+        switch (notification.icon) {
+          case "account-check":  
+          case "account-alert":
+          navigation.navigate("Profile")
+          break;
+          case "hospital-box":
+          navigation.navigate("Emergency Records", {screen: "awaiting-response"})
+          break;
+          case "shield-check":
+            navigation.navigate("Emergency Records", {screen: "resolved"})
+          break;
+          case "car-emergency":
+            navigation.navigate("Emergency Records", {screen: "on-going"})
+          break;
+          default:
+            break;
         }
       }}
     >

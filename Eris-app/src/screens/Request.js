@@ -106,7 +106,6 @@ const Request = () => {
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const adminNotification = {
         userId: user.uid,
-        type: "request",
         message: `User ${user.email} submitted an emergency: ${emergencyType}`,
         description,
         isSeen: false,
@@ -118,7 +117,6 @@ const Request = () => {
 
       // Notify user
       const userNotification = {
-        type: "emergency",
         title: "Emergency Reported!",
         message: `You have successfully reported an emergency.`,
         description,
@@ -134,7 +132,6 @@ const Request = () => {
         if (responder.profileComplete) {
           const responderNotification = {
             userId: user.uid,
-            type: "emergency",
             message: `New emergency reported from ${user.email}: ${emergencyType}`,
             description,
             isSeen: false,

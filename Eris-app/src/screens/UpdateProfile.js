@@ -120,7 +120,6 @@ const UpdateProfile = () => {
           `users/${user.uid}/notifications`
         );
         const newUserNotification = {
-          type: "updateProfile",
           title: "Profile Updated!",
           message: `Congratulations!, you have successfully update your profile information.`,
           isSeen: false,
@@ -130,22 +129,6 @@ const UpdateProfile = () => {
         };
 
         await push(notificationUserRef, newUserNotification);
-
-        const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-        const notificationRef = ref(
-          database,
-          `admins/${adminId}/notifications`
-        );
-        const newNotification = {
-          userId: user.uid,
-          type: "users",
-          message: `updated ${userData?.gender === "Male" ? "his" : "her"} profile details`,
-          isSeen: false,
-          date: new Date().toISOString(),
-          timestamp: serverTimestamp(), // Add this line
-        };
-
-        await push(notificationRef, newNotification);
 
         Alert.alert(
           "Success",
