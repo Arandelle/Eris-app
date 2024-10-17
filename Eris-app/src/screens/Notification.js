@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
@@ -15,11 +9,8 @@ import { useNotificationData } from "../hooks/useNotificationData";
 import useResponderData from "../hooks/useResponderData";
 
 const Notification = () => {
-  const {
-    notificationsCount,
-    notifications,
-    markAllNotificationsAsRead,
-  } = useNotificationData();
+  const { notificationsCount, notifications, markAllNotificationsAsRead } =
+    useNotificationData();
   const [viewAll, setViewAll] = useState(false);
 
   const displayedNotifications = viewAll
@@ -73,85 +64,94 @@ const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
   const { userData } = useFetchData();
   const { responderData } = useResponderData();
-  const {handleSpecificNotification} = useNotificationData()
+  const { handleSpecificNotification } = useNotificationData();
 
-  const responderDetails = responderData.find((responder) => responder.id === notification.responderId);
+  const responderDetails = responderData.find(
+    (responder) => responder.id === notification.responderId
+  );
 
   const notificationImg = {
-    users: userData?.img,
-    updateProfile: userData?.img,
-    responder: responderDetails?.img,
-    emergency: userData?.img,
+    "account-check": userData?.img,
+    "account-alert": userData?.img,
+    "hospital-box": userData?.img,
+    "shield-check": responderDetails?.img,
+    "car-emergency": responderDetails?.img,
   };
 
   const notificationData = {
     "account-check": "bg-blue-500",
     "account-alert": "bg-red-500",
     "hospital-box": "bg-orange-500",
-    "shield-check" : "bg-green-500",
-    "car-emergency" : "bg-red-500"
+    "shield-check": "bg-green-500",
+    "car-emergency": "bg-red-500",
   };
 
   return (
-    <TouchableOpacity
-      key={notification.id}
-      onPress={() => {
-        handleSpecificNotification(notification.id);
-        switch (notification.icon) {
-          case "account-check":  
-          case "account-alert":
-          navigation.navigate("Profile")
-          break;
-          case "hospital-box":
-          navigation.navigate("Emergency Records", {screen: "awaiting-response"})
-          break;
-          case "shield-check":
-            navigation.navigate("Emergency Records", {screen: "resolved"})
-          break;
-          case "car-emergency":
-            navigation.navigate("Emergency Records", {screen: "on-going"})
-          break;
-          default:
-            break;
-        }
-      }}
-    >
-      <View
-        className={`flex flex-row justify-between p-4 ${
-          notification.isSeen ? "bg-white" : "bg-blue-50"
-        }`}
+      <TouchableOpacity
+        key={notification.id}
+        onPress={() => {
+          handleSpecificNotification(notification.id);
+          switch (notification.icon) {
+            case "account-check":
+            case "account-alert":
+              navigation.navigate("Profile");
+              break;
+            case "hospital-box":
+              navigation.navigate("Emergency Records", {
+                screen: "awaiting-response",
+              });
+              break;
+            case "shield-check":
+              navigation.navigate("Emergency Records", { screen: "resolved" });
+              break;
+            case "car-emergency":
+              navigation.navigate("Emergency Records", { screen: "on-going" });
+              break;
+            default:
+              break;
+          }
+        }}
       >
-        <View className="relative">
-          <View>
-            <Image
-              source={{ uri: notificationImg[notification.type] }}
-              className="rounded-full h-14 w-14 border-4 border-blue-500"
-            />
-            <View
-              className={`absolute bottom-0 right-0 ${
-                notificationData[notification.icon]
-              } rounded-full p-1 border-2 border-white`}
-            >
-              <Icon name={notification.icon} size={16} color={"white"} />
+        <View
+          className={`flex flex-row justify-between p-4 ${
+            notification.isSeen ? "bg-white" : "bg-blue-50"
+          }`}
+        >
+          <View className="relative">
+            <View>
+              <Image
+                source={{ uri: notificationImg[notification.icon] }}
+                className="rounded-full h-16 w-16 border-4 border-blue-500"
+              />
+              <View
+                className={`absolute -bottom-[2px] -right-[4px] ${
+                  notificationData[notification.icon]
+                } rounded-full p-1.5 shadow-xl`}
+              >
+                <Icon name={notification.icon} size={20} color={"white"} />
+              </View>
+            </View>
+          </View>
+          <View className="pl-4 flex-1">
+            <View className="text-sm mb-1 text-gray-600">
+              <Text className="font-semibold text-lg text-gray-800">
+                {notification.title}
+              </Text>
+              <Text className="font-semibold text-gray-500">
+                {notification.message}
+              </Text>
+            </View>
+            <View className="flex flex-row justify-between text-xs text-gray-500">
+              <Text className="text-blue-500">
+                {getTimeDifference(notification.timestamp)}
+              </Text>
+              <Text className="text-gray-500">
+                {formatDate(notification.date)}
+              </Text>
             </View>
           </View>
         </View>
-        <View className="pl-4 flex-1">
-          <View className="text-sm mb-1 text-gray-600">
-            <Text className="font-semibold text-lg text-gray-800">
-              {notification.title}
-            </Text>
-            <Text className="font-semibold text-gray-500">{notification.message}</Text>
-          </View>
-          <View className="flex flex-row justify-between text-xs text-gray-500">
-            <Text className="text-blue-500">{getTimeDifference(notification.timestamp)}</Text>
-            <Text className="text-gray-500">
-              {formatDate(notification.date)}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
   );
 };
 
