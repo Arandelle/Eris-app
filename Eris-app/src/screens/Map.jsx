@@ -4,10 +4,12 @@ import MapView, { Polyline, Marker } from "react-native-maps";
 import Logo from "../../assets/logo.png";
 import responderMarker from "../../assets/ambulance.png";
 import useLocationTracking from "../hooks/useLocationTracking";
+import useRoute from "../hooks/useRoute";
 
 const Map = ({ userData }) => {
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
   const { latitude, longitude, responderLocation, trackUserLocation } = useLocationTracking(userData, setRefreshing);
+  const {route, setRoute, distance, setDistance } = useRoute(userData, responderLocation)
 
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true

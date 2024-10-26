@@ -124,11 +124,11 @@ const NotificationItem = ({ notification }) => {
                 className="rounded-full h-16 w-16 border-4 border-blue-500"
               />
               <View
-                className={`absolute -bottom-[2px] -right-[4px] ${
+                className={`absolute bottom-0 -right-[4px] ${
                   notificationData[notification.icon]
-                } rounded-full p-1.5 shadow-xl`}
+                } rounded-full p-1.5 border border-blue-50`}
               >
-                <Icon name={notification.icon} size={20} color={"white"} />
+                <Icon name={notification.icon} size={18} color={"white"} />
               </View>
             </View>
           </View>
