@@ -7,25 +7,25 @@ import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
 import { View, TouchableOpacity } from "react-native";
-import { useFetchData } from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../constant/colors";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const navigation = useNavigation();
-  const { userData } = useFetchData();
+  const { currentUser} = useCurrentUser()
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [dayTime, setDayTime] = useState("");
   const [showTabBar, setShowTabBar] = useState(true);
 
   useEffect(() => {
-    if (userData) {
-      setIsProfileComplete(userData.profileComplete);
+    if (currentUser) {
+      setIsProfileComplete(currentUser.profileComplete);
     }
-  }, [userData]);
+  }, [currentUser]);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -94,8 +94,8 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Home"
         options={{
-          title: `${dayTime} ${userData?.firstname || ""} ${
-            userData?.lastname || ""
+          title: `${dayTime} ${currentUser?.firstname || ""} ${
+            currentUser?.lastname || ""
           }!`,
           tabBarLabel: "Home",
         }}

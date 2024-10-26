@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { useFetchData } from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useNotificationData } from "../hooks/useNotificationData";
-import useResponderData from "../hooks/useResponderData";
+import useResponderData from "../hooks/useFetchData";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const Notification = () => {
   const { notificationsCount, notifications, markAllNotificationsAsRead } =
@@ -62,8 +62,8 @@ const Notification = () => {
 
 const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
-  const { userData } = useFetchData();
-  const { responderData } = useResponderData();
+  const { currentUser} = useCurrentUser()
+  const { data: responderData } = useResponderData("responders");
   const { handleSpecificNotification } = useNotificationData();
 
   const responderDetails = responderData.find(
@@ -71,9 +71,9 @@ const NotificationItem = ({ notification }) => {
   );
 
   const notificationImg = {
-    "account-check": userData?.img,
-    "account-alert": userData?.img,
-    "hospital-box": userData?.img,
+    "account-check": currentUser?.img,
+    "account-alert": currentUser?.img,
+    "hospital-box": currentUser?.img,
     "shield-check": responderDetails?.img,
     "car-emergency": responderDetails?.img,
   };

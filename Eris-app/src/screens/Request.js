@@ -11,10 +11,10 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
 import { ref, serverTimestamp, push, update } from "firebase/database";
-import { useFetchData } from "../hooks/useFetchData";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useActiveRequest from "../hooks/useActiveRequest";
-import useResponderData from "../hooks/useResponderData";
+import useFetchData from "../hooks/useFetchData";
+import useCurrentUser from "../hooks/useCurrentUser";
 import { generateUniqueBarangayID } from "../helper/generateID";
 
 const Request = () => {
@@ -23,9 +23,9 @@ const Request = () => {
   const [newRequestKey, setNewRequestKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
-  const { userData } = useFetchData("users");
-  const { responderData } = useResponderData();
-  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } = useLocationTracking(userData, setRefreshing);
+  const {currentUser} = useCurrentUser()
+  const { data: responderData } = useFetchData("responders");
+  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } = useLocationTracking(currentUser, setRefreshing);
   const {
     checkActiveRequest,
     emergencyExpired,
@@ -34,7 +34,7 @@ const Request = () => {
     setEmergencyDone,
     hasActiveRequest,
     setHasActiveRequest,
-  } = useActiveRequest(userData);
+  } = useActiveRequest(currentUser);
   
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true

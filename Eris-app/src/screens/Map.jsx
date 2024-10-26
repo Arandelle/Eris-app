@@ -6,10 +6,10 @@ import responderMarker from "../../assets/ambulance.png";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useRoute from "../hooks/useRoute";
 
-const Map = ({ userData }) => {
+const Map = ({ currentUser }) => {
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
-  const { latitude, longitude, responderLocation, trackUserLocation } = useLocationTracking(userData, setRefreshing);
-  const {route, setRoute, distance, setDistance } = useRoute(userData, responderLocation)
+  const { latitude, longitude, responderLocation, trackUserLocation } = useLocationTracking(currentUser, setRefreshing);
+  const {route, setRoute, distance, setDistance } = useRoute(currentUser, responderLocation)
 
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true

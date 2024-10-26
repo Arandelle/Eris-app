@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import useFetchRecords from "../hooks/useFetchRecords";
-import useResponderData from "../hooks/useResponderData";
+import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
 
 const Records = ({ status }) => {
@@ -29,7 +29,7 @@ const Records = ({ status }) => {
 };
 
 const RecordItem = ({ emergency }) => {
-  const { responderData } = useResponderData();
+  const { data: responderData } = useFetchData("responders");
   const responderID = "LmDRYHsGOHWi8Lk6K1YbvrJ5Vq02"; // Example responder ID
   const responder = responderData.find(
     (responder) => responder.id === responderID

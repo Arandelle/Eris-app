@@ -22,11 +22,9 @@ import {
 } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import { generateUniqueBarangayID } from "../helper/generateID";
-import useFetchAdmin from "../hooks/useFetchAdmin";
 
 const SignupForm = () => {
   const navigation = useNavigation();
-  const {adminData} = useFetchAdmin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);

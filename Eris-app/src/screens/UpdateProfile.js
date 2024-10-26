@@ -10,297 +10,194 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ref, update, onValue, serverTimestamp, push } from "firebase/database";
+import { ref, update, serverTimestamp, push, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useFetchData } from "../hooks/useFetchData";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const { userData, setUserData } = useFetchData();
-  const [mobileNum, setMobileNum] = useState("");
-  const [firstname, setFirstName] = useState("");
-  const [lastname, setLastName] = useState("");
-  const [age, setAge] = useState("");
-  const [address, setCurrentAddress] = useState("");
-  const [selectedGender, setSelectedGender] = useState("Male");
-  const [selectedProfile, setSelectedProfile] = useState(
-    "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
-  );
+  const { currentUser, updateCurrentUser } = useCurrentUser();
+  const [userData, setUserData] = useState({
+    mobileNum: "",
+    firstname: "",
+    lastname: "",
+    age: "",
+    address: "",
+    gender: "Male",
+    img:
+      "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+  });
   const [loading, setLoading] = useState(true);
-  const [mobileError, setMobileError] = useState("");
-  const [ageError, setAgeError] = useState("");
+  const [errors, setErrors] = useState({ mobileNum: "", age: "" });
 
   const genders = ["Male", "Female"];
+  const imageUrls = [
+    ...Array.from({ length: 5 }, (_, i) => `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`),
+    ...Array.from({ length: 99 }, (_, i) => `https://robohash.org/${i + 1}.png`),
+  ];
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         const userRef = ref(database, `users/${user.uid}`);
-
-        try {
-          const snapshot = await new Promise((resolve, reject) => {
-            onValue(userRef, resolve, reject, { onlyOnce: true });
-          });
+        onValue(userRef, (snapshot) => {
           const data = snapshot.val();
-          setUserData(data);
-          setMobileNum(data?.mobileNum || "");
-          setFirstName(data?.firstname || "");
-          setLastName(data?.lastname || "");
-          setAge(data?.age || "");
-          setSelectedGender(data?.gender || "");
-          setSelectedProfile(data?.img || "");
-          setCurrentAddress(data?.address || "");
+          if (data) setUserData(data);
           setLoading(false);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          Alert.alert("Error", "Failed to fetch user data. Please try again.");
-        }
+        });
       } else {
         navigation.navigate("Login");
       }
     });
+    return unsubscribeAuth;
+  }, [navigation]);
 
-    return () => unsubscribeAuth();
-  }, []);
+  const validateInput = () => {
+    const errors = {};
+    if (!/^(09\d{9}|\+639\d{9})$/.test(userData.mobileNum))
+      errors.mobileNum = "Please enter a valid PH contact number";
+    if (userData.age < 18) errors.age = "User must be 18 years old or above";
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleUpdateProfile = async () => {
-    const user = auth.currentUser;
-    const isProfileCompleted = Boolean(
-      firstname &&
-        lastname &&
-        age &&
-        address &&
-        mobileNum &&
-        selectedGender &&
-        selectedProfile
-    );
-
-    // if (
-    //   !firstname ||
-    //   !lastname ||
-    //   !age ||
-    //   !address ||
-    //   !mobileNum ||
-    //   !selectedGender ||
-    //   !selectedProfile
-    // ) {
-    //   Alert.alert(
-    //     "Validation Error",
-    //     "Please fill in all fields before updating your profile."
-    //   );
-    //   return; // Exit the function if any field is empty
-    // }
-
-    if (user) {
-      const updatedData = {
-        firstname,
-        lastname,
-        age,
-        address,
-        email: user.email,
-        img: selectedProfile,
-        mobileNum,
-        gender: selectedGender,
-        profileComplete: isProfileCompleted,
-      };
-
-      const userRef = ref(database, `users/${user.uid}`);
-      try {
-        await update(userRef, updatedData);
-        setUserData(updatedData);
-        setLoading(true)
-
-        navigation.setParams({ updatedUserData: updatedData });
-
-        const notificationUserRef = ref(
-          database,
-          `users/${user.uid}/notifications`
-        );
-        const newUserNotification = {
-          title: "Profile Updated!",
-          message: `Congratulations!, you have successfully update your profile information.`,
-          isSeen: false,
-          date: new Date().toISOString(),
-          timestamp: serverTimestamp(),
-          icon: "account-check",
-        };
-
-        await push(notificationUserRef, newUserNotification);
-
-        Alert.alert(
-          "Success",
-          "Profile updated successfully!",
-          [
-            {
-              text: "Cancel",
-              onPress: () => console.log("Cancel Pressed"),
-              style: "cancel",
-            },
-            {
-              text: "OK",
-              onPress: () => {
-                console.log("OK Pressed");
-                navigation.goBack();
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      } catch (error) {
-        console.error("Error updating user data:", error);
-        Alert.alert("Error", error.message);
-      } finally{
-        setLoading(false)
-      }
-    } else {
-      Alert.alert("Error", "User not authenticated");
+    if (!validateInput()) return;
+    setLoading(true);
+    const updatedData = {
+      ...userData,
+      email: auth.currentUser.email,
+      profileComplete: Boolean(
+        userData.firstname &&
+        userData.lastname &&
+        userData.age &&
+        userData.address &&
+        userData.mobileNum &&
+        userData.gender &&
+        userData.img
+      ),
+    };
+    const userRef = ref(database, `users/${auth.currentUser.uid}`);
+    try {
+      await update(userRef, updatedData);
+      updateCurrentUser(updatedData);
+      const notificationRef = ref(database, `users/${auth.currentUser.uid}/notifications`);
+      await push(notificationRef, {
+        title: "Profile Updated!",
+        message: "Your profile was updated successfully.",
+        isSeen: false,
+        timestamp: serverTimestamp(),
+        icon: "account-check",
+      });
+      Alert.alert("Success", "Profile updated successfully!");
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", "Failed to update profile.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#0000ff" />
-      </SafeAreaView>
-    );
-  }
-
-  const handleChange = (field, value) => {
-    const regex = /^(09\d{9}|\+639\d{9})$/;
-
-    if(field === "mobileNum"){
-      if (regex.test(value)) {
-        setMobileError("");
-      } else {
-        setMobileError("Please enter a valid PH contact number");
-      }
-      setMobileNum(value);
-    } else if (field === "age"){
-      if (value < 18) {
-        setAgeError("User must be 18 years old above");
-      } else {
-        setAgeError("");
-      }
-      setAge(value);
-    }
-    }
-   
-
-  const flowbite = Array.from(
-    { length: 5 },
-    (_, i) =>
-      `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
+  if (loading) return (
+    <SafeAreaView className="flex-1 justify-center items-center">
+      <ActivityIndicator size="large" color="#0000ff" />
+    </SafeAreaView>
   );
-
-  const robohash = Array.from(
-    { length: 99 },
-    (_, i) => `https://robohash.org/${i + 1}.png`
-  );
-  const ImageUrl = [...flowbite, ...robohash];
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView className="">
-        <View className="flex-1">
-          <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <View className="flex flex-row space-x-3 justify-center">
-              <TouchableOpacity>
+      <ScrollView>
+        <View className="p-4">
+          <Text className="text-lg m-4 text-sky-600 font-bold">Avatar:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row space-x-3 justify-center">
+            <TouchableOpacity>
                 <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="plus" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
-              {ImageUrl.map((url) => (
+              {imageUrls.map((url) => (
                 <TouchableOpacity
                   key={url}
-                  onPress={() => setSelectedProfile(url)}
+                  onPress={() => setUserData({ ...userData, img: url })}
                   className="relative"
                 >
                   <Image
                     source={{ uri: url }}
-                    className="h-[70px] w-[70px] rounded-full"
+                    className="h-16 w-16 rounded-full"
                   />
-
-                  {selectedProfile === url && (
+                  {userData.img === url && (
                     <View className="absolute top-0 right-0 bg-white rounded-full">
                       <Icon
                         name="checkbox-marked-circle"
                         size={20}
-                        color={"green"}
+                        color="green"
+                        className="absolute top-0 right-0"
                       />
-                    </View>
+                   </View>
                   )}
                 </TouchableOpacity>
               ))}
             </View>
           </ScrollView>
-          <View className="m-4">
-            <CustomInput
-              label={"First Name"}
-              value={firstname}
-              onChangeText={setFirstName}
-              placeholder="Enter your firstname"
-            />
-            <CustomInput
-              label={"Last Name"}
-              value={lastname}
-              onChangeText={setLastName}
-              placeholder="Enter your lastname"
-            />
-            <CustomInput
-              label={"Mobile phone"}
-              value={mobileNum}
-              onChangeText={(value)=> handleChange('mobileNum', value)}
-              placeholder="Enter your mobile number"
-              errorMessage={mobileError}
-            />
-            <CustomInput
-              label={"Age"}
-              value={age}
-              onChangeText={(value) => handleChange('age', value)}
-              placeholder="Enter your age"
-              errorMessage={ageError}
-            />
-            <View className="w-full mb-4">
-              <Text className="text-lg mb-1 text-sky-600 font-bold">
-                Select Gender:
-              </Text>
-              <View className="flex flex-row justify-around p-2">
-                {genders.map((gender) => (
-                  <TouchableOpacity
-                    key={gender}
-                    className={`flex flex-row items-center my-1`}
-                    onPress={() => setSelectedGender(gender)}
-                  >
-                    <View className="h-5 w-5 rounded-full border-2 border-blue-600 items-center justify-center">
-                      {selectedGender === gender && (
-                        <View className="h-3 w-3 rounded-full bg-blue-600" />
-                      )}
-                    </View>
-                    <Text className="ml-2 font-bold text-lg">{gender}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <CustomInput
-              label={"Complete Address"}
-              value={address}
-              onChangeText={setCurrentAddress}
-              placeholder="Enter your current address"
-            />
-            <TouchableOpacity
-              className="p-3 w-full bg-green-500 rounded-2xl"
-              onPress={handleUpdateProfile}
-            >
-              <Text className="text-center text-lg font-extrabold text-white">
-                Update Profile
-              </Text>
-            </TouchableOpacity>
+          <CustomInput
+            label="First Name"
+            value={userData.firstname}
+            onChangeText={(value) => setUserData({ ...userData, firstname: value })}
+            placeholder="Enter your firstname"
+          />
+          <CustomInput
+            label="Last Name"
+            value={userData.lastname}
+            onChangeText={(value) => setUserData({ ...userData, lastname: value })}
+            placeholder="Enter your lastname"
+          />
+          <CustomInput
+            label="Mobile phone"
+            value={userData.mobileNum}
+            onChangeText={(value) => setUserData({ ...userData, mobileNum: value })}
+            placeholder="Enter your mobile number"
+            errorMessage={errors.mobileNum}
+          />
+          <CustomInput
+            label="Age"
+            value={userData.age}
+            onChangeText={(value) => setUserData({ ...userData, age: value })}
+            placeholder="Enter your age"
+            errorMessage={errors.age}
+          />
+          <Text className="text-lg mb-1 text-sky-600 font-bold">Select Gender:</Text>
+          <View className="flex-row justify-around p-2">
+            {genders.map((gender) => (
+              <TouchableOpacity
+                key={gender}
+                onPress={() => setUserData({ ...userData, gender })}
+                className={`flex flex-row items-center my-1`}
+              >
+                <View className="h-5 w-5 rounded-full border-2 border-blue-600 justify-center items-center">
+                  {userData.gender === gender && (
+                    <View className="h-3 w-3 rounded-full bg-blue-600" />
+                  )}
+                </View>
+                <Text className="ml-2 font-bold">{gender}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
+          <CustomInput
+            label="Complete Address"
+            value={userData.address}
+            onChangeText={(value) => setUserData({ ...userData, address: value })}
+            placeholder="Enter your current address"
+          />
+          <TouchableOpacity
+            className="p-3 w-full bg-green-500 rounded-2xl"
+            onPress={handleUpdateProfile}
+          >
+            <Text className="text-center text-lg font-extrabold text-white">Update Profile</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
