@@ -16,10 +16,13 @@ import useActiveRequest from "../hooks/useActiveRequest";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import { generateUniqueBarangayID } from "../helper/generateID";
+import useSendNotification from "../hooks/useSendNotification";
 
 const Request = () => {
+
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
+  const {sendNotification} = useSendNotification(emergencyType, description);
   const [newRequestKey, setNewRequestKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
@@ -104,42 +107,15 @@ const Request = () => {
 
       // Notify admins
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      const adminNotification = {
-        userId: user.uid,
-        message: `User ${user.email} submitted an emergency: ${emergencyType}`,
-        description,
-        isSeen: false,
-        date: new Date().toISOString(),
-        timestamp: serverTimestamp(),
-        icon: "hospital-box",
-      };
-      await push(ref(database, `admins/${adminId}/notifications`), adminNotification);
+      await sendNotification("admins",adminId,"adminReport");
 
       // Notify user
-      const userNotification = {
-        title: "Emergency Reported!",
-        message: `You have successfully reported an emergency.`,
-        description,
-        isSeen: false,
-        timestamp: serverTimestamp(),
-        icon: "hospital-box",
-        date: new Date().toISOString()
-      };
-      await push(ref(database, `users/${user.uid}/notifications`), userNotification);
+      await sendNotification("users", currentUser.id, "userReport")
 
       // Notify responders
       responderData.forEach(async (responder) => {
         if (responder.profileComplete) {
-          const responderNotification = {
-            userId: user.uid,
-            message: `New emergency reported from ${user.email}: ${emergencyType}`,
-            description,
-            isSeen: false,
-            timestamp: serverTimestamp(),
-            icon: "hospital-box",
-            date: new Date().toISOString(),
-          };
-          await push(ref(database, `responders/${responder.id}/notifications`), responderNotification);
+          await sendNotification("responders", responder.id, "responderReport");
         }
       });
 

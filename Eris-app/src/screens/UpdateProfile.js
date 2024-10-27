@@ -20,7 +20,7 @@ import useSendNotification from "../hooks/useSendNotification";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const {handleNotifcation} = useSendNotification()
+  const {sendNotification} = useSendNotification()
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     mobileNum: "",
@@ -116,15 +116,7 @@ const UpdateProfile = () => {
     };
     try {
       await updateCurrentUser(updatedData);
-      const notifData = {
-        title: "Profile Updated!",
-        message: "Your profile was updated successfully.",
-        isSeen: false,
-        date: new Date().toISOString(),
-        timestamp: serverTimestamp(),
-        icon: "account-check",
-      }
-      await handleNotifcation("users", currentUser.id, notifData);
+      await sendNotification("users", currentUser.id, "userProfileUpdate");
       Alert.alert("Success", "Profile update successfully");
       navigation.goBack()
     } catch (error) {
