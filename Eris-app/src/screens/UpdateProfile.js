@@ -10,7 +10,7 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ref, update, serverTimestamp, push, onValue } from "firebase/database";
+import { ref, serverTimestamp, push, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
@@ -27,16 +27,23 @@ const UpdateProfile = () => {
     age: "",
     address: "",
     gender: "Male",
-    img:
-      "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+    img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
   });
   const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState({ mobileNum: "", age: "" });
+  const [errors, setErrors] = useState({ mobileNum: "", age: ""});
+  const [valid, setValid] = useState(true)
 
   const genders = ["Male", "Female"];
   const imageUrls = [
-    ...Array.from({ length: 5 }, (_, i) => `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`),
-    ...Array.from({ length: 99 }, (_, i) => `https://robohash.org/${i + 1}.png`),
+    ...Array.from(
+      { length: 5 },
+      (_, i) =>
+        `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
+    ),
+    ...Array.from(
+      { length: 99 },
+      (_, i) => `https://robohash.org/${i + 1}.png`
+    ),
   ];
 
   useEffect(() => {
@@ -55,36 +62,62 @@ const UpdateProfile = () => {
     return unsubscribeAuth;
   }, [navigation]);
 
-  const validateInput = () => {
-    const errors = {};
-    if (!/^(09\d{9}|\+639\d{9})$/.test(userData.mobileNum))
-      errors.mobileNum = "Please enter a valid PH contact number";
-    if (userData.age < 18) errors.age = "User must be 18 years old or above";
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
+  const validateInput = (field, value) => {
+    const errorsCopy = { ...errors }; // Copy existing errors
+
+    if(value){
+      switch(field){
+        case "mobileNum":
+          if (!/^(09\d{9}|\+639\d{9})$/.test(value)) {
+            errorsCopy.mobileNum = "Please enter a valid PH contact number";
+            setValid(false)
+          } else {
+            delete errorsCopy.mobileNum; // Clear error if valid
+            setValid(true)
+          }
+          break;
+        
+        case "age" :
+          if (value < 18 || isNaN(value)) {
+            errorsCopy.age = "User must be 18 years old or above";
+            setValid(false)
+          } else {
+            delete errorsCopy.age; // Clear error if valid
+            setValid(true)
+          }
+          break;
+      }
+    }
+
+    setErrors(errorsCopy); // Update state with new errors
   };
 
+  const handleFieldChange = (field, value) => {
+    setUserData(prev => ({...prev, [field]: value}));
+    validateInput(field, value)
+  }
+
   const handleUpdateProfile = async () => {
-    if (!validateInput()) return;
     setLoading(true);
     const updatedData = {
       ...userData,
       email: auth.currentUser.email,
       profileComplete: Boolean(
         userData.firstname &&
-        userData.lastname &&
-        userData.age &&
-        userData.address &&
-        userData.mobileNum &&
-        userData.gender &&
-        userData.img
+          userData.lastname &&
+          userData.age &&
+          userData.address &&
+          userData.mobileNum &&
+          userData.gender &&
+          userData.img
       ),
     };
-    const userRef = ref(database, `users/${auth.currentUser.uid}`);
     try {
-      await update(userRef, updatedData);
-      updateCurrentUser(updatedData);
-      const notificationRef = ref(database, `users/${auth.currentUser.uid}/notifications`);
+      await updateCurrentUser(updatedData);
+      const notificationRef = ref(
+        database,
+        `users/${auth.currentUser.uid}/notifications`
+      );
       await push(notificationRef, {
         title: "Profile Updated!",
         message: "Your profile was updated successfully.",
@@ -101,11 +134,12 @@ const UpdateProfile = () => {
     }
   };
 
-  if (loading) return (
-    <SafeAreaView className="flex-1 justify-center items-center">
-      <ActivityIndicator size="large" color="#0000ff" />
-    </SafeAreaView>
-  );
+  if (loading)
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
 
   return (
     <SafeAreaView className="flex-1">
@@ -114,7 +148,7 @@ const UpdateProfile = () => {
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar:</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row space-x-3 justify-center">
-            <TouchableOpacity>
+              <TouchableOpacity>
                 <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="plus" size={40} color={"gray"} />
                 </View>
@@ -137,7 +171,7 @@ const UpdateProfile = () => {
                         color="green"
                         className="absolute top-0 right-0"
                       />
-                   </View>
+                    </View>
                   )}
                 </TouchableOpacity>
               ))}
@@ -146,30 +180,33 @@ const UpdateProfile = () => {
           <CustomInput
             label="First Name"
             value={userData.firstname}
-            onChangeText={(value) => setUserData({ ...userData, firstname: value })}
+            onChangeText={(value) => handleFieldChange("firstname", value)}
             placeholder="Enter your firstname"
           />
           <CustomInput
             label="Last Name"
             value={userData.lastname}
-            onChangeText={(value) => setUserData({ ...userData, lastname: value })}
+            onChangeText={(value) => handleFieldChange("lastname", value)}
             placeholder="Enter your lastname"
           />
           <CustomInput
             label="Mobile phone"
             value={userData.mobileNum}
-            onChangeText={(value) => setUserData({ ...userData, mobileNum: value })}
+            onChangeText={(value) => handleFieldChange("mobileNum", value)}
             placeholder="Enter your mobile number"
             errorMessage={errors.mobileNum}
           />
           <CustomInput
             label="Age"
             value={userData.age}
-            onChangeText={(value) => setUserData({ ...userData, age: value })}
+            onChangeText={(value) => handleFieldChange("age", value)}
             placeholder="Enter your age"
             errorMessage={errors.age}
           />
-          <Text className="text-lg mb-1 text-sky-600 font-bold">Select Gender:</Text>
+
+          <Text className="text-lg mb-1 text-sky-600 font-bold">
+            Select Gender:
+          </Text>
           <View className="flex-row justify-around p-2">
             {genders.map((gender) => (
               <TouchableOpacity
@@ -189,14 +226,19 @@ const UpdateProfile = () => {
           <CustomInput
             label="Complete Address"
             value={userData.address}
-            onChangeText={(value) => setUserData({ ...userData, address: value })}
+            onChangeText={(value) => handleFieldChange("address", value)}
             placeholder="Enter your current address"
           />
-          <TouchableOpacity
-            className="p-3 w-full bg-green-500 rounded-2xl"
+           <TouchableOpacity
+            className={`p-3 w-full rounded-2xl ${
+              !valid ? "bg-gray-400" : "bg-green-500"
+            }`}
             onPress={handleUpdateProfile}
+            disabled={!valid}
           >
-            <Text className="text-center text-lg font-extrabold text-white">Update Profile</Text>
+            <Text className="text-center text-lg font-extrabold text-white">
+              Update Profile
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

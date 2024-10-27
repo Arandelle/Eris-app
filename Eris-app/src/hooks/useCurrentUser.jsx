@@ -1,6 +1,6 @@
 import useResponderData from './useFetchData'
 import { auth, database } from '../services/firebaseConfig';
-import {ref} from "firebase/database"
+import {ref, update} from "firebase/database"
 
 const useCurrentUser = () => {
 
