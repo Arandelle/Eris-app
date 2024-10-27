@@ -16,9 +16,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../component/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
+import useSendNotification from "../hooks/useSendNotification";
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
+  const {handleNotifcation} = useSendNotification()
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     mobileNum: "",
@@ -114,19 +116,17 @@ const UpdateProfile = () => {
     };
     try {
       await updateCurrentUser(updatedData);
-      const notificationRef = ref(
-        database,
-        `users/${auth.currentUser.uid}/notifications`
-      );
-      await push(notificationRef, {
+      const notifData = {
         title: "Profile Updated!",
         message: "Your profile was updated successfully.",
         isSeen: false,
+        date: new Date().toISOString(),
         timestamp: serverTimestamp(),
         icon: "account-check",
-      });
-      Alert.alert("Success", "Profile updated successfully!");
-      navigation.goBack();
+      }
+      await handleNotifcation("users", currentUser.id, notifData);
+      Alert.alert("Success", "Profile update successfully");
+      navigation.goBack()
     } catch (error) {
       Alert.alert("Error", "Failed to update profile.");
     } finally {
