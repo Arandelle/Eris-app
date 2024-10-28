@@ -18,9 +18,7 @@ import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "../hooks/useSendNotification";
 
 const Request = () => {
-  const [emergencyExpired, setEmergencyExpired] = useState(false);
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
-  const [emergencyDone, setEmergencyDone] = useState(false);
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
   const { sendNotification } = useSendNotification(emergencyType, description);
@@ -29,69 +27,14 @@ const Request = () => {
 
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
-  const { data: emergencyRecords } = useFetchData("emergencyRequest");
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
 
   useEffect(() => {
-    const checkAndHandleRequestStatus = async () => {
-      if (currentUser && currentUser.activeRequest) {
-        const { activeRequest } = currentUser;
-        const requestId = activeRequest?.requestId;
-        const emergencyData = emergencyRecords.find(
-          (emergency) => emergency.id === requestId
-        );
-
-        // Set active request status
-        setHasActiveRequest(true);
-
-        // Check if the request has expired
-        const now = new Date().getTime();
-        const expiresAt = new Date(emergencyData?.expiresAt).getTime();
-
-        if (now > expiresAt) {
-          // Update request status to "expired" in Firebase
-          const requestRef = ref(database, `emergencyRequest/${requestId}`);
-          const historyRef = ref(
-            database,
-            `users/${currentUser.id}/emergencyHistory/${requestId}`
-          );
-          const userRef = ref(
-            database,
-            `users/${currentUser?.id}/activeRequest`
-          );
-
-          try {
-            await update(requestRef, { status: "expired" });
-            await update(historyRef, { status: "expired" });
-
-            // Remove activeRequest from the user
-            await remove(userRef);
-
-            // Update local state
-            setHasActiveRequest(false);
-            setEmergencyExpired(true);
-            setEmergencyDone(false);
-          } catch (error) {
-            console.error("Error updating Firebase:", error);
-          }
-        } else if (activeRequest.status === "resolved") {
-          setHasActiveRequest(false);
-          setEmergencyExpired(false);
-          setEmergencyDone(true);
-        } else {
-          setEmergencyExpired(false);
-          setEmergencyDone(false);
-        }
-      } else {
-        // No active request found
-        setHasActiveRequest(false);
-        setEmergencyExpired(false);
-        setEmergencyDone(false);
-      }
-    };
-
-    checkAndHandleRequestStatus();
+    if (currentUser?.activeRequest) {
+      setHasActiveRequest(true);
+    }
+    setHasActiveRequest(false);
   }, [currentUser]);
 
   const handleRefresh = () => {
@@ -100,9 +43,7 @@ const Request = () => {
   };
 
   const handleSubmit = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
+    if (!currentUser) {
       Alert.alert("Error", "No user is signed in.");
       return;
     }
@@ -122,7 +63,7 @@ const Request = () => {
       const emergencyID = await generateUniqueBarangayID("emergency");
 
       const newRequest = {
-        userId: user.uid,
+        userId: currentUser.id,
         timestamp: serverTimestamp(),
         type: emergencyType,
         description,
@@ -148,7 +89,7 @@ const Request = () => {
         ...newRequest,
         id: newRequestKey,
       };
-      updates[`users/${user.uid}/emergencyHistory/${newRequestKey}`] =
+      updates[`users/${currentUser.id}/emergencyHistory/${newRequestKey}`] =
         newRequest;
 
       // Update Firebase
@@ -156,7 +97,7 @@ const Request = () => {
       setNewRequestKey(newRequestKey);
 
       // Update user's active request
-      await update(ref(database, `users/${user.uid}`), {
+      await update(ref(database, `users/${currentUser.id}`), {
         activeRequest: {
           requestId: newRequestKey,
           latitude,
@@ -182,8 +123,6 @@ const Request = () => {
       setEmergencyType("");
       setDescription("");
       setHasActiveRequest(true);
-      setEmergencyExpired(false);
-      setEmergencyDone(false);
     } catch (error) {
       console.error("Error submitting emergency request", error);
       Alert.alert(
@@ -204,23 +143,11 @@ const Request = () => {
         Emergency Form
       </Text>
 
-      {hasActiveRequest ? (
+      {hasActiveRequest && (
         <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
           You have an active emergency report. Please wait for it to be
           resolved.
         </Text>
-      ) : emergencyExpired ? (
-        <Text className="text-lg text-center text-red-600 italic mb-5">
-          Your last emergency report expired. You can submit a new one if
-          needed.
-        </Text>
-      ) : (
-        emergencyDone && (
-          <Text className="text-lg text-center text-blue-500 italic mb-5">
-            Your last emergency report was resolved. You can submit a new one if
-            needed.
-          </Text>
-        )
       )}
 
       <View className="space-y-5">

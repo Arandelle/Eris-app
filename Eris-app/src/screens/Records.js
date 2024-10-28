@@ -30,9 +30,9 @@ const Records = ({ status }) => {
 
 const RecordItem = ({ emergency }) => {
   const { data: responderData } = useFetchData("responders");
-  const responderID = "LmDRYHsGOHWi8Lk6K1YbvrJ5Vq02"; // Example responder ID
+
   const responder = responderData.find(
-    (responder) => responder.id === responderID
+    (responder) => responder.id === emergency.responderId
   );
 
   const emergencyStatus = {
