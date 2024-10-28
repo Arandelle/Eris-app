@@ -35,8 +35,6 @@ export const useNotificationData = () => {
           }
         }
 
-        // Sort notifications by date
-        notificationList.sort((a, b) => new Date(b.date) - new Date(a.date));
         setNotifications(notificationList);
         setNotificationsCount(unseenCount);
       });

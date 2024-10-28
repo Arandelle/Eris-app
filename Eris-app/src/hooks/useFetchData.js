@@ -22,7 +22,7 @@ const useFetchData = (dataType) => {
         });
 
         return () => unsubscribe();
-    }, [])
+    }, [dataType])
 
   return {data, loading}
 }

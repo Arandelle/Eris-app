@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,35 +10,90 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, update } from "firebase/database";
+import { ref, serverTimestamp, push, update, remove } from "firebase/database";
 import useLocationTracking from "../hooks/useLocationTracking";
-import useActiveRequest from "../hooks/useActiveRequest";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "../hooks/useSendNotification";
 
 const Request = () => {
-
+  const [emergencyExpired, setEmergencyExpired] = useState(false);
+  const [hasActiveRequest, setHasActiveRequest] = useState(false);
+  const [emergencyDone, setEmergencyDone] = useState(false);
   const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
-  const {sendNotification} = useSendNotification(emergencyType, description);
+  const { sendNotification } = useSendNotification(emergencyType, description);
   const [newRequestKey, setNewRequestKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
-  const {currentUser} = useCurrentUser()
+  const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
-  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } = useLocationTracking(currentUser, setRefreshing);
-  const {
-    checkActiveRequest,
-    emergencyExpired,
-    setEmergencyExpired,
-    emergencyDone,
-    setEmergencyDone,
-    hasActiveRequest,
-    setHasActiveRequest,
-  } = useActiveRequest(currentUser);
-  
+  const { data: emergencyRecords } = useFetchData("emergencyRequest");
+  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
+    useLocationTracking(currentUser, setRefreshing);
+
+  useEffect(() => {
+    const checkAndHandleRequestStatus = async () => {
+      if (currentUser && currentUser.activeRequest) {
+        const { activeRequest } = currentUser;
+        const requestId = activeRequest?.requestId;
+        const emergencyData = emergencyRecords.find(
+          (emergency) => emergency.id === requestId
+        );
+
+        // Set active request status
+        setHasActiveRequest(true);
+
+        // Check if the request has expired
+        const now = new Date().getTime();
+        const expiresAt = new Date(emergencyData?.expiresAt).getTime();
+
+        if (now > expiresAt) {
+          // Update request status to "expired" in Firebase
+          const requestRef = ref(database, `emergencyRequest/${requestId}`);
+          const historyRef = ref(
+            database,
+            `users/${currentUser.id}/emergencyHistory/${requestId}`
+          );
+          const userRef = ref(
+            database,
+            `users/${currentUser?.id}/activeRequest`
+          );
+
+          try {
+            await update(requestRef, { status: "expired" });
+            await update(historyRef, { status: "expired" });
+
+            // Remove activeRequest from the user
+            await remove(userRef);
+
+            // Update local state
+            setHasActiveRequest(false);
+            setEmergencyExpired(true);
+            setEmergencyDone(false);
+          } catch (error) {
+            console.error("Error updating Firebase:", error);
+          }
+        } else if (activeRequest.status === "resolved") {
+          setHasActiveRequest(false);
+          setEmergencyExpired(false);
+          setEmergencyDone(true);
+        } else {
+          setEmergencyExpired(false);
+          setEmergencyDone(false);
+        }
+      } else {
+        // No active request found
+        setHasActiveRequest(false);
+        setEmergencyExpired(false);
+        setEmergencyDone(false);
+      }
+    };
+
+    checkAndHandleRequestStatus();
+  }, [currentUser]);
+
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true
     trackUserLocation();
@@ -78,8 +133,8 @@ const Request = () => {
         location: {
           latitude,
           longitude,
-          address: geoCodeLocation
-        }
+          address: geoCodeLocation,
+        },
       };
 
       // Generate a new key for the emergency request
@@ -89,8 +144,12 @@ const Request = () => {
 
       // Prepare updates
       const updates = {};
-      updates[`emergencyRequest/${newRequestKey}`] = { ...newRequest, id: newRequestKey };
-      updates[`users/${user.uid}/emergencyHistory/${newRequestKey}`] = newRequest;
+      updates[`emergencyRequest/${newRequestKey}`] = {
+        ...newRequest,
+        id: newRequestKey,
+      };
+      updates[`users/${user.uid}/emergencyHistory/${newRequestKey}`] =
+        newRequest;
 
       // Update Firebase
       await update(ref(database), updates);
@@ -107,10 +166,10 @@ const Request = () => {
 
       // Notify admins
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      await sendNotification("admins",adminId,"adminReport");
+      await sendNotification("admins", adminId, "adminReport");
 
       // Notify user
-      await sendNotification("users", currentUser.id, "userReport")
+      await sendNotification("users", currentUser.id, "userReport");
 
       // Notify responders
       responderData.forEach(async (responder) => {
@@ -125,37 +184,41 @@ const Request = () => {
       setHasActiveRequest(true);
       setEmergencyExpired(false);
       setEmergencyDone(false);
-
     } catch (error) {
       console.error("Error submitting emergency request", error);
-      Alert.alert("Error", "Could not submit emergency report, please try again");
+      Alert.alert(
+        "Error",
+        "Could not submit emergency report, please try again"
+      );
     }
   };
 
   return (
-    <ScrollView className="flex-1 p-5 bg-gray-100"
-    refreshControl={
-      <RefreshControl 
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-      />
-    }>
+    <ScrollView
+      className="flex-1 p-5 bg-gray-100"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
         Emergency Form
       </Text>
 
       {hasActiveRequest ? (
         <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
-          You have an active emergency report. Please wait for it to be resolved.
+          You have an active emergency report. Please wait for it to be
+          resolved.
         </Text>
       ) : emergencyExpired ? (
         <Text className="text-lg text-center text-red-600 italic mb-5">
-          Your last emergency report expired. You can submit a new one if needed.
+          Your last emergency report expired. You can submit a new one if
+          needed.
         </Text>
       ) : (
         emergencyDone && (
           <Text className="text-lg text-center text-blue-500 italic mb-5">
-            Your last emergency report was resolved. You can submit a new one if needed.
+            Your last emergency report was resolved. You can submit a new one if
+            needed.
           </Text>
         )
       )}
