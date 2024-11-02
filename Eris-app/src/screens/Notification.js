@@ -33,8 +33,8 @@ const Notification = () => {
       <ScrollView className="bg-white">
         <View className="h-full w-full">
           {displayedNotifications.length > 0 ? (
-            displayedNotifications.map((notification) => (
-              <NotificationItem notification={notification} />
+            displayedNotifications.map((notification, key) => (
+              <NotificationItem key={key} notification={notification} />
             ))
           ) : (
             <View className="flex items-center justify-center mt-60">

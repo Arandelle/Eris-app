@@ -24,6 +24,7 @@ const useLocationTracking = (userData, setRefreshing) => {
       console.error("Failed to update location in Firebase: ", error);
     }
   };
+  
   const trackUserLocation = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();

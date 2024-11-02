@@ -8,6 +8,8 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
+  Pressable,
+  Linking,
 } from "react-native";
 import ProfileReminderModal from "../component/ProfileReminderModal";
 import { ref, onValue } from "firebase/database";
@@ -15,6 +17,7 @@ import { database } from "../services/firebaseConfig";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import ImageViewer from "react-native-image-zoom-viewer";
+import { hotlineNumbers } from "../data/hotlines";
 
 const Home = ({ setShowTabBar }) => {
   const [announcement, setAnnouncement] = useState([]);
@@ -66,6 +69,14 @@ const Home = ({ setShowTabBar }) => {
     setIsImageModalVisible(true); // Show the image modal
   };
 
+  const openDialerOrEmail = (value, type) => {
+    if (type === "phone") {
+      Linking.openURL(`tel:${value}`);
+    } else if (type === "email") {
+      Linking.openURL(`mailto:${value}`);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -95,7 +106,42 @@ const Home = ({ setShowTabBar }) => {
       >
         <View className="flex-1 px-3 pb-3 bg-white space-y-3">
           <ProfileReminderModal />
-
+          <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
+            Barangay Bagtas Hotline Numbers
+          </Text>
+          <View className="flex flex-row flex-wrap">
+            {hotlineNumbers?.map((item, key) => (
+              <View
+                key={key}
+                className="w-1/2 p-1" // 1/3 width to fit three items per row
+              >
+                <View className="border-2 border-blue-900">
+                  <Text className="text-white text-center bg-blue-900 p-1 font-bold">
+                    {item.title.toUpperCase()}
+                  </Text>
+                  <Pressable
+                    onPress={() =>
+                      openDialerOrEmail(
+                        item.number || item.email,
+                        item.number ? "phone" : "email"
+                      )
+                    }
+                  >
+                    <Text
+                      className={`text-red-500 font-extrabold text-center underline ${
+                        item.email ? "p-1" : "text-xl"
+                      }`}
+                    >
+                      {item.number || item.email}
+                    </Text>
+                  </Pressable>
+                  <Text className="text-center font-bold text-blue-900">
+                    {item.name}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
           {announcement.length > 0 &&
             announcement.map((item, key) => (
               <View

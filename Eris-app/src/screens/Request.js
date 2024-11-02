@@ -8,9 +8,8 @@ import {
   Alert,
   RefreshControl,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { auth, database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, update, remove } from "firebase/database";
+import { database } from "../services/firebaseConfig";
+import { ref, serverTimestamp, push, update } from "firebase/database";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
@@ -19,9 +18,8 @@ import useSendNotification from "../hooks/useSendNotification";
 
 const Request = () => {
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
-  const [emergencyType, setEmergencyType] = useState("");
   const [description, setDescription] = useState("");
-  const { sendNotification } = useSendNotification(emergencyType, description);
+  const { sendNotification } = useSendNotification(description);
   const [newRequestKey, setNewRequestKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
@@ -47,7 +45,7 @@ const Request = () => {
       Alert.alert("Error", "No user is signed in.");
       return;
     }
-    if (!emergencyType || !description || !location) {
+    if (!location) {
       Alert.alert("Error", "Please fill in all the fields");
       return;
     }
@@ -65,7 +63,6 @@ const Request = () => {
       const newRequest = {
         userId: currentUser.id,
         timestamp: serverTimestamp(),
-        type: emergencyType,
         description,
         status: "awaiting response",
         expiresAt: new Date(Date.now() + 30000).toISOString(),
@@ -152,24 +149,7 @@ const Request = () => {
 
       <View className="space-y-5">
         <View>
-          <Text className="text-lg mb-1 text-gray-600">Emergency Type:</Text>
-          <View className="border border-gray-300 rounded-md bg-white">
-            <Picker
-              selectedValue={emergencyType}
-              onValueChange={(itemValue) => setEmergencyType(itemValue)}
-              className="h-22"
-            >
-              <Picker.Item label="Select type" value="" />
-              <Picker.Item label="Medical Emergency" value="medical" />
-              <Picker.Item label="Crime" value="crime" />
-              <Picker.Item label="Noise Complaint" value="noise" />
-              <Picker.Item label="Public Safety Issue" value="disaster" />
-            </Picker>
-          </View>
-        </View>
-
-        <View>
-          <Text className="text-lg mb-1 text-gray-600">Description:</Text>
+          <Text className="text-lg mb-1 text-gray-500">Description (Optional)</Text>
           <TextInput
             className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
             multiline

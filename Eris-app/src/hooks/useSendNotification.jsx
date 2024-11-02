@@ -3,7 +3,7 @@ import { database } from "../services/firebaseConfig";
 import { Alert } from "react-native";
 import useCurrentUser from "./useCurrentUser";
 
-const useSendNotification = (emergencyType, description) => {
+const useSendNotification = (description) => {
   const { currentUser } = useCurrentUser();
 
   const sendNotification = async (dataType, userId, messageType) => {
@@ -31,14 +31,14 @@ const useSendNotification = (emergencyType, description) => {
       adminReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `User ${currentUser?.email} submitted an emergency: ${emergencyType}`,
+        message: `User ${currentUser?.email} submitted an emergency`,
         description,
         icon: "hospital-box",
       },
       responderReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `New emergency reported from ${currentUser?.email}: ${emergencyType}`,
+        message: `New emergency reported from ${currentUser?.email}`,
         description,
         icon: "hospital-box",
       },
