@@ -90,6 +90,7 @@ const SignupForm = () => {
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       const notificationRef = ref(database, `admins/${adminId}/notifications`);
       const newNotification = {
+        userId: user.uid,
         message: `A new user has registered with the email `,
         email: `${user.email}`,
         isSeen: false,

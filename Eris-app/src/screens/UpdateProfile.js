@@ -26,16 +26,15 @@ const UpdateProfile = () => {
     mobileNum: "",
     firstname: "",
     lastname: "",
-    age: "",
-    address: "",
-    gender: "Male",
+    gender: "Prefer not to say",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
   });
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({ mobileNum: "", age: ""});
   const [valid, setValid] = useState(true)
 
-  const genders = ["Male", "Female"];
+  const genders = ["Male", "Female", "Prefer not to say"];
+  
   const imageUrls = [
     ...Array.from(
       { length: 5 },
@@ -78,16 +77,6 @@ const UpdateProfile = () => {
             setValid(true)
           }
           break;
-        
-        case "age" :
-          if (value < 18 || isNaN(value)) {
-            errorsCopy.age = "User must be 18 years old or above";
-            setValid(false)
-          } else {
-            delete errorsCopy.age; // Clear error if valid
-            setValid(true)
-          }
-          break;
       }
     }
 
@@ -107,8 +96,6 @@ const UpdateProfile = () => {
       profileComplete: Boolean(
         userData.firstname &&
           userData.lastname &&
-          userData.age &&
-          userData.address &&
           userData.mobileNum &&
           userData.gender &&
           userData.img
@@ -188,18 +175,11 @@ const UpdateProfile = () => {
             placeholder="Enter your mobile number"
             errorMessage={errors.mobileNum}
           />
-          <CustomInput
-            label="Age"
-            value={userData.age}
-            onChangeText={(value) => handleFieldChange("age", value)}
-            placeholder="Enter your age"
-            errorMessage={errors.age}
-          />
 
           <Text className="text-lg mb-1 text-sky-600 font-bold">
             Select Gender:
           </Text>
-          <View className="flex-row justify-around p-2">
+          <View className="flex-row justify-around p-2 mb-2">
             {genders.map((gender) => (
               <TouchableOpacity
                 key={gender}
@@ -215,12 +195,6 @@ const UpdateProfile = () => {
               </TouchableOpacity>
             ))}
           </View>
-          <CustomInput
-            label="Complete Address"
-            value={userData.address}
-            onChangeText={(value) => handleFieldChange("address", value)}
-            placeholder="Enter your current address"
-          />
            <TouchableOpacity
             className={`p-3 w-full rounded-2xl ${
               !valid ? "bg-gray-400" : "bg-green-500"

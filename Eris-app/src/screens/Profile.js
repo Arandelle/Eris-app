@@ -1,89 +1,28 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
-  ActivityIndicator,
   ScrollView,
   SafeAreaView,
-  Alert,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { ref, onValue } from "firebase/database";
-import { auth, database } from "../services/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import { auth } from "../services/firebaseConfig";
+import { signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import useCurrentUser from "../hooks/useCurrentUser";
+import colors from "../constant/colors";
 
 const Profile = () => {
+  const { currentUser } = useCurrentUser();
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [logout, setLogout] = useState(false);
-
-  const fetchUserData = async (uid) => {
-    setLoading(true);
-    const userRef = ref(database, `users/${uid}`);
-    try {
-      const snapshot = await new Promise((resolve, reject) => {
-        onValue(userRef, resolve, reject, { onlyOnce: true });
-      });
-      const data = snapshot.val();
-      setUserData(data);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert("Error", "Failed to fetch user data. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          fetchUserData(user.uid);
-        } else {
-          navigation.navigate("Login");
-        }
-      });
-
-      return () => unsubscribeAuth();
-    }, [navigation])
-  );
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        fetchUserData(user.uid);
-      } else {
-        navigation.navigate("Login");
-      }
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
 
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile");
-  };
-
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1">
-        <ActivityIndicator size="large" color="#007bff" />
-      </SafeAreaView>
-    );
-  }
-
-  const renderPlaceholder = (value, placeholder) => {
-    return value ? (
-      <Text className="text-xl text-gray-500">{value}</Text>
-    ) : (
-      <Text className="italic text-xl text-gray-900">{placeholder}</Text>
-    );
   };
 
   const handleLogoutModal = () => {
@@ -102,13 +41,13 @@ const Profile = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
       <ScrollView>
-        <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md">
+        <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 space-y-2 shadow-md">
           <View className="items-center border-b-2 border-b-gray-300">
             <View className="relative">
-              {userData?.img ? (
+              {currentUser?.img ? (
                 <Image
-                  source={{ uri: userData.img }}
-                  className="h-[100px] w-[100px] rounded-full"
+                  source={{ uri: currentUser.img }}
+                  className="h-[80px] w-[80px] rounded-full"
                 />
               ) : (
                 <Text className="text-gray-900 text-lg">
@@ -119,67 +58,63 @@ const Profile = () => {
                 className="absolute bottom-0 right-0 rounded-full p-2 bg-white"
                 onPress={handleShowUpdateForm}
               >
-                <Icon name="pencil" size={20} color={"blue"} />
+                <Icon name="pencil" size={18} color={colors.blue[500]} />
               </TouchableOpacity>
             </View>
-            <Text className="text-2xl font-bold p-2">
-              {userData?.firstname && userData?.lastname
-                ? `${userData.firstname} ${userData.lastname}`
-                : renderPlaceholder(null, "Your Name")}
-            </Text>
+            <View className="text-2xl font-bold p-2">
+              {currentUser?.firstname || currentUser?.lastname ? (
+                <Text className="text-xl text-gray-600 font-bold">
+                  {[currentUser?.firstname, currentUser?.lastname]
+                    .filter(Boolean)
+                    .join(" ")}
+                </Text>
+              ) : (
+                <Text className="italic text-xl text-gray-900">
+                  Your fulname
+                </Text>
+              )}
+            </View>
           </View>
           <View className="mb-5 space-y-8 py-2">
             <Text className="italic font-bold bg-blue-100 text-blue-600 p-2 text-lg rounded-md">
-              {userData.customId}
+              {currentUser?.customId}
             </Text>
             <View>
               <Text className="text-xl font-bold mb-2 ">Contact:</Text>
               <View className="flex flex-col justify-between space-y-1">
                 <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.email}
+                  {currentUser?.email}
                 </Text>
                 <Text className="text-lg text-gray-500 font-bold">
-                  {userData.mobileNum ? userData.mobileNum : "not yet set"}
+                  {currentUser?.mobileNum || "not yet set"}
                 </Text>
               </View>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2">
-                Age:{" "}
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.age
-                    ? userData.age
-                    : renderPlaceholder(null, "Age")}
-                </Text>
-              </Text>
             </View>
             <View>
               <Text className="text-xl font-bold mb-2 ">
                 Gender:{" "}
                 <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.gender
-                    ? userData?.gender
-                    : renderPlaceholder(null, "Your gender")}
+                  {currentUser?.gender ? currentUser?.gender : "Your gender"}
                 </Text>
               </Text>
             </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.address
-                  ? userData.address
-                  : renderPlaceholder(null, "House No. Street Barangay")}
-              </Text>
-            </View>
-                        
-          {!userData.profileComplete && (
-            <View className="p-4 bg-red-100 rounded-md">
-            <Text className="text-gray-900">Please update your profile for security purposes</Text>
-            </View>
-          )}
 
+            {!currentUser?.profileComplete && (
+              <View className="p-4 bg-indigo-50 border-l-4 border-indigo-400 rounded-md">
+                <View className="flex flex-row items-center gap-2">
+                  <Icon name={"shield"} color={colors.blue[500]} size={20} />
+                  <Text className="text-gray-800 text-lg font-medium">
+                    Finish Setting Up Your Profile
+                  </Text>
+                </View>
+                <Text className="text-gray-600 mt-1">
+                  Complete your profile to ensure faster assistance during
+                  emergencies
+                </Text>
+              </View>
+            )}
           </View>
-          <View className="mb-2 space-y-2.5">
+          <View className="">
             <TouchableOpacity
               className="p-3 bg-blue-500 rounded-full"
               onPress={handleLogoutModal}
@@ -191,6 +126,7 @@ const Profile = () => {
           </View>
         </View>
       </ScrollView>
+
       <Modal
         animationType="slide"
         transparent={true}

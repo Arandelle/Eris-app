@@ -13,9 +13,10 @@ const Notification = () => {
     useNotificationData();
   const [viewAll, setViewAll] = useState(false);
 
+  const sortedNotification = notifications.sort((a,b) => new Date(b.date) - new Date(a.date));
   const displayedNotifications = viewAll
-    ? notifications.sort((a,b) => new Date(b.date) - new Date(a.date))
-    : notifications.slice(0, 6); // it's like telling viewAll is true? then show all notifications else slice it to 7
+    ? sortedNotification
+    : sortedNotification.slice(0, 6); // it's like telling viewAll is true? then show all notifications else slice it to 7
 
   return (
     <>

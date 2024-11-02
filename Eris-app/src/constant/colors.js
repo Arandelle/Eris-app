@@ -1,6 +1,18 @@
 // src/constants/colors.js
+export const PROFILE_ICONS = {
+    security: "shield",
+    identity: "user",
+    contact: "phone",
+    emergency: "alert-triangle",
+    location: "map-pin",
+    medical: "heart",
+    documents: "file-text",
+    verification: "check-circle",
+    incomplete: "alert-circle",
+    update: "refresh-ccw"
+  };
 
-const colors = {
+export const colors = {
     blue: {
         50: '#eff6ff',   // light blue
         100: '#dbeafe',
