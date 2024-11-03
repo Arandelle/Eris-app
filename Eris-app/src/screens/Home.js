@@ -159,7 +159,7 @@ const Home = ({ setShowTabBar }) => {
                 </TouchableOpacity>
                 <View className="p-4 space-y-2">
                   <Text className="font-bold text-blue-500">
-                    {formatDate(item.startDate)}
+                    {formatDate(item.date)}
                   </Text>
                   <Text className="font-bold text-lg">{item.title}</Text>
                   <Text className="text-gray-600 text-lg">

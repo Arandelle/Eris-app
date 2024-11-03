@@ -17,14 +17,15 @@ import {
   getDatabase,
   ref,
   set,
-  push,
   serverTimestamp,
 } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import { generateUniqueBarangayID } from "../helper/generateID";
+import useSendNotification from "../hooks/useSendNotification";
 
 const SignupForm = () => {
   const navigation = useNavigation();
+  const {sendNotification} = useSendNotification();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -46,11 +47,11 @@ const SignupForm = () => {
 
 
   const handleSignup = async () => {
-    if (!validateEmail(email)) {
-      setError("Please use a valid gmail.com email address.");
-      Alert.alert("Error signing up", error);
-      return;
-    }
+    // if (!validateEmail(email)) {
+    //   setError("Please use a valid gmail.com email address.");
+    //   Alert.alert("Error signing up", error);
+    //   return;
+    // }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -88,35 +89,9 @@ const SignupForm = () => {
       ]);
 
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      const notificationRef = ref(database, `admins/${adminId}/notifications`);
-      const newNotification = {
-        userId: user.uid,
-        message: `A new user has registered with the email `,
-        email: `${user.email}`,
-        isSeen: false,
-        date: new Date().toISOString(),
-        timestamp: serverTimestamp(), // Add this line
-        img: imageUrl,
-      };
+      await sendNotification("admins", adminId, "userCreatedAccount", user.uid);
 
-      await push(notificationRef, newNotification);
-
-      const notificationUserRef = ref(
-        database,
-        `users/${user.uid}/notifications`
-      );
-      const newUserNotification = {
-        title: "Welcome!",
-        message: `You have successfully created your account`,
-        email: `${user.email}`,
-        isSeen: false,
-        date: new Date().toISOString(),
-        timestamp: serverTimestamp(), // Add this line
-        img: imageUrl,
-        icon: "account-alert",
-      };
-
-      await push(notificationUserRef, newUserNotification);
+      await sendNotification("users", user.uid, "welcomeUser");
 
       setEmail("");
       setPassword("");

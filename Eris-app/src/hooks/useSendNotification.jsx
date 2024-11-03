@@ -5,8 +5,9 @@ import useCurrentUser from "./useCurrentUser";
 
 const useSendNotification = (description) => {
   const { currentUser } = useCurrentUser();
+  const fullName = [currentUser?.firstname,currentUser?.lastname].filter(Boolean).join(' ') || "Anonymous";
 
-  const sendNotification = async (dataType, userId, messageType) => {
+  const sendNotification = async (dataType, userId, messageType, additionalId) => {
 
     const mainNotificationData = {
         isSeen: false,
@@ -21,6 +22,19 @@ const useSendNotification = (description) => {
         message: "Your profile was updated successfully.",
         icon: "account-check",
       },
+      welcomeUser : {
+        ...mainNotificationData,
+        title: "Welcome!",
+        message: "You have successfully created your account",
+        icon: "account-alert"
+      },
+      userCreatedAccount : {
+        ...mainNotificationData,
+        userId: additionalId,
+        title: "New user",
+        message: "A new user has registered with the system",
+        icon: "account-check"
+      },
       userReport: {
         ...mainNotificationData,
         title: "Emergency Reported!",
@@ -31,14 +45,14 @@ const useSendNotification = (description) => {
       adminReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `User ${currentUser?.email} submitted an emergency`,
+        message: `${fullName} has new emergency report`,
         description,
         icon: "hospital-box",
       },
       responderReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `New emergency reported from ${currentUser?.email}`,
+        message: `${fullName} has new emergency report`,
         description,
         icon: "hospital-box",
       },
