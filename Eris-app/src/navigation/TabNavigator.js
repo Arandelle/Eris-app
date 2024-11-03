@@ -11,6 +11,7 @@ import { useNotificationData } from "../hooks/useNotificationData";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../constant/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
+import ScrollViewScreen from "../screens/ScrollViewScreen";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -91,9 +92,10 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Home"
         options={{
+          headerShown: false,
           title: `${dayTime} ${currentUser?.firstname || ""} ${
             currentUser?.lastname || ""
           }!`,
@@ -101,8 +103,17 @@ const TabNavigator = () => {
         }}
       >
         {(props) => <Home {...props} setShowTabBar={setShowTabBar} />}
-      </Tab.Screen>
+      </Tab.Screen> */}
+      <Tab.Screen
+        name="Home"
+        options={{
+          headerShown: false,
+          tabBarLabel: "Home"
 
+        }}
+      >
+        {(props) => <ScrollViewScreen {...props} dayTime={dayTime} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Map"
         component={Map}

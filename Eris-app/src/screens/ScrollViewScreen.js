@@ -1,38 +1,59 @@
-import React, { useRef } from 'react';
-import { Alert, Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View, StatusBar } from 'react-native';
+import React, { useRef, useState } from "react";
+import {
+  Alert,
+  Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  StatusBar,
+  Pressable,
+  Image,
+  Linking,
+  Modal
+} from "react-native";
+import ImageViewer from "react-native-image-zoom-viewer";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import colors from '../constant/colors';
-import { useNavigation } from '@react-navigation/native';
-
-const DATA = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }));
+import colors from "../constant/colors";
+import useFetchData from "../hooks/useFetchData";
+import ProfileReminderModal from "../component/ProfileReminderModal";
+import { hotlineNumbers } from "../data/hotlines";
+import { formatDate } from "../helper/FormatDate";
+import { getTimeDifference } from "../helper/getTimeDifference";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const ScrollViewScreen = () => {
-  const navigation = useNavigation();
+const ScrollViewScreen = ({dayTime}) => {
+  const { data: announcement } = useFetchData("announcement");
+  const {currentUser} = useCurrentUser();
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
+  const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
+  const fullname = [currentUser?.firstname, currentUser?.lastname].filter(Boolean).join(' ');
 
   // Animate the main header
   const headerHeight = scrollOffsetY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE],
     outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   // Animate the header content opacity
   const headerContentOpacity = scrollOffsetY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
     outputRange: [1, 0],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   // Animate the sticky header opacity
   const stickyHeaderOpacity = scrollOffsetY.interpolate({
     inputRange: [HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
     outputRange: [0, 1],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   const handleScroll = Animated.event(
@@ -40,152 +61,169 @@ const ScrollViewScreen = () => {
     { useNativeDriver: false }
   );
 
+  
+const handleImageClick = (imageUri) => {
+  setSelectedImageUri(imageUri);
+  setIsImageModalVisible(true); // Show the image modal
+};
+
+  const openDialerOrEmail = (value, type) => {
+    if (type === "phone") {
+      Linking.openURL(`tel:${value}`);
+    } else if (type === "email") {
+      Linking.openURL(`mailto:${value}`);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#181D31" />
-      
-      {/* Main Animated Header */}
-      <Animated.View 
-        style={[
-          styles.header,
-          {
-            height: headerHeight,
-          }
-        ]}
+  <>
+       <Modal
+        visible={isImageModalVisible}
+        transparent={true}
+        onRequestClose={() => setIsImageModalVisible(false)} // Close modal when back button is pressed
       >
-        {/* Collapsible Content */}
-        <Animated.View 
+        <ImageViewer
+          imageUrls={[{ url: selectedImageUri }]} // Use selected image URL for viewing
+          onSwipeDown={() => setIsImageModalVisible(false)} // Close modal on swipe down
+          enableSwipeDown={true}
+          renderIndicator={() => null} // Hide the pagination
+          backgroundColor="rgba(0,0,0,0.8)"
+        />
+      </Modal>
+      <View className="flex-1 bg-gray-200">
+        <StatusBar barStyle="light-content" backgroundColor={colors.blue[500]} />
+  
+        {/* Main Animated Header */}
+        <Animated.View
+          className="absolute top-0 right-0 left-0 bg-blue-500 z-50"
           style={[
-            styles.headerContent,
-            { opacity: headerContentOpacity }
+            {
+              height: headerHeight,
+            },
           ]}
         >
-          <TouchableOpacity 
-            onPress={() => Alert.alert("Notification")}
-            style={styles.headerButton}
+          {/* Collapsible Content */}
+          <Animated.View
+            className="flex-1 items-center justify-center p-5"
+            style={[{ opacity: headerContentOpacity }]}
           >
-            <Icon name="bell" size={60} color={colors.blue[900]} />
-            <Text style={styles.headerButtonText}>Click Me</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={()=> navigation.navigate("ERIS")}>
-            <Text className="text-white text-lg">Back na</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="items-center"
+              onPress={() => Alert.alert("Notification")}
+            >
+              <Icon name="bell" size={100} color={colors.yellow[400]} />
+              <Text className="text-3xl text-center text-white font-bold">
+                Report Now!
+              </Text>
+            </TouchableOpacity>
+              <Text className="text-gray-50 font-thin text-2xl">
+                tap the bell for immediate emergency
+              </Text>
+          </Animated.View>
+  
+          {/* Sticky Header Content */}
+          <Animated.View
+            className={`absolute left-0 right-0 bottom-0`}
+            style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
+          >
+            <View className="flex flex-row p-2 items-center h-full bg-blue-500">
+              <Text className="text-lg text-white font-bold">{`${dayTime} ${fullname}`}</Text>
+            </View>
+          </Animated.View>
         </Animated.View>
-
-        {/* Sticky Header Content */}
-        <Animated.View 
-          style={[
-            styles.stickyHeader,
-            { opacity: stickyHeaderOpacity }
-          ]}
+  
+        {/* Main ScrollView Content */}
+        <ScrollView
+          scrollEventThrottle={16}
+          onScroll={handleScroll}
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.stickyHeaderContent}>
-            <TouchableOpacity onPress={() => navigation.navigate("ERIS")}>
-              <Icon name="menu" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.stickyHeaderTitle}>Your App Title</Text>
-            <TouchableOpacity onPress={() => Alert.alert("Settings")}>
-              <Icon name="cog" size={24} color="#fff" />
-            </TouchableOpacity>
+          <View className="flex-1 px-3 pb-3 bg-white space-y-3">
+            <ProfileReminderModal />
+            <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
+              Barangay Bagtas Hotline Numbers
+            </Text>
+            <View className="flex flex-row flex-wrap">
+              {hotlineNumbers?.map((item, key) => (
+                <View
+                  key={key}
+                  className="w-1/2 p-1" // 1/3 width to fit three items per row
+                >
+                  <View className="border-2 border-blue-900">
+                    <Text className="text-white text-center bg-blue-900 p-1 font-bold">
+                      {item.title.toUpperCase()}
+                    </Text>
+                    <Pressable
+                      onPress={() =>
+                        openDialerOrEmail(
+                          item.number || item.email,
+                          item.number ? "phone" : "email"
+                        )
+                      }
+                    >
+                      <Text
+                        className={`text-red-500 font-extrabold text-center underline ${
+                          item.email ? "p-1" : "text-xl"
+                        }`}
+                      >
+                        {item.number || item.email}
+                      </Text>
+                    </Pressable>
+                    <Text className="text-center font-bold text-blue-900">
+                      {item.name}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+            {announcement.length > 0 &&
+              announcement.map((item, key) => (
+                <View
+                  key={key}
+                  className="rounded-lg bg-white border-0.5 border-gray-800 shadow-2xl"
+                >
+                  <TouchableOpacity
+                    onPress={() => handleImageClick(item.imageUrl)}
+                  >
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      className=" h-52 rounded-t-lg"
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                  <View className="p-4 space-y-2">
+                    <Text className="font-bold text-blue-500">
+                      {formatDate(item.date)}
+                    </Text>
+                    <Text className="font-bold text-lg">{item.title}</Text>
+                    <Text className="text-gray-600 text-lg">
+                      {item.description}
+                    </Text>
+                    <View className="pt-2 flex flex-row items-center space-x-3">
+                      <Image
+                        source={{
+                          uri: "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+                        }}
+                        className="h-10 w-10 rounded-full"
+                      />
+                      <View>
+                        <Text className="font-bold text-blue-500">Admin</Text>
+                        <Text>{getTimeDifference(item.timestamp)}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              ))}
           </View>
-        </Animated.View>
-      </Animated.View>
-
-      {/* Main ScrollView Content */}
-      <ScrollView
-        scrollEventThrottle={16}
-        onScroll={handleScroll}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {DATA.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Text style={styles.cardText}>({item.id})</Text>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+  </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#181D31',
-    zIndex: 1000,
-    elevation: 4,
-  },
-  headerContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 20,
-  },
-  headerButton: {
-    alignItems: 'center',
-  },
-  headerButtonText: {
-    color: '#fff',
-    fontSize: 24,
-    marginTop: 8,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 16,
-  },
-  stickyHeader: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: HEADER_MIN_HEIGHT,
-  },
-  stickyHeaderContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  stickyHeaderTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
   scrollContent: {
-    paddingTop: HEADER_MAX_HEIGHT + 10,
-    paddingBottom: 20,
-  },
-  card: {
-    height: 100,
-    backgroundColor: '#E6DDC4',
-    marginHorizontal: 10,
-    marginBottom: 10,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardText: {
-    color: '#181D31',
-    fontWeight: 'bold',
-    fontSize: 16,
+    paddingTop: HEADER_MAX_HEIGHT,
   },
 });
 

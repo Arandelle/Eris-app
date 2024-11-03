@@ -84,11 +84,6 @@ const App = () => {
       >
         {user ? (
             <>
-            <Stack.Screen
-                name="ScrollHeader"
-                options={{ headerShown: false }}
-                component={ScrollViewScreen}
-              />
               <Stack.Screen
                 name="ERIS"
                 options={{ headerShown: false }}
