@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
+import ScrollViewScreen from "./src/screens/ScrollViewScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -83,6 +84,11 @@ const App = () => {
       >
         {user ? (
             <>
+            <Stack.Screen
+                name="ScrollHeader"
+                options={{ headerShown: false }}
+                component={ScrollViewScreen}
+              />
               <Stack.Screen
                 name="ERIS"
                 options={{ headerShown: false }}

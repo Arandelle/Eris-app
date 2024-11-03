@@ -15,7 +15,7 @@ import { signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
-
+import ScrollViewScreen from "./ScrollViewScreen";
 const Profile = () => {
   const { currentUser } = useCurrentUser();
   const navigation = useNavigation();
@@ -41,6 +41,7 @@ const Profile = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
       <ScrollView>
+    
         <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 space-y-2 shadow-md">
           <View className="items-center border-b-2 border-b-gray-300">
             <View className="relative">
@@ -75,6 +76,9 @@ const Profile = () => {
               )}
             </View>
           </View>
+          <TouchableOpacity onPress={()=> navigation.navigate("ScrollHeader")}>
+            <Text className="rounded-md text-lg text-white text-center font-bold p-1 bg-blue-500">Navigate to ScrollHeader</Text>
+          </TouchableOpacity>
           <View className="mb-5 space-y-8 py-2">
             <Text className="italic font-bold bg-blue-100 text-blue-600 p-2 text-lg rounded-md">
               {currentUser?.customId}

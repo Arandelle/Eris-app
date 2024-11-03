@@ -117,7 +117,6 @@ const Request = () => {
       });
 
       Alert.alert("Emergency reported", "Help is on the way!");
-      setEmergencyType("");
       setDescription("");
       setHasActiveRequest(true);
     } catch (error) {
