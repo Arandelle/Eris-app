@@ -3,7 +3,7 @@ import { database } from "../services/firebaseConfig";
 import { Alert } from "react-native";
 import useCurrentUser from "./useCurrentUser";
 
-const useSendNotification = (description) => {
+const useSendNotification = (description = "N/A") => {
   const { currentUser } = useCurrentUser();
   const fullName = [currentUser?.firstname,currentUser?.lastname].filter(Boolean).join(' ') || "Anonymous";
 
@@ -66,7 +66,7 @@ const useSendNotification = (description) => {
 
       await push(notificationRef, notificationMessage[messageType]);
     } catch (error) {
-      Alert.alert("Error", "Failed to update profile.");
+      Alert.alert("Error", "Error submitting notification");
     }
   };
 

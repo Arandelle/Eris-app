@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -21,6 +21,9 @@ import { hotlineNumbers } from "../data/hotlines";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import useCurrentUser from "../hooks/useCurrentUser";
+import useLocationTracking from "../hooks/useLocationTracking";
+import { submitEmergencyReport } from "../hooks/useSubmitReport";
+import useSendNotification from "../hooks/useSendNotification";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
@@ -28,11 +31,18 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const ScrollViewScreen = ({ dayTime }) => {
   const { data: announcement } = useFetchData("announcement");
+  const {data :responderData} = useFetchData("responders");
   const { currentUser } = useCurrentUser();
+  const {location, latitude, longitude, geoCodeLocation,trackUserLocation} = useLocationTracking(currentUser);
+  const {sendNotification} = useSendNotification();
   const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
   const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
+
+  useEffect(() => {
+    trackUserLocation();
+  }, []);
 
   const fullname = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
@@ -85,6 +95,23 @@ const ScrollViewScreen = ({ dayTime }) => {
     }
   };
 
+  const handleConfirmReport = async () => {
+    try{
+      await submitEmergencyReport({
+        currentUser,
+        location,
+        latitude,
+        longitude,
+        geoCodeLocation,
+        sendNotification,
+        responderData
+      });
+      Alert.alert("Emergency reported", "Help is on the way!");
+    }catch(error){
+      Alert.alert("Error", "Could not submit emergency alert, please try again");
+    }
+  }
+
   return (
     <>
       <Modal
@@ -122,11 +149,18 @@ const ScrollViewScreen = ({ dayTime }) => {
           >
             <TouchableOpacity
               className="items-center space-y-1"
-              onPress={() => Alert.alert("Notification")}
+              onPress={() => (
+                Alert.alert("Send Emergency Alert?","This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location", [{
+                  text: "Cancel",
+                  style: "cancel"
+                }, {
+                  text: "Send Alert",
+                  style: "destructive",
+                  onPress: handleConfirmReport,
+                }])
+              )}
             >
-              <View className="bg-blue-200 shadow-2xl rounded-full p-2">
-                <Icon name="bell" size={40} color={colors.blue[600]} />
-              </View>
+                <Icon name="bell-ring" size={80} color={colors.yellow[400]} />
               <Text className="text-2xl text-center text-white font-bold">
                 Report Now!
               </Text>
@@ -161,14 +195,15 @@ const ScrollViewScreen = ({ dayTime }) => {
             <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
               Barangay Bagtas Hotline Numbers
             </Text>
+
             <View className="flex flex-row flex-wrap">
               {hotlineNumbers?.map((item, key) => (
                 <View
                   key={key}
-                  className="w-1/2 p-1" // 1/3 width to fit three items per row
+                  className="w-1/2 py-2" // 1/3 width to fit three items per row
                 >
-                  <View className="border-2 border-blue-900">
-                    <Text className="text-white text-center bg-blue-900 p-1 font-bold">
+                  <View className="border-2 border-blue-600">
+                    <Text className="text-white text-center bg-blue-600 p-1 font-bold">
                       {item.title.toUpperCase()}
                     </Text>
                     <Pressable

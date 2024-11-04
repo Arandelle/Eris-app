@@ -15,6 +15,7 @@ import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "../hooks/useSendNotification";
+import { submitEmergencyReport } from "../hooks/useSubmitReport";
 
 const Request = () => {
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
@@ -41,93 +42,27 @@ const Request = () => {
   };
 
   const handleSubmit = async () => {
-    if (!currentUser) {
-      Alert.alert("Error", "No user is signed in.");
-      return;
-    }
-    if (!location) {
-      Alert.alert("Error", "Please fill in all the fields");
-      return;
-    }
-    if (hasActiveRequest) {
-      Alert.alert(
-        "Active Request",
-        "You have already submitted an emergency. Please wait until it's resolved."
-      );
-      return;
-    }
-
     try {
-      const emergencyID = await generateUniqueBarangayID("emergency");
-
-      const newRequest = {
-        userId: currentUser.id,
-        timestamp: serverTimestamp(),
+      await submitEmergencyReport({
+        currentUser,
+        location,
+        latitude,
+        longitude,
+        geoCodeLocation,
         description,
-        status: "awaiting response",
-        expiresAt: new Date(Date.now() + 30000).toISOString(),
-        date: new Date().toISOString(),
-        emergencyId: emergencyID,
-        location: {
-          latitude,
-          longitude,
-          address: geoCodeLocation,
-        },
-      };
-
-      // Generate a new key for the emergency request
-      const emergencyRequestRef = ref(database, "emergencyRequest");
-      const newRequestRef = push(emergencyRequestRef);
-      const newRequestKey = newRequestRef.key;
-
-      // Prepare updates
-      const updates = {};
-      updates[`emergencyRequest/${newRequestKey}`] = {
-        ...newRequest,
-        id: newRequestKey,
-      };
-      updates[`users/${currentUser.id}/emergencyHistory/${newRequestKey}`] =
-        newRequest;
-
-      // Update Firebase
-      await update(ref(database), updates);
-      setNewRequestKey(newRequestKey);
-
-      // Update user's active request
-      await update(ref(database, `users/${currentUser.id}`), {
-        activeRequest: {
-          requestId: newRequestKey,
-          latitude,
-          longitude,
-        },
+        sendNotification,
+        hasActiveRequest,
+        responderData
       });
-
-      // Notify admins
-      const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      await sendNotification("admins", adminId, "adminReport");
-
-      // Notify user
-      await sendNotification("users", currentUser.id, "userReport");
-
-      // Notify responders
-      responderData.forEach(async (responder) => {
-        if (responder.profileComplete) {
-          await sendNotification("responders", responder.id, "responderReport");
-        }
-      });
-
+      
       Alert.alert("Emergency reported", "Help is on the way!");
       setDescription("");
       setHasActiveRequest(true);
     } catch (error) {
-      console.error("Error submitting emergency request", error);
-      Alert.alert(
-        "Error",
-        "Could not submit emergency report, please try again"
-      );
+      Alert.alert("Error", "Could not submit emergency report, please try again");
     }
   };
-
+  
   return (
     <ScrollView
       className="flex-1 p-5 bg-gray-100"
@@ -136,7 +71,7 @@ const Request = () => {
       }
     >
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
-        Emergency Form
+     Submit Detailed Report
       </Text>
 
       {hasActiveRequest && (
