@@ -1,17 +1,3 @@
-// src/constants/colors.js
-export const PROFILE_ICONS = {
-    security: "shield",
-    identity: "user",
-    contact: "phone",
-    emergency: "alert-triangle",
-    location: "map-pin",
-    medical: "heart",
-    documents: "file-text",
-    verification: "check-circle",
-    incomplete: "alert-circle",
-    update: "refresh-ccw"
-  };
-
 export const colors = {
     blue: {
         50: '#eff6ff',   // light blue
@@ -84,6 +70,18 @@ export const colors = {
         700: '#374151',
         800: '#1f2937',
         900: '#111827',  // dark gray
+    },
+    indigo: {
+        50: '#eef2ff',   // light indigo
+        100: '#e0e7ff',
+        200: '#c7d2fe',
+        300: '#a5b4fc',
+        400: '#818cf8',
+        500: '#6366f1',  // indigo
+        600: '#4f46e5',
+        700: '#4338ca',
+        800: '#3730a3',
+        900: '#312e81',  // dark indigo
     },
 };
 

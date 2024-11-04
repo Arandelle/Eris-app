@@ -3,7 +3,6 @@ import {
   Alert,
   Animated,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -11,7 +10,7 @@ import {
   Pressable,
   Image,
   Linking,
-  Modal
+  Modal,
 } from "react-native";
 import ImageViewer from "react-native-image-zoom-viewer";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -27,13 +26,15 @@ const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const ScrollViewScreen = ({dayTime}) => {
+const ScrollViewScreen = ({ dayTime }) => {
   const { data: announcement } = useFetchData("announcement");
-  const {currentUser} = useCurrentUser();
+  const { currentUser } = useCurrentUser();
   const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
   const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
-  const fullname = [currentUser?.firstname, currentUser?.lastname].filter(Boolean).join(' ');
+  const fullname = [currentUser?.firstname, currentUser?.lastname]
+    .filter(Boolean)
+    .join(" ");
 
   // Animate the main header
   const headerHeight = scrollOffsetY.interpolate({
@@ -61,23 +62,24 @@ const ScrollViewScreen = ({dayTime}) => {
     { useNativeDriver: false }
   );
 
-  
-const handleImageClick = (imageUri) => {
-  setSelectedImageUri(imageUri);
-  setIsImageModalVisible(true); // Show the image modal
-};
+  const handleImageClick = (imageUri) => {
+    setSelectedImageUri(imageUri);
+    setIsImageModalVisible(true); // Show the image modal
+  };
 
   const openDialerOrEmail = (value, type) => {
     if (type === "phone") {
       Linking.openURL(`tel:${value}`);
     } else if (type === "email") {
       Linking.openURL(`mailto:${value}`);
+    } else if (type === "links") {
+      Linking.openURL(value);
     }
   };
 
   return (
-  <>
-       <Modal
+    <>
+      <Modal
         visible={isImageModalVisible}
         transparent={true}
         onRequestClose={() => setIsImageModalVisible(false)} // Close modal when back button is pressed
@@ -91,11 +93,14 @@ const handleImageClick = (imageUri) => {
         />
       </Modal>
       <View className="flex-1 bg-gray-200">
-        <StatusBar barStyle="light-content" backgroundColor={colors.blue[500]} />
-  
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.blue[600]}
+        />
+
         {/* Main Animated Header */}
         <Animated.View
-          className="absolute top-0 right-0 left-0 bg-blue-500 z-50"
+          className="absolute top-0 right-0 left-0 bg-blue-600 z-50"
           style={[
             {
               height: headerHeight,
@@ -104,39 +109,43 @@ const handleImageClick = (imageUri) => {
         >
           {/* Collapsible Content */}
           <Animated.View
-            className="flex-1 items-center justify-center p-5"
+            className="flex-1 items-center justify-center p-5 space-y-2"
             style={[{ opacity: headerContentOpacity }]}
           >
             <TouchableOpacity
-              className="items-center"
+              className="items-center space-y-1"
               onPress={() => Alert.alert("Notification")}
             >
-              <Icon name="bell" size={100} color={colors.yellow[400]} />
-              <Text className="text-3xl text-center text-white font-bold">
+              <View className="bg-blue-200 shadow-2xl rounded-full p-2">
+                <Icon name="bell" size={40} color={colors.blue[600]} />
+              </View>
+              <Text className="text-2xl text-center text-white font-bold">
                 Report Now!
               </Text>
             </TouchableOpacity>
-              <Text className="text-gray-50 font-thin text-2xl">
-                tap the bell for immediate emergency
-              </Text>
+            <Text className="text-gray-50 font-thin text-md">
+              tap the bell for immediate emergency
+            </Text>
           </Animated.View>
-  
+
           {/* Sticky Header Content */}
           <Animated.View
             className={`absolute left-0 right-0 bottom-0`}
             style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
           >
-            <View className="flex flex-row p-2 items-center h-full bg-blue-500">
+            <View className="flex flex-row p-2 items-center h-full bg-blue-600">
               <Text className="text-lg text-white font-bold">{`${dayTime} ${fullname}`}</Text>
             </View>
           </Animated.View>
         </Animated.View>
-  
+
         {/* Main ScrollView Content */}
         <ScrollView
           scrollEventThrottle={16}
           onScroll={handleScroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{
+            paddingTop: HEADER_MAX_HEIGHT,
+          }}
         >
           <View className="flex-1 px-3 pb-3 bg-white space-y-3">
             <ProfileReminderModal />
@@ -195,7 +204,28 @@ const handleImageClick = (imageUri) => {
                     <Text className="font-bold text-blue-500">
                       {formatDate(item.date)}
                     </Text>
-                    <Text className="font-bold text-lg">{item.title}</Text>
+                    <Pressable
+                      onPress={() => openDialerOrEmail(item.links, "links")}
+                    >
+                      <View className="flex-row items-center">
+                        <Text
+                          className={`font-bold text-lg ${
+                            item.links ? "underline" : ""
+                          }`}
+                        >
+                          {item.title.toUpperCase()}
+                        </Text>
+                        {item.links && (
+                          <Icon
+                            name="eye"
+                            size={20}
+                            style={{ marginLeft: 5 }}
+                            color={colors.gray[600]}
+                          />
+                        )}
+                      </View>
+                    </Pressable>
+
                     <Text className="text-gray-600 text-lg">
                       {item.description}
                     </Text>
@@ -217,14 +247,8 @@ const handleImageClick = (imageUri) => {
           </View>
         </ScrollView>
       </View>
-  </>
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingTop: HEADER_MAX_HEIGHT,
-  },
-});
 
 export default ScrollViewScreen;
