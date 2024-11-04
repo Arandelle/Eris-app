@@ -32,6 +32,8 @@ const ScrollViewScreen = ({ dayTime }) => {
   const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
   const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef(null);
+
   const fullname = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
     .join(" ");
@@ -74,6 +76,12 @@ const ScrollViewScreen = ({ dayTime }) => {
       Linking.openURL(`mailto:${value}`);
     } else if (type === "links") {
       Linking.openURL(value);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: 0, animated: true });
     }
   };
 
@@ -141,6 +149,7 @@ const ScrollViewScreen = ({ dayTime }) => {
 
         {/* Main ScrollView Content */}
         <ScrollView
+          ref={scrollViewRef}
           scrollEventThrottle={16}
           onScroll={handleScroll}
           contentContainerStyle={{
@@ -246,6 +255,22 @@ const ScrollViewScreen = ({ dayTime }) => {
               ))}
           </View>
         </ScrollView>
+        <Animated.View style={{ opacity: stickyHeaderOpacity }}>
+          <TouchableOpacity
+            onPress={scrollToTop}
+            style={{
+              position: "absolute",
+              bottom: 20,
+              right: 20,
+              backgroundColor: colors.blue[600],
+              padding: 15,
+              borderRadius: 50,
+              elevation: 5,
+            }}
+          >
+            <Icon name="arrow-up" size={30} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </>
   );
