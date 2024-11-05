@@ -130,12 +130,12 @@ const ScrollViewScreen = ({ dayTime }) => {
       <View className="flex-1 bg-gray-200">
         <StatusBar
           barStyle="light-content"
-          backgroundColor={colors.blue[600]}
+          backgroundColor={colors.blue[800]}
         />
 
         {/* Main Animated Header */}
         <Animated.View
-          className="absolute top-0 right-0 left-0 bg-blue-600 z-50"
+          className="absolute top-0 right-0 left-0 bg-blue-800 z-50"
           style={[
             {
               height: headerHeight,
@@ -175,7 +175,7 @@ const ScrollViewScreen = ({ dayTime }) => {
             className={`absolute left-0 right-0 bottom-0`}
             style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
           >
-            <View className="flex flex-row p-2 items-center h-full bg-blue-600">
+            <View className="flex flex-row p-2 items-center h-full bg-blue-800">
               <Text className="text-lg text-white font-bold">{`${dayTime} ${fullname}`}</Text>
             </View>
           </Animated.View>
@@ -202,8 +202,8 @@ const ScrollViewScreen = ({ dayTime }) => {
                   key={key}
                   className="w-1/2 py-2" // 1/3 width to fit three items per row
                 >
-                  <View className="border-2 border-blue-600">
-                    <Text className="text-white text-center bg-blue-600 p-1 font-bold">
+                  <View className="border-2 border-blue-900">
+                    <Text className="text-white text-center bg-blue-800 p-1 font-bold">
                       {item.title.toUpperCase()}
                     </Text>
                     <Pressable
@@ -297,7 +297,7 @@ const ScrollViewScreen = ({ dayTime }) => {
               position: "absolute",
               bottom: 20,
               right: 20,
-              backgroundColor: colors.blue[600],
+              backgroundColor: colors.blue[800],
               padding: 15,
               borderRadius: 50,
               elevation: 5,

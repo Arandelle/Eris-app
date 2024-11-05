@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,12 +13,14 @@ import {
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signInAnonymously
 } from "firebase/auth";
-import { ref, get } from "firebase/database"; // Import Firebase Realtime Database functions
+import { ref, get, set, serverTimestamp } from "firebase/database"; // Import Firebase Realtime Database functions
 import { auth, database } from "../services/firebaseConfig"; // Ensure you have both auth and database imports
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
+import { generateUniqueBarangayID } from "../helper/generateID";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -28,6 +30,13 @@ const LoginForm = () => {
   const [showPass, setShowPass] = useState(false);
   const [isPromptVisible, setPromptVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    const randomNumber = Math.floor(Math.random() * 5) + 1;
+    const url = `https://flowbite.com/docs/images/people/profile-picture-${randomNumber}.jpg`;
+    setImageUrl(url);
+  }, []);
 
   const handleShowPass = () => {
     setShowPass(!showPass);
@@ -66,6 +75,49 @@ const LoginForm = () => {
       }
     } catch (error) {
       Alert.alert("Login Error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnonymousLogin = async () => {
+    if (loading) return;
+    
+    try {
+      setLoading(true);
+      
+      // Sign in anonymously
+      const userCredential = await signInAnonymously(auth);
+      const user = userCredential.user;
+      const userId = await generateUniqueBarangayID("user");
+      
+      // Create a basic profile for anonymous user
+      const userRef = ref(database, `users/${user.uid}`);
+      await set(userRef, {
+        customId: userId,
+        profileComplete: false,
+        isAnonymous: true,
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        img: imageUrl,
+        lastLogin: new Date().toISOString()
+      });
+
+      console.log("Anonymous user created:", user.uid);
+      
+      navigation.navigate("TabNavigator");
+      ToastAndroid.show(
+        "Logged in as guest user",
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
+      
+    } catch (error) {
+      console.error("Anonymous login error:", error);
+      Alert.alert(
+        "Login Error",
+        "Unable to login as guest. Please try again or use email login."
+      );
     } finally {
       setLoading(false);
     }
@@ -148,6 +200,15 @@ const LoginForm = () => {
               >
                 <Text className="text-center text-lg text-white font-bold">
                   {loading ? "Logging in..." : "Login"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="w-full bg-gray-400 p-3 rounded mt-2"
+                onPress={handleAnonymousLogin}
+                disabled={loading}
+              >
+                <Text className="text-center text-lg text-white font-bold">
+                  {loading ? "Please wait..." : "Login Anonymously"}
                 </Text>
               </TouchableOpacity>
               <Text className="text-lg py-2 text-center">

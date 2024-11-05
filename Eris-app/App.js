@@ -33,7 +33,7 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
+      if (user && (user.emailVerified || user.isAnonymous)) {
         const userRef = ref(database, `users/${user.uid}`);
 
         try {

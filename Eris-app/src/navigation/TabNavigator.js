@@ -47,11 +47,11 @@ const TabNavigator = () => {
         headerShown: true,
         tabBarIcon: ({ color, size }) => {
           const icons = {
-            Home: "home-outline",
-            Map: "map-marker-outline",
+            Home: "home",
+            Map: "map-marker",
             Report: "hospital-box",
-            Notification: "bell-outline",
-            Profile: "account-circle-outline",
+            Notification: "bell",
+            Profile: "account-circle",
           };
 
           const iconName = icons[route.name];
@@ -73,8 +73,8 @@ const TabNavigator = () => {
             </View>
           );
         },
-        tabBarActiveTintColor: "#42a5f5",
-        tabBarInactiveTintColor: "gray",
+        tabBarActiveTintColor: colors.blue[800],
+        tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
           paddingBottom: 10,
           paddingTop: 10,
