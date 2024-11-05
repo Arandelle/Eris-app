@@ -148,6 +148,7 @@ const ScrollViewScreen = ({ dayTime }) => {
             style={[{ opacity: headerContentOpacity }]}
           >
             <TouchableOpacity
+              disabled={currentUser?.isAnonymous ? true : false}
               className="items-center space-y-1"
               onPress={() => (
                 Alert.alert("Send Emergency Alert?","This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location", [{
@@ -159,10 +160,13 @@ const ScrollViewScreen = ({ dayTime }) => {
                   onPress: handleConfirmReport,
                 }])
               )}
-            >
-                <Icon name="bell-ring" size={80} color={colors.yellow[400]} />
+            >    
+                {currentUser?.isAnonymous ? 
+                <Icon name="bell-off" size={80} color={colors.gray[400]} /> :  
+                <Icon name="bell-ring" size={80} color={colors.yellow[400]} />}
+
               <Text className="text-2xl text-center text-white font-bold">
-                Report Now!
+               {currentUser?.isAnonymous ? "Please update your profile" : "Report Now!"}
               </Text>
             </TouchableOpacity>
             <Text className="text-gray-50 font-thin text-md">
