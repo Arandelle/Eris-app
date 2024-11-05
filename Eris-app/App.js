@@ -115,6 +115,11 @@ const App = () => {
             </>
           ) : (
           <>
+          <Stack.Screen
+                name="ERIS"
+                options={{ headerShown: false }}
+                component={TabNavigator}
+              />
             <Stack.Screen name="Login" component={LoginForm} />
             <Stack.Screen 
                 name="Phone"

@@ -10,6 +10,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  onAuthStateChanged
 } from "firebase/auth";
 import { app, auth } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -38,7 +39,43 @@ const SignupForm = () => {
     const randomNumber = Math.floor(Math.random() * 5) + 1;
     const url = `https://flowbite.com/docs/images/people/profile-picture-${randomNumber}.jpg`;
     setImageUrl(url);
-  }, []);
+
+    // Add auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Check if email is verified
+        if (user.emailVerified) {
+          // Navigate to home screen
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'ERIS' }],
+          });
+        } else {
+          // Check email verification status periodically
+          const checkVerification = setInterval(async () => {
+            try {
+              await auth.currentUser.reload();
+              if (auth.currentUser.emailVerified) {
+                clearInterval(checkVerification);
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'ERIS' }],
+                });
+              }
+            } catch (error) {
+              console.error("Error checking verification:", error);
+            }
+          }, 3000); // Check every 3 seconds
+
+          // Cleanup interval
+          return () => clearInterval(checkVerification);
+        }
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, [navigation]);
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
@@ -52,6 +89,10 @@ const SignupForm = () => {
     //   Alert.alert("Error signing up", error);
     //   return;
     // }
+    if (!isChecked) {
+      Alert.alert("Terms and Conditions", "Please accept the terms and conditions to continue.");
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -84,7 +125,11 @@ const SignupForm = () => {
         },
         {
           text: "OK",
-          onPress: () => navigation.goBack(),
+          onPress: () => {
+            // Clear the form
+            setEmail("");
+            setPassword("");
+          }
         },
       ]);
 
