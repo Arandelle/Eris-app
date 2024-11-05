@@ -15,7 +15,6 @@ import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import ScrollViewScreen from "./src/screens/ScrollViewScreen";
-import PhoneAuth from "./src/screens/PhoneAuth";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,33 +33,40 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && (user.emailVerified || user.isAnonymous)) {
-        const userRef = ref(database, `users/${user.uid}`);
-
-        try {
-          const userSnapshot = await get(userRef);
-          console.log(`Admin snapshot exists: ${userSnapshot.exists()}`);
-          if (userSnapshot.exists()) {
-            setUser(user);
-          } else {
+      if (user) {
+        if (user.isAnonymous) {
+          // Directly set the user as anonymous without a database check
+          setUser(user);
+        } else if (user.emailVerified) {
+          try {
+            const userRef = ref(database, `users/${user.uid}`);
+            const userSnapshot = await get(userRef);
+            
+            console.log(`User snapshot exists: ${userSnapshot.exists()}`);
+            if (userSnapshot.exists()) {
+              setUser(user);
+            } else {
+              await signOut(auth);
+              setUser(null);
+              Alert.alert("Error", "User data not found");
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
             await signOut(auth);
             setUser(null);
-            Alert.alert("Error", "User data not found");
+            Alert.alert("Error", "Account is not found");
           }
-        } catch (error) {
-          console.error("Error fetching admin data:", error);
-          await signOut(auth);
-          setUser(null);
-          Alert.alert("Error", "Account is not found");
         }
       } else {
+        // Reset the user when there is no authenticated user
         setUser(null);
       }
       setLoading(false);
     });
-
+  
     return () => unsubscribe();
   }, []);
+  
 
   if (loading) {
     return (
@@ -115,16 +121,7 @@ const App = () => {
             </>
           ) : (
           <>
-          <Stack.Screen
-                name="ERIS"
-                options={{ headerShown: false }}
-                component={TabNavigator}
-              />
             <Stack.Screen name="Login" component={LoginForm} />
-            <Stack.Screen 
-                name="Phone"
-                component={PhoneAuth}
-              />
             <Stack.Screen
               name="Signup"
               component={SignupForm}

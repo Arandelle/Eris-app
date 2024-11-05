@@ -114,7 +114,7 @@ const LoginForm = () => {
 
       console.log("Anonymous user created:", user.uid);
 
-      navigation.navigate("TabNavigator");
+      navigation.navigate("ERIS");
       ToastAndroid.show(
         "Logged in as guest user",
         ToastAndroid.SHORT,
