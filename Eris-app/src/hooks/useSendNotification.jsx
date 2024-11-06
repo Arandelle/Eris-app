@@ -28,6 +28,19 @@ const useSendNotification = (description = "N/A") => {
         message: "You have successfully created your account",
         icon: "account-alert"
       },
+      welcomeGuest : {
+        ...mainNotificationData,
+        title: "Welcome!",
+        message: "Feel free to explore the app",
+        icon: "account-alert"
+      },
+      userGuest : {
+        ...mainNotificationData,
+        userId: additionalId,
+        title: "New user",
+        message: "A new guest has login with the system",
+        icon: "account-check"
+      },
       userCreatedAccount : {
         ...mainNotificationData,
         userId: additionalId,

@@ -22,10 +22,11 @@ import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
 import { generateUniqueBarangayID } from "../helper/generateID";
 import colors from "../constant/colors";
+import useSendNotification from "../hooks/useSendNotification";
 
 const LoginForm = () => {
   const navigation = useNavigation();
-
+  const {sendNotification} = useSendNotification()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -120,6 +121,10 @@ const LoginForm = () => {
         ToastAndroid.SHORT,
         ToastAndroid.BOTTOM
       );
+      const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
+      await sendNotification("admins", adminId, "userGuest", user.uid);
+      await sendNotification("users", user.uid, "welcomeGuest");
+
     } catch (error) {
       console.error("Anonymous login error:", error);
       Alert.alert(
