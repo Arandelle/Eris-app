@@ -11,6 +11,8 @@ import {
   Image,
   Linking,
   Modal,
+  Button,
+  TextInput
 } from "react-native";
 import ImageViewer from "react-native-image-zoom-viewer";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -24,6 +26,8 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import useLocationTracking from "../hooks/useLocationTracking";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useSendNotification from "../hooks/useSendNotification";
+import { handleAccountLinking } from "../hooks/useLinkAnonymous";
+import { auth } from "../services/firebaseConfig";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
@@ -31,14 +35,17 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const ScrollViewScreen = ({ dayTime }) => {
   const { data: announcement } = useFetchData("announcement");
-  const {data :responderData} = useFetchData("responders");
+  const { data: responderData } = useFetchData("responders");
   const { currentUser } = useCurrentUser();
-  const {location, latitude, longitude, geoCodeLocation,trackUserLocation} = useLocationTracking(currentUser);
-  const {sendNotification} = useSendNotification();
+  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
+    useLocationTracking(currentUser);
+  const { sendNotification } = useSendNotification();
   const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
   const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     trackUserLocation();
@@ -96,7 +103,7 @@ const ScrollViewScreen = ({ dayTime }) => {
   };
 
   const handleConfirmReport = async () => {
-    try{
+    try {
       await submitEmergencyReport({
         currentUser,
         location,
@@ -104,13 +111,32 @@ const ScrollViewScreen = ({ dayTime }) => {
         longitude,
         geoCodeLocation,
         sendNotification,
-        responderData
+        responderData,
       });
       Alert.alert("Emergency reported", "Help is on the way!");
-    }catch(error){
-      Alert.alert("Error", "Could not submit emergency alert, please try again");
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Could not submit emergency alert, please try again"
+      );
     }
-  }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const result = await handleAccountLinking(auth, email, password);
+      
+      if (result) {
+        // Show success message
+        alert("Account successfully linked! Please check your email for verification.");
+      }
+    } catch (error) {
+      // Show error message
+      alert("Failed to link account. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -150,24 +176,64 @@ const ScrollViewScreen = ({ dayTime }) => {
             <TouchableOpacity
               disabled={currentUser?.isAnonymous ? true : false}
               className="items-center space-y-1"
-              onPress={() => (
-                Alert.alert("Send Emergency Alert?","This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location", [{
-                  text: "Cancel",
-                  style: "cancel"
-                }, {
-                  text: "Send Alert",
-                  style: "destructive",
-                  onPress: handleConfirmReport,
-                }])
+              onPress={() =>
+                Alert.alert(
+                  "Send Emergency Alert?",
+                  "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Send Alert",
+                      style: "destructive",
+                      onPress: handleConfirmReport,
+                    },
+                  ]
+                )
+              }
+            >
+                        {currentUser?.isAnonymous ? (
+                <>
+                  <Icon name="bell-off" size={80} color={colors.gray[400]} />
+                  <TouchableOpacity>
+                    <Text className="text-2xl text-center text-white font-bold">
+                      Verify your account now!
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={{ padding: 20 }}>
+                    <Button
+                      title="Link Account with Email & Password"
+                      onPress={handleSubmit}
+                    />
+                    <Text style={{ marginVertical: 20 }}>
+                      Check Verification Status
+                    </Text>
+    
+                    <TextInput
+                      placeholder="Email"
+                      value={email}
+                      onChangeText={setEmail}
+                      style={{ borderBottomWidth: 1, marginBottom: 10 }}
+                    />
+                    <TextInput
+                      placeholder="Password"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                      style={{ borderBottomWidth: 1, marginBottom: 10 }}
+                    />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Icon name="bell-ring" size={80} color={colors.yellow[400]} />
+                  <Text className="text-2xl text-center text-white font-bold">
+                    Report Now!
+                  </Text>
+                </>
               )}
-            >    
-                {currentUser?.isAnonymous ? 
-                <Icon name="bell-off" size={80} color={colors.gray[400]} /> :  
-                <Icon name="bell-ring" size={80} color={colors.yellow[400]} />}
-
-              <Text className="text-2xl text-center text-white font-bold">
-               {currentUser?.isAnonymous ? "Please update your profile" : "Report Now!"}
-              </Text>
             </TouchableOpacity>
             <Text className="text-gray-50 font-thin text-md">
               tap the bell for immediate emergency
@@ -199,7 +265,6 @@ const ScrollViewScreen = ({ dayTime }) => {
             <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
               Barangay Bagtas Hotline Numbers
             </Text>
-
             <View className="flex flex-row flex-wrap">
               {hotlineNumbers?.map((item, key) => (
                 <View
