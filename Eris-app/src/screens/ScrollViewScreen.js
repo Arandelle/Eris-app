@@ -12,7 +12,8 @@ import {
   Linking,
   Modal,
   Button,
-  TextInput
+  TextInput,
+  TouchableWithoutFeedback,
 } from "react-native";
 import ImageViewer from "react-native-image-zoom-viewer";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -46,6 +47,7 @@ const ScrollViewScreen = ({ dayTime }) => {
   const scrollViewRef = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLinkingAccount, setIsLinkingAccount] = useState(false);
 
   useEffect(() => {
     trackUserLocation();
@@ -124,13 +126,15 @@ const ScrollViewScreen = ({ dayTime }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const result = await handleAccountLinking(auth, email, password);
-      
+
       if (result) {
         // Show success message
-        alert("Account successfully linked! Please check your email for verification.");
+        alert(
+          "Account successfully linked! Please check your email for verification."
+        );
       }
     } catch (error) {
       // Show error message
@@ -194,37 +198,16 @@ const ScrollViewScreen = ({ dayTime }) => {
                 )
               }
             >
-                        {currentUser?.isAnonymous ? (
+              {currentUser?.isAnonymous ? (
                 <>
                   <Icon name="bell-off" size={80} color={colors.gray[400]} />
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setIsLinkingAccount(!isLinkingAccount)}
+                  >
                     <Text className="text-2xl text-center text-white font-bold">
                       Verify your account now!
                     </Text>
                   </TouchableOpacity>
-                  <View style={{ padding: 20 }}>
-                    <Button
-                      title="Link Account with Email & Password"
-                      onPress={handleSubmit}
-                    />
-                    <Text style={{ marginVertical: 20 }}>
-                      Check Verification Status
-                    </Text>
-    
-                    <TextInput
-                      placeholder="Email"
-                      value={email}
-                      onChangeText={setEmail}
-                      style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                    />
-                    <TextInput
-                      placeholder="Password"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry
-                      style={{ borderBottomWidth: 1, marginBottom: 10 }}
-                    />
-                  </View>
                 </>
               ) : (
                 <>
@@ -261,7 +244,7 @@ const ScrollViewScreen = ({ dayTime }) => {
           }}
         >
           <View className="flex-1 px-3 pb-3 bg-white space-y-3">
-            <ProfileReminderModal />
+            {/* <ProfileReminderModal /> */}
             <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
               Barangay Bagtas Hotline Numbers
             </Text>
@@ -361,21 +344,72 @@ const ScrollViewScreen = ({ dayTime }) => {
         </ScrollView>
         <Animated.View style={{ opacity: stickyHeaderOpacity }}>
           <TouchableOpacity
+            className="absolute bottom-5 right-5 bg-blue-800 p-4 rounded-full shadow-lg"
             onPress={scrollToTop}
-            style={{
-              position: "absolute",
-              bottom: 20,
-              right: 20,
-              backgroundColor: colors.blue[800],
-              padding: 15,
-              borderRadius: 50,
-              elevation: 5,
-            }}
           >
             <Icon name="arrow-up" size={30} color="white" />
           </TouchableOpacity>
         </Animated.View>
       </View>
+
+      <Modal
+        visible={isLinkingAccount}
+        transparent={true}
+        onRequestClose={() => setIsLinkingAccount(false)}
+        animationType="slide"
+      >
+        <ScrollView>
+          <TouchableWithoutFeedback onPress={() => setIsLinkingAccount(false)}>
+            <View
+              className="h-screen w-full flex items-center justify-center p-4"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            >
+          
+              <View className="w-full flex  justify-center px-2 py-6 rounded-lg space-y-4 bg-white">
+              <Text className="text-center text-lg">Link your guest account</Text>
+                <View className="relative z-10">
+                  <View className="flex items-center absolute top-4 left-3 z-50">
+                    <Icon name={"email"} size={20} color={colors.blue[800]} />
+                  </View>
+                  <TextInput
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                    placeholder={"Enter you email"}
+                    autoCapitalize="none"
+                    onChangeText={setEmail}
+                    value={email}
+                  />
+                </View>
+
+                <View className="relative z-10">
+                  <View className="flex items-center absolute top-4 left-3 z-50">
+                    <Icon name="lock" size={20} color={colors.blue[800]} />
+                  </View>
+                  <TextInput
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                    onChangeText={setPassword}
+                    value={password}
+                    placeholder="Type your password"
+                    secureTextEntry
+                  />
+                  <TouchableOpacity className="absolute right-4 top-4 flex items-center">
+                    <Icon name="eye" size={20} color={colors.blue[800]} />
+                  </TouchableOpacity>
+                </View>
+                <View>
+                  <TouchableOpacity
+                    className="w-full bg-blue-800 p-3 rounded"
+                    onPress={handleSubmit}
+                  >
+                    <Text className="text-center text-lg text-white font-bold">
+                      Link my account
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </Modal>
     </>
   );
 };
