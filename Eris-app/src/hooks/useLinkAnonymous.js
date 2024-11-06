@@ -3,14 +3,8 @@ import {
     linkWithCredential,
     sendEmailVerification,
   } from "firebase/auth";
-  
-  /**
-   * Links an anonymous account to an email/password account
-   * @param {object} auth - Firebase auth instance
-   * @param {string} email - User's email
-   * @param {string} password - User's password
-   * @returns {Promise<{success: boolean, user?: object, error?: string}>}
-   */
+import { Alert } from "react-native";
+
   export const linkAnonymousAccount = async (auth, email, password) => {
     if (!auth.currentUser?.isAnonymous) {
       return {
@@ -80,6 +74,7 @@ import {
       return true;
     } else {
       console.error("Error linking account:", result.error);
+      Alert.alert("Error Linking account",result.error)
       // Handle error (e.g., show error message to user)
       return false;
     }

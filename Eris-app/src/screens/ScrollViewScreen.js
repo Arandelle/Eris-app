@@ -11,7 +11,6 @@ import {
   Image,
   Linking,
   Modal,
-  Button,
   TextInput,
   TouchableWithoutFeedback,
 } from "react-native";
@@ -178,7 +177,7 @@ const ScrollViewScreen = ({ dayTime }) => {
             style={[{ opacity: headerContentOpacity }]}
           >
             <TouchableOpacity
-              disabled={currentUser?.isAnonymous ? true : false}
+              disabled={!auth.currentUser.emailVerified ? true : false}
               className="items-center space-y-1"
               onPress={() =>
                 Alert.alert(
@@ -198,7 +197,7 @@ const ScrollViewScreen = ({ dayTime }) => {
                 )
               }
             >
-              {currentUser?.isAnonymous ? (
+              {!auth.currentUser.emailVerified ? (
                 <>
                   <Icon name="bell-off" size={80} color={colors.gray[400]} />
                   <TouchableOpacity
@@ -365,16 +364,20 @@ const ScrollViewScreen = ({ dayTime }) => {
               style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
             >
           
-              <View className="w-full flex  justify-center px-2 py-6 rounded-lg space-y-4 bg-white">
-              <Text className="text-center text-lg">Link your guest account</Text>
+              <View className="w-full flex  justify-center p-4 rounded-lg space-y-6 bg-white shadow-xl">
+              <View className="space-y-2">
+                <Text className="font-bold text-green-600 text-2xl">Link your account</Text>
+                <Text className="text-gray-500 text-md">To make it easier to access your account in the future, please link an email and password. This will let you log in directly without using guest access</Text>
+              </View>
                 <View className="relative z-10">
                   <View className="flex items-center absolute top-4 left-3 z-50">
-                    <Icon name={"email"} size={20} color={colors.blue[800]} />
+                    <Icon name={"email"} size={20} color={colors.green[600]} />
                   </View>
                   <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                    placeholder={"Enter you email"}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                    placeholder={"Email"}
                     autoCapitalize="none"
+                    keyboardType="email-address"
                     onChangeText={setEmail}
                     value={email}
                   />
@@ -382,26 +385,26 @@ const ScrollViewScreen = ({ dayTime }) => {
 
                 <View className="relative z-10">
                   <View className="flex items-center absolute top-4 left-3 z-50">
-                    <Icon name="lock" size={20} color={colors.blue[800]} />
+                    <Icon name="lock" size={20} color={colors.green[600]} />
                   </View>
                   <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
                     onChangeText={setPassword}
                     value={password}
-                    placeholder="Type your password"
+                    placeholder="Password"
                     secureTextEntry
                   />
                   <TouchableOpacity className="absolute right-4 top-4 flex items-center">
-                    <Icon name="eye" size={20} color={colors.blue[800]} />
+                    <Icon name="eye" size={20} color={colors.green[600]} />
                   </TouchableOpacity>
                 </View>
                 <View>
                   <TouchableOpacity
-                    className="w-full bg-blue-800 p-3 rounded"
+                    className="w-full bg-green-600 p-3 rounded-lg shadow-lg"
                     onPress={handleSubmit}
                   >
                     <Text className="text-center text-lg text-white font-bold">
-                      Link my account
+                      Save account details
                     </Text>
                   </TouchableOpacity>
                 </View>
