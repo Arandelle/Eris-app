@@ -15,6 +15,7 @@ import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import ScrollViewScreen from "./src/screens/ScrollViewScreen";
+import PhoneAuth from "./src/screens/PhoneAuth";
 
 const Stack = createNativeStackNavigator();
 
@@ -121,6 +122,11 @@ const App = () => {
             </>
           ) : (
           <>
+          {/* <Stack.Screen
+                name="Phone"
+                options={{ headerShown: false }}
+                component={PhoneAuth}
+              /> */}
             <Stack.Screen name="Login" component={LoginForm} />
             <Stack.Screen
               name="Signup"

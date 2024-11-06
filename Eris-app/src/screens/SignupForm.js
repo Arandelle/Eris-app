@@ -1,38 +1,18 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-} from "react-native";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
-import { app, auth } from "../services/firebaseConfig";
+import { useEffect, useState } from "react";
+import {  View, Text, TextInput,  TouchableOpacity, Alert,ScrollView,} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import {
-  getDatabase,
-  ref,
-  set,
-  serverTimestamp,
-} from "firebase/database";
-import { useNavigation } from "@react-navigation/native";
-import { generateUniqueBarangayID } from "../helper/generateID";
-import useSendNotification from "../hooks/useSendNotification";
+import useHandleSignup from "../hooks/useHandleSignup";
+import CustomInput from "../component/CustomInput";
+import colors from "../constant/colors";
 
 const SignupForm = () => {
-  const navigation = useNavigation();
-  const {sendNotification} = useSendNotification();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const [showPass, setShowPass] = useState(false);
   const [createType, setCreateType] = useState(true);
   const [isChecked, setChecked] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const { handleSignup } = useHandleSignup();
 
   useEffect(() => {
     const randomNumber = Math.floor(Math.random() * 5) + 1;
@@ -40,66 +20,16 @@ const SignupForm = () => {
     setImageUrl(url);
   }, []);
 
-  const validateEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    return regex.test(email);
-  };
+  const signUpClicked = async () => {
+    if (!isChecked) {
+      Alert.alert("Terms and Conditions", "Please accept Terms and Conditions");
+      return;
+    }
 
-
-  const handleSignup = async () => {
-    // if (!validateEmail(email)) {
-    //   setError("Please use a valid gmail.com email address.");
-    //   Alert.alert("Error signing up", error);
-    //   return;
-    // }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      await sendEmailVerification(user);
-
-      const userId = await generateUniqueBarangayID("user");
-
-      // Create a user document in the database
-      const userData = {
-        email: user.email,
-        profileComplete: false,
-        createdAt: new Date().toISOString(),
-        timestamp: serverTimestamp(), // Add this line
-        img: imageUrl,
-        customId: userId
-      };
-      const database = getDatabase(app);
-      await set(ref(database, `users/${user.uid}`), userData);
-
-      console.log("User created:", userId);
-      Alert.alert("Success", "Please check your email for verification", [
-        {
-          text: "Cancel",
-          style: " cancel",
-        },
-        {
-          text: "OK",
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-
-      const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      await sendNotification("admins", adminId, "userCreatedAccount", user.uid);
-
-      await sendNotification("users", user.uid, "welcomeUser");
-
+    const result = await handleSignup(email, password, imageUrl);
+    if (result.success) {
       setEmail("");
       setPassword("");
-      // Handle navigation or other logic after successful signup
-    } catch (error) {
-      Alert.alert("Error signing up", error.message);
-      setError(error.message);
-      console.error("Error signing up:", error);
     }
   };
 
@@ -125,7 +55,7 @@ const SignupForm = () => {
                 <Text
                   className={`text-xl ${
                     createType
-                      ? "text-blue-500 border-b-2 pb-0.5 border-blue-500"
+                      ? "text-blue-800 border-b-2 pb-0.5 border-blue-800"
                       : "text-gray-400"
                   } font-extrabold`}
                 >
@@ -136,7 +66,7 @@ const SignupForm = () => {
                 <Text
                   className={`text-xl ${
                     !createType
-                      ? "text-blue-500 border-b-2 pb-0.5 border-blue-500"
+                      ? "text-blue-800 border-b-2 pb-0.5 border-blue-800"
                       : "text-gray-400"
                   } font-extrabold`}
                 >
@@ -151,11 +81,11 @@ const SignupForm = () => {
                   <Icon
                     name={createType ? "email" : "call"}
                     size={20}
-                    color="black"
+                    color={colors.blue[800]}
                   />
                 </View>
                 <TextInput
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
                   placeholder={createType ? "user@gmail.com" : "+63 912345678"}
                   autoCapitalize="none"
                   onChangeText={setEmail}
@@ -169,10 +99,10 @@ const SignupForm = () => {
               </View>
               <View className="relative z-10">
                 <View className="flex items-center absolute top-4 left-3 z-50">
-                  <Icon name="lock" size={20} color="black" />
+                  <Icon name="lock" size={20} color={colors.blue[800]} />
                 </View>
                 <TextInput
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-800 focus:border-blue-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
                   onChangeText={setPassword}
                   value={password}
                   placeholder="Type your password"
@@ -185,11 +115,13 @@ const SignupForm = () => {
                   <Icon
                     name={showPass ? "visibility" : "visibility-off"}
                     size={20}
-                    color="black"
+                    color={colors.blue[800]}
                   />
                 </TouchableOpacity>
               </View>
-              <View className="flex flex-row py-2 items-center justify-center">
+                
+                {/** for check box */}
+              <View className="flex flex-row py-2 items-center justify-start">
                 <TouchableOpacity
                   className="flex flex-row items-center"
                   onPress={toggleCheckbox}
@@ -198,26 +130,26 @@ const SignupForm = () => {
                     className={`w-5 h-5 mr-2 border-2 rounded-full border-gray-300 bg-white items-center justify-center`}
                   >
                     {isChecked && (
-                      <Icon name="check-circle" color="blue" size={16} />
+                      <Icon name="check-circle" color={colors.blue[800]} size={16} />
                     )}
                   </View>
                 </TouchableOpacity>
 
-                <View className="flex flex-row items-center justify-center space-x-2">
-                  <Text>I have read and agree to Eris' </Text>
-                  <TouchableOpacity>
-                    <Text className="text-blue-600">Terms of Service</Text>
-                  </TouchableOpacity>
-                  <Text> and</Text>
-                  <TouchableOpacity>
-                    <Text className="text-blue-600">Privacy Policy</Text>
-                  </TouchableOpacity>
-                </View>
+                 <View className="flex flex-row">
+                    <TouchableOpacity>
+                      <Text className="text-blue-800 text-lg">Terms of Service</Text>
+                    </TouchableOpacity>
+                    <Text className="text-lg"> and </Text>
+                    <TouchableOpacity>
+                      <Text className="text-blue-800 text-lg">Privacy Policy</Text>
+                    </TouchableOpacity>
+                 </View>
               </View>
+
             </View>
             <TouchableOpacity
-              className="w-full bg-blue-500 p-3 rounded"
-              onPress={handleSignup}
+              className="w-full bg-blue-800 p-3 rounded"
+              onPress={signUpClicked}
             >
               <Text className="text-center text-lg text-white font-bold">
                 Signup

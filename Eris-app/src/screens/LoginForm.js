@@ -15,8 +15,8 @@ import {
   sendPasswordResetEmail,
   signInAnonymously,
 } from "firebase/auth";
-import { ref, get, set, serverTimestamp } from "firebase/database"; // Import Firebase Realtime Database functions
-import { auth, database } from "../services/firebaseConfig"; // Ensure you have both auth and database imports
+import { ref, get, set, serverTimestamp } from "firebase/database";
+import { auth, database } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
@@ -68,7 +68,7 @@ const LoginForm = () => {
           // You can now use the userData as needed, e.g., storing in context or state
           console.log("User Data:", userData);
 
-          navigation.navigate("TabNavigator");
+          navigation.navigate("ERIS");
           ToastAndroid.show(
             "Login Successfully",
             ToastAndroid.SHORT,
@@ -149,7 +149,7 @@ const LoginForm = () => {
       source={require("../../assets/background.jpg")}
       className="flex-1"
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="space-y-10">
           <View className="flex items-center mt-20">
             <Image
@@ -159,7 +159,7 @@ const LoginForm = () => {
           </View>
           <View className="flex items-center">
             <View className="w-full max-w-sm">
-              <Text className="text-center text-2xl mb-3">
+              <Text className="text-center text-2xl text-blue-800 font-bold mb-3">
                 Welcome to Eris App!
               </Text>
               <View className="space-y-4">
@@ -188,6 +188,7 @@ const LoginForm = () => {
                       </Text>
                     </TouchableOpacity>
                   </View>
+                  {/** Password Input */}
                   <View className="relative z-10">
                     <View className="flex items-center absolute top-4 left-3 z-50">
                       <Icon name="lock" size={20} color={colors.blue[800]} />
@@ -211,9 +212,9 @@ const LoginForm = () => {
                     </TouchableOpacity>
                   </View>
                 </View>
-
+                {/** Login button */}
                 <TouchableOpacity
-                  className="w-full bg-blue-800 p-3 rounded flex flex-row items-center justify-center space-x-4"
+                  className="w-full bg-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
                   onPress={handleLogin}
                   disabled={loading}
                 >
@@ -226,11 +227,15 @@ const LoginForm = () => {
                 {/* button for anonymous*/}
 
                 <TouchableOpacity
-                  className="w-full bg-white border-2 border-blue-800 p-3 rounded flex flex-row items-center justify-center space-x-4"
+                  className="w-full bg-white border-2 border-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
                   onPress={handleAnonymousLogin}
                   disabled={loading}
                 >
-                  <Icon name="account-arrow-right" size={20} color={colors.blue[800]} />
+                  <Icon
+                    name="account-arrow-right"
+                    size={20}
+                    color={colors.blue[800]}
+                  />
                   <Text className="text-center text-lg text-blue-800 font-bold">
                     {loading ? "Please wait..." : "Login as Guest"}
                   </Text>
@@ -247,19 +252,6 @@ const LoginForm = () => {
                   </Text>
                 </TouchableOpacity> */}
 
-                <View className="flex flex-row items-center justify-center space-x-2 p-2">
-                  <Text className="text-lg">
-                    Don't have an account?
-                  </Text>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate("Signup")}
-                    >
-                      <Text className="text-blue-500 underline font-bold text-lg">
-                        Create an account
-                      </Text>
-                    </TouchableOpacity>
-                </View>
-
                 <ForgotPass
                   visible={isPromptVisible}
                   onClose={() => setPromptVisible(false)}
@@ -267,6 +259,17 @@ const LoginForm = () => {
                 />
               </View>
             </View>
+          </View>
+        </View>
+
+        <View className="absolute bottom-10 self-center">
+          <View className="flex flex-col items-center justify-center space-x-2 p-2">
+            <Text className="text-lg">Don't have an account?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+              <Text className="text-blue-500 underline font-bold text-lg">
+                Create an account
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

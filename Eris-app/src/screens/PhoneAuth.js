@@ -1,71 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { Button, TextInput, View } from 'react-native';
-import { auth } from '../services/firebaseConfig';
-import { signInWithPhoneNumber, ConfirmationResult, onAuthStateChanged } from 'firebase/auth';
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, Alert } from "react-native";
+import { auth } from "../services/firebaseConfig";
+import { 
+  PhoneAuthProvider,
+  signInWithCredential 
+} from "firebase/auth";
 
 const PhoneAuth = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationId, setVerificationId] = useState(null);
-  const [code, setCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [verificationId, setVerificationId] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
 
-  useEffect(() => {
-    const subscriber = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, handle navigation or UI changes
-        console.log('User signed in:', user);
-      }
-    });
-    return subscriber; // Unsubscribe on unmount
-  }, []);
-
-  const handlePhoneNumberChange = (text) => {
-    setPhoneNumber(text);
-  };
-
-  const handleCodeChange = (text) => {
-    setCode(text);
-  };
-
-  const startPhoneNumberVerification = async () => {
+  const sendVerificationCode = async () => {
     try {
-      // Create a RecaptchaVerifier instance (replace with your site key)
-      const recaptchaVerifier = new window.firebase.auth.RecaptchaVerifier('recaptcha-container', 'invisible', auth);
+      // Format phone number to E.164 standard
+      const formattedNumber = phoneNumber.startsWith('+') 
+        ? phoneNumber 
+        : `+${phoneNumber}`;
 
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-      setVerificationId(confirmationResult.verificationId);
+      const recaptchaVerifier = window.recaptchaVerifier;
+      
+      // Get verification ID
+      const verificationId = await PhoneAuthProvider.verifyPhoneNumber(
+        auth,
+        formattedNumber,
+        recaptchaVerifier
+      );
+      
+      setVerificationId(verificationId);
+      Alert.alert("Success", "Verification code has been sent to your phone!");
     } catch (error) {
-      console.error('Error starting phone number verification:', error);
+      console.error(error);
+      Alert.alert("Error", error.message);
     }
   };
 
   const verifyCode = async () => {
     try {
-      const credential = await ConfirmationResult.credential(verificationId, code);
-      await auth.signInWithCredential(credential);
-      console.log('Code verified successfully');
+      const credential = PhoneAuthProvider.credential(
+        verificationId,
+        verificationCode
+      );
+      
+      await signInWithCredential(auth, credential);
+      Alert.alert("Success", "Phone number verified successfully!");
     } catch (error) {
-      console.error('Error verifying code:', error);
+      console.error(error);
+      Alert.alert("Error", error.message);
     }
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View>
+      <Text>Phone Authentication</Text>
       <TextInput
-        placeholder="Enter phone number"
+        placeholder="Phone Number (e.g. +1234567890)"
         value={phoneNumber}
-        onChangeText={handlePhoneNumberChange}
+        onChangeText={setPhoneNumber}
+        keyboardType="phone-pad"
       />
-      <Button title="Start Verification" onPress={startPhoneNumberVerification} />
-      {verificationId && (
-        <>
+      <Button title="Send Verification Code" onPress={sendVerificationCode} />
+      {verificationId ? (
+        <View>
           <TextInput
-            placeholder="Enter verification code"
-            value={code}
-            onChangeText={handleCodeChange}
+            placeholder="Verification Code"
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+            keyboardType="number-pad"
           />
           <Button title="Verify Code" onPress={verifyCode} />
-        </>
-      )}
+        </View>
+      ) : null}
     </View>
   );
 };
