@@ -106,11 +106,9 @@ const LoginForm = () => {
       await set(userRef, {
         customId: userId,
         profileComplete: false,
-        isAnonymous: true,
         createdAt: new Date().toISOString(),
         timestamp: serverTimestamp(),
         img: imageUrl,
-        lastLogin: new Date().toISOString(),
       });
 
       console.log("Anonymous user created:", user.uid);

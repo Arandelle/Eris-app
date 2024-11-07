@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "../screens/Map";
@@ -12,15 +12,18 @@ import { useNavigation } from "@react-navigation/native";
 import colors from "../constant/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
 import ScrollViewScreen from "../screens/ScrollViewScreen";
+import { auth } from "../services/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const navigation = useNavigation();
-  const { currentUser} = useCurrentUser()
+  const { currentUser } = useCurrentUser();
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [dayTime, setDayTime] = useState("");
   const [showTabBar, setShowTabBar] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -38,6 +41,33 @@ const TabNavigator = () => {
     } else {
       setDayTime("Good evening! 🌙");
     }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setIsVerified(currentUser.emailVerified);
+        // Start polling for email verification status
+        if (!currentUser.emailVerified) {
+          const checkVerification = setInterval(async () => {
+            await currentUser.reload(); // Reloads the user's data from Firebase
+            if (currentUser.emailVerified) {
+              setIsVerified(true);
+              clearInterval(checkVerification); // Stop polling once verified
+              Alert.alert("Email Verified", "Your email has been verified!");
+            }
+          }, 5000); // Check every 5 seconds
+
+          // Clear the interval when the component unmounts
+          return () => clearInterval(checkVerification);
+        }
+      } else {
+        setIsVerified(false);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   return (
@@ -83,7 +113,7 @@ const TabNavigator = () => {
           // bottom: 16,
           // right: 16,
           // left: 16,
-          // borderRadius: 10,
+          borderRadius: 10,
           display: showTabBar ? "block" : "none",
         },
         tabBarLabelStyle: {
@@ -108,34 +138,42 @@ const TabNavigator = () => {
         name="Home"
         options={{
           headerShown: false,
-          tabBarLabel: "Home"
-
+          tabBarLabel: "Home",
         }}
       >
-        {(props) => <ScrollViewScreen {...props} dayTime={dayTime} />}
+        {(props) => (
+          <ScrollViewScreen
+            {...props}
+            dayTime={dayTime}
+            isVerified={isVerified}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen
         name="Map"
         component={Map}
         options={{ title: "Map", headerShown: false }}
       ></Tab.Screen>
-      <Tab.Screen
-        name="Report"
-        component={Request}
-        options={{
-          title: "Submit Emergency Assistance",
-          tabBarLabel: "Report",
-          headerRight: () => (
-                <TouchableOpacity
-                  className="m-4"
-                  onPress={() => navigation.navigate("Emergency Records")}
-                >
-                    <View className="absolute top-0 z-50 left-0 w-3 h-3 bg-red-500 rounded-full"></View>
-                    <Icon name="history" size={25} />
-                </TouchableOpacity>
-          ),
-        }}
-      />
+      {isVerified && (
+        <Tab.Screen
+          name="Report"
+          component={Request}
+          options={{
+            title: "Submit Emergency Assistance",
+            tabBarLabel: "Report",
+            headerRight: () => (
+              <TouchableOpacity
+                className="m-4"
+                onPress={() => navigation.navigate("Emergency Records")}
+              >
+                <View className="absolute top-0 z-50 left-0 w-3 h-3 bg-red-500 rounded-full"></View>
+                <Icon name="history" size={25} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+      )}
+
       <Tab.Screen
         name="Notification"
         component={Notification}

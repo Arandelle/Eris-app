@@ -35,7 +35,7 @@ const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const ScrollViewScreen = ({ dayTime }) => {
+const ScrollViewScreen = ({ dayTime, isVerified}) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
   const { currentUser } = useCurrentUser();
@@ -49,42 +49,11 @@ const ScrollViewScreen = ({ dayTime }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     trackUserLocation();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        setIsVerified(currentUser.emailVerified);
-
-        // Start polling for email verification status
-        if (!currentUser.emailVerified) {
-          const checkVerification = setInterval(async () => {
-            await currentUser.reload(); // Reloads the user's data from Firebase
-            if (currentUser.emailVerified) {
-              setIsVerified(true);
-              clearInterval(checkVerification); // Stop polling once verified
-              Alert.alert("Email Verified", "Your email has been verified!");
-            }
-          }, 5000); // Check every 5 seconds
-
-          // Clear the interval when the component unmounts
-          return () => clearInterval(checkVerification);
-        }
-      } else {
-        setIsVerified(false);
-      }
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
   const fullname = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
     .join(" ");

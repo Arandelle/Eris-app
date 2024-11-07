@@ -35,7 +35,6 @@ import { database } from "../services/firebaseConfig";
       const userRef = ref(database, `users/${result.user.uid}`);
       await update(userRef, {
         email: result.user.email,
-        isEmailVerified: result.user.emailVerified
       })
   
       // Send verification email
