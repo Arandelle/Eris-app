@@ -3,7 +3,9 @@ import {
     linkWithCredential,
     sendEmailVerification,
   } from "firebase/auth";
+import { ref, set, update } from "firebase/database";
 import { Alert } from "react-native";
+import { database } from "../services/firebaseConfig";
 
   export const linkAnonymousAccount = async (auth, email, password) => {
     if (!auth.currentUser?.isAnonymous) {
@@ -28,6 +30,13 @@ import { Alert } from "react-native";
   
       // Link anonymous account with credential
       const result = await linkWithCredential(auth.currentUser, credential);
+
+      //create user data in database
+      const userRef = ref(database, `users/${result.user.uid}`);
+      await update(userRef, {
+        email: result.user.email,
+        isEmailVerified: result.user.emailVerified
+      })
   
       // Send verification email
       await sendEmailVerification(result.user);

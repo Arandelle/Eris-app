@@ -8,7 +8,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert, Image } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
 import { auth, database } from "./src/services/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, sendEmailVerification, signOut } from "firebase/auth";
 import { get, ref } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import Logo from "./assets/logo.png";
@@ -38,15 +38,26 @@ const App = () => {
         if (user.isAnonymous) {
           // Directly set the user as anonymous without a database check
           setUser(user);
-        } else if (user.emailVerified) {
+        } else {
           try {
             const userRef = ref(database, `users/${user.uid}`);
             const userSnapshot = await get(userRef);
-            
-            console.log(`User snapshot exists: ${userSnapshot.exists()}`);
+
             if (userSnapshot.exists()) {
               setUser(user);
+
+              if(!user.emailVerified){
+                Alert.alert("Email verification Pending", "Please verify your email address. Check your inbox for verification link", [{
+                  text: "Resend Email",
+                  onPress: () => sendEmailVerification(user)
+                }, {
+                  text: "Ok",
+                  style: "cancel"
+                }])
+              }
+
             } else {
+              //if no user data found on database
               await signOut(auth);
               setUser(null);
               Alert.alert("Error", "User data not found");

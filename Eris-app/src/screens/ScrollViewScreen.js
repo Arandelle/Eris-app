@@ -28,6 +28,8 @@ import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useSendNotification from "../hooks/useSendNotification";
 import { handleAccountLinking } from "../hooks/useLinkAnonymous";
 import { auth } from "../services/firebaseConfig";
+import { reload } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 60;
@@ -47,11 +49,42 @@ const ScrollViewScreen = ({ dayTime }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     trackUserLocation();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setIsVerified(currentUser.emailVerified);
+
+        // Start polling for email verification status
+        if (!currentUser.emailVerified) {
+          const checkVerification = setInterval(async () => {
+            await currentUser.reload(); // Reloads the user's data from Firebase
+            if (currentUser.emailVerified) {
+              setIsVerified(true);
+              clearInterval(checkVerification); // Stop polling once verified
+              Alert.alert("Email Verified", "Your email has been verified!");
+            }
+          }, 5000); // Check every 5 seconds
+
+          // Clear the interval when the component unmounts
+          return () => clearInterval(checkVerification);
+        }
+      } else {
+        setIsVerified(false);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
   const fullname = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
     .join(" ");
@@ -177,7 +210,7 @@ const ScrollViewScreen = ({ dayTime }) => {
             style={[{ opacity: headerContentOpacity }]}
           >
             <TouchableOpacity
-              disabled={!auth.currentUser.emailVerified ? true : false}
+              disabled={!isVerified ? true : false}
               className="items-center space-y-1"
               onPress={() =>
                 Alert.alert(
@@ -197,7 +230,7 @@ const ScrollViewScreen = ({ dayTime }) => {
                 )
               }
             >
-              {!auth.currentUser.emailVerified ? (
+              {!isVerified ? (
                 <>
                   <Icon name="bell-off" size={80} color={colors.gray[400]} />
                   <TouchableOpacity
@@ -363,42 +396,55 @@ const ScrollViewScreen = ({ dayTime }) => {
               className="h-screen w-full flex items-center justify-center p-4"
               style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
             >
-          
               <View className="w-full flex  justify-center p-4 rounded-lg space-y-6 bg-white shadow-xl">
-              <View className="space-y-2">
-                <Text className="font-bold text-green-600 text-2xl">Link your account</Text>
-                <Text className="text-gray-500 text-md">To make it easier to access your account in the future, please link an email and password. This will let you log in directly without using guest access</Text>
-              </View>
-                <View className="relative z-10">
-                  <View className="flex items-center absolute top-4 left-3 z-50">
-                    <Icon name={"email"} size={20} color={colors.green[600]} />
-                  </View>
-                  <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                    placeholder={"Email"}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    onChangeText={setEmail}
-                    value={email}
-                  />
+                <View className="space-y-2">
+                  <Text className="font-bold text-green-600 text-2xl">
+                    Link your account
+                  </Text>
+                  <Text className="text-gray-500 text-md">
+                    To make it easier to access your account in the future,
+                    please link an email and password. This will let you log in
+                    directly without using guest access
+                  </Text>
+                  {!isVerified && auth.currentUser?.email && (
+                  <Text className="text-gray-500 text-lg">
+                   Verify this email <Text className="text-red-500">{auth.currentUser.email}</Text>
+                  </Text>
+                )}
                 </View>
+               {!isVerified && !auth.currentUser?.email && ( 
+               <View className="space-y-6">
+                  <View className="relative z-10">
+                    <View className="flex items-center absolute top-4 left-3 z-50">
+                      <Icon name={"email"} size={20} color={colors.green[600]} />
+                    </View>
+                    <TextInput
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                      placeholder={"Email"}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      onChangeText={setEmail}
+                      value={email}
+                    />
+                  </View>
+                 
+                  <View className="relative z-10">
+                    <View className="flex items-center absolute top-4 left-3 z-50">
+                      <Icon name="lock" size={20} color={colors.green[600]} />
+                    </View>
+                    <TextInput
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                      onChangeText={setPassword}
+                      value={password}
+                      placeholder="Password"
+                      secureTextEntry
+                    />
+                    <TouchableOpacity className="absolute right-4 top-4 flex items-center">
+                      <Icon name="eye" size={20} color={colors.green[600]} />
+                    </TouchableOpacity>
+                  </View>
 
-                <View className="relative z-10">
-                  <View className="flex items-center absolute top-4 left-3 z-50">
-                    <Icon name="lock" size={20} color={colors.green[600]} />
-                  </View>
-                  <TextInput
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                    onChangeText={setPassword}
-                    value={password}
-                    placeholder="Password"
-                    secureTextEntry
-                  />
-                  <TouchableOpacity className="absolute right-4 top-4 flex items-center">
-                    <Icon name="eye" size={20} color={colors.green[600]} />
-                  </TouchableOpacity>
-                </View>
-                <View>
+                  <View>
                   <TouchableOpacity
                     className="w-full bg-green-600 p-3 rounded-lg shadow-lg"
                     onPress={handleSubmit}
@@ -408,6 +454,8 @@ const ScrollViewScreen = ({ dayTime }) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
+               </View>)}
+
               </View>
             </View>
           </TouchableWithoutFeedback>

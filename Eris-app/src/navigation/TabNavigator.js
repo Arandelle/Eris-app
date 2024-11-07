@@ -31,12 +31,12 @@ const TabNavigator = () => {
   useEffect(() => {
     const hour = new Date().getHours();
 
-    if (hour >= 5 && hour < 12) {
-      setDayTime("Good morning");
+    if (hour >= 3 && hour < 12) {
+      setDayTime("Good morning! ☕");
     } else if (hour >= 12 && hour < 18) {
-      setDayTime("Good afternoon");
+      setDayTime("Good afternoon! 👋");
     } else {
-      setDayTime("Good evening");
+      setDayTime("Good evening! 🌙");
     }
   }, []);
 
