@@ -6,9 +6,8 @@ import Map from "../screens/Map";
 import Request from "../screens/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
-import { View, TouchableOpacity } from "react-native";
+import { View } from "react-native";
 import { useNotificationData } from "../hooks/useNotificationData";
-import { useNavigation } from "@react-navigation/native";
 import colors from "../constant/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
 import ScrollViewScreen from "../screens/ScrollViewScreen";
@@ -17,13 +16,13 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
-  const navigation = useNavigation();
   const { currentUser } = useCurrentUser();
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [dayTime, setDayTime] = useState("");
   const [showTabBar, setShowTabBar] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (currentUser) {
@@ -75,7 +74,7 @@ const TabNavigator = () => {
       initialRouteName="Home"
       screenOptions={({ route }) => ({
         headerShown: true,
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ color, size, }) => {
           const icons = {
             Home: "home",
             Map: "map-marker",
@@ -104,6 +103,10 @@ const TabNavigator = () => {
           );
         },
         tabBarActiveTintColor: colors.blue[800],
+        headerTintColor: "white",
+        headerStyle: {
+          backgroundColor:  colors.blue[800],
+          shadowColor: "transparent"},
         tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
           paddingBottom: 10,
@@ -113,7 +116,7 @@ const TabNavigator = () => {
           // bottom: 16,
           // right: 16,
           // left: 16,
-          borderRadius: 10,
+          // borderRadius: 10,
           display: showTabBar ? "block" : "none",
         },
         tabBarLabelStyle: {
@@ -161,15 +164,6 @@ const TabNavigator = () => {
           options={{
             title: "Submit Emergency Assistance",
             tabBarLabel: "Report",
-            headerRight: () => (
-              <TouchableOpacity
-                className="m-4"
-                onPress={() => navigation.navigate("Emergency Records")}
-              >
-                <View className="absolute top-0 z-50 left-0 w-3 h-3 bg-red-500 rounded-full"></View>
-                <Icon name="history" size={25} />
-              </TouchableOpacity>
-            ),
           }}
         />
       )}
