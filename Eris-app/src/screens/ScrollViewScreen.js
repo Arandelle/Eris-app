@@ -33,7 +33,7 @@ const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const ScrollViewScreen = ({ dayTime, isVerified}) => {
+const ScrollViewScreen = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
   const { currentUser } = useCurrentUser();
@@ -228,11 +228,18 @@ const ScrollViewScreen = ({ dayTime, isVerified}) => {
             style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
           >
             <View className="flex flex-row px-4 space-x-2 items-center h-full bg-blue-800">
-              <View className="rounded-full border border-green-500"><Image source={{uri : currentUser?.img}} className="h-12 w-12 rounded-full"/></View>
-             <View className="space-y-0">
+              <View className="rounded-full border border-green-500">
+                <Image
+                  source={{ uri: currentUser?.img }}
+                  className="h-12 w-12 rounded-full"
+                />
+              </View>
+              <View className="space-y-0">
                 <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
-                <Text className="text-lg text-white font-bold">{`${fullname}` || `${currentUser?.customId}`}</Text>
-             </View>
+                <Text className="text-lg text-white font-bold">
+                  {`${fullname}` || `${currentUser?.customId}`}
+                </Text>
+              </View>
             </View>
           </Animated.View>
         </Animated.View>
@@ -246,11 +253,14 @@ const ScrollViewScreen = ({ dayTime, isVerified}) => {
             paddingTop: HEADER_MAX_HEIGHT,
           }}
         >
-          <View className="flex-1 px-3 pb-3 bg-white space-y-3">
+          <View className="flex-1 p-3 bg-white space-y-3">
             {/* <ProfileReminderModal /> */}
-            <Text className="text-center text-3xl text-blue-900 font-extrabold space-y-0">
-              Barangay Bagtas Hotline Numbers
-            </Text>
+            <View className="bg-red-50 mt-3 p-4 rounded-md shadow-md">
+              <Text className="text-center text-2xl text-red-500 font-extrabold">
+                Barangay Bagtas Hotline Numbers
+              </Text>
+            </View>
+
             <View className="flex flex-row flex-wrap">
               {hotlineNumbers?.map((item, key) => (
                 <View
@@ -378,55 +388,62 @@ const ScrollViewScreen = ({ dayTime, isVerified}) => {
                     directly without using guest access
                   </Text>
                   {!isVerified && auth.currentUser?.email && (
-                  <Text className="text-gray-500 text-lg">
-                   Verify this email <Text className="text-red-500">{auth.currentUser.email}</Text>
-                  </Text>
-                )}
-                </View>
-               {!isVerified && !auth.currentUser?.email && ( 
-               <View className="space-y-6">
-                  <View className="relative z-10">
-                    <View className="flex items-center absolute top-4 left-3 z-50">
-                      <Icon name={"email"} size={20} color={colors.green[600]} />
-                    </View>
-                    <TextInput
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                      placeholder={"Email"}
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                      onChangeText={setEmail}
-                      value={email}
-                    />
-                  </View>
-                 
-                  <View className="relative z-10">
-                    <View className="flex items-center absolute top-4 left-3 z-50">
-                      <Icon name="lock" size={20} color={colors.green[600]} />
-                    </View>
-                    <TextInput
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                      onChangeText={setPassword}
-                      value={password}
-                      placeholder="Password"
-                      secureTextEntry
-                    />
-                    <TouchableOpacity className="absolute right-4 top-4 flex items-center">
-                      <Icon name="eye" size={20} color={colors.green[600]} />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View>
-                  <TouchableOpacity
-                    className="w-full bg-green-600 p-3 rounded-lg shadow-lg"
-                    onPress={handleSubmit}
-                  >
-                    <Text className="text-center text-lg text-white font-bold">
-                      Save account details
+                    <Text className="text-gray-500 text-lg">
+                      Verify this email{" "}
+                      <Text className="text-red-500">
+                        {auth.currentUser.email}
+                      </Text>
                     </Text>
-                  </TouchableOpacity>
+                  )}
                 </View>
-               </View>)}
+                {!isVerified && !auth.currentUser?.email && (
+                  <View className="space-y-6">
+                    <View className="relative z-10">
+                      <View className="flex items-center absolute top-4 left-3 z-50">
+                        <Icon
+                          name={"email"}
+                          size={20}
+                          color={colors.green[600]}
+                        />
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                        placeholder={"Email"}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        onChangeText={setEmail}
+                        value={email}
+                      />
+                    </View>
 
+                    <View className="relative z-10">
+                      <View className="flex items-center absolute top-4 left-3 z-50">
+                        <Icon name="lock" size={20} color={colors.green[600]} />
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
+                        onChangeText={setPassword}
+                        value={password}
+                        placeholder="Password"
+                        secureTextEntry
+                      />
+                      <TouchableOpacity className="absolute right-4 top-4 flex items-center">
+                        <Icon name="eye" size={20} color={colors.green[600]} />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View>
+                      <TouchableOpacity
+                        className="w-full bg-green-600 p-3 rounded-lg shadow-lg"
+                        onPress={handleSubmit}
+                      >
+                        <Text className="text-center text-lg text-white font-bold">
+                          Save account details
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
               </View>
             </View>
           </TouchableWithoutFeedback>
