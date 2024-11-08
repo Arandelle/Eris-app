@@ -108,9 +108,9 @@ const Profile = () => {
               </View>
 
               {!currentUser?.profileComplete && (
-                <View className="p-4 bg-indigo-50 border-l-4 border-indigo-400 rounded-md">
+                <View className="p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
                   <View className="flex flex-row items-center gap-2">
-                    <Icon name={"shield"} color={colors.blue[500]} size={20} />
+                    <Icon name={"shield"} color={colors.red[300]} size={20} />
                     <Text className="text-gray-800 text-lg font-medium">
                       Finish Setting Up Your Profile
                     </Text>

@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 import { auth, database } from "../services/firebaseConfig";
 import { ref, update, onValue } from "firebase/database";
 
-const useLocationTracking = (userData, setRefreshing=false) => {
+const useLocationTracking = (userData, setRefreshing =false) => {
   const [location, setLocation] = useState("");
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);

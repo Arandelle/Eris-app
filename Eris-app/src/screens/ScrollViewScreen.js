@@ -28,6 +28,10 @@ import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useSendNotification from "../hooks/useSendNotification";
 import { handleAccountLinking } from "../hooks/useLinkAnonymous";
 import { auth } from "../services/firebaseConfig";
+import {
+  PanGestureHandler,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
@@ -37,8 +41,9 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
   const { currentUser } = useCurrentUser();
+  const [refreshing, setRefreshing] = useState(false);
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
-    useLocationTracking(currentUser);
+    useLocationTracking(currentUser, setRefreshing);
   const { sendNotification } = useSendNotification();
   const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
   const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
@@ -141,6 +146,62 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
     }
   };
 
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  //Handle the gesture event to update the animate value
+  const handleGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: translateX } }],
+    { useNativeDriver: true }
+  );
+
+  // handle the end of the gesture
+  const handleGestureEnd = (event) => {
+    if (Math.abs(event.nativeEvent.translationX) > 50) {
+      if (auth.currentUser.emailVerified) {
+        Alert.alert(
+          "Send Emergency Alert?",
+          "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Send Alert",
+              style: "destructive",
+              onPress: handleConfirmReport,
+            },
+          ]
+        );
+      } else {
+        setIsLinkingAccount(!isLinkingAccount);
+      }
+    }
+    //Reset the position after the gesture ends
+
+    Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
+  };
+
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // Set up pulsing animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(slideAnim, {
+          toValue: 20, // Move right by 20 pixels
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0, // Move back to start position
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [slideAnim]);
+
   return (
     <>
       <Modal
@@ -172,55 +233,68 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
           ]}
         >
           {/* Collapsible Content */}
-          <Animated.View
-            className="flex-1 items-center justify-center p-5 space-y-2"
-            style={[{ opacity: headerContentOpacity }]}
-          >
-            <TouchableOpacity
-              disabled={!isVerified ? true : false}
-              className="items-center space-y-1"
-              onPress={() =>
-                Alert.alert(
-                  "Send Emergency Alert?",
-                  "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
-                  [
-                    {
-                      text: "Cancel",
-                      style: "cancel",
-                    },
-                    {
-                      text: "Send Alert",
-                      style: "destructive",
-                      onPress: handleConfirmReport,
-                    },
-                  ]
-                )
-              }
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Animated.View
+              className="flex-1 items-center justify-center p-5 space-y-2"
+              style={[{ opacity: headerContentOpacity }]}
             >
-              {!isVerified ? (
-                <>
-                  <Icon name="bell-off" size={80} color={colors.gray[400]} />
-                  <TouchableOpacity
-                    onPress={() => setIsLinkingAccount(!isLinkingAccount)}
-                  >
-                    <Text className="text-2xl text-center text-white font-bold">
-                      Verify your account now!
-                    </Text>
+              <PanGestureHandler
+                onGestureEvent={handleGestureEvent}
+                onEnded={handleGestureEnd}
+              >
+                <Animated.View style={{ transform: [{ translateX }] }}>
+                  <TouchableOpacity className="items-center space-y-1">
+                    {!isVerified ? (
+                      <>
+                        <View className="flex flex-row items-center justify-center">
+                          <Animated.View
+                            className="flex flex-row  space-x-4 items-center"
+                            style={{ transform: [{ translateX: slideAnim }] }}
+                          >
+                            <Icon
+                              name="email-fast"
+                              size={80}
+                              color={colors.gray[400]}
+                            />
+                            <Icon
+                              name="arrow-right-circle"
+                              size={30}
+                              color={colors.gray[300]}
+                            />
+                          </Animated.View>
+                        </View>
+                        <Text className="text-white text-lg">Slide to link an email</Text>
+                      </>
+                    ) : (
+                      <>
+                        <View className="flex flex-row items-center justify-center">
+                          <Animated.View
+                            className="flex flex-row  space-x-4 items-center"
+                            style={{ transform: [{ translateX: slideAnim }] }}
+                          >
+                            <Icon
+                              name="bell-ring"
+                              size={80}
+                              color={colors.yellow[400]}
+                            />
+                            <Icon
+                              name="arrow-right-circle"
+                              size={30}
+                              color={colors.gray[300]}
+                            />
+                          </Animated.View>
+                        </View>
+                        <Text className="text-white text-lg">Slide for quick emergency report</Text>
+                      </>
+                    )}
                   </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <Icon name="bell-ring" size={80} color={colors.yellow[400]} />
-                  <Text className="text-2xl text-center text-white font-bold">
-                    Report Now!
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-            <Text className="text-gray-50 font-thin text-md">
-              tap the bell for immediate emergency
-            </Text>
-          </Animated.View>
+                </Animated.View>
+              </PanGestureHandler>
+              <Text className="text-gray-50 font-thin text-md">
+                Quick response bell
+              </Text>
+            </Animated.View>
+          </GestureHandlerRootView>
 
           {/* Sticky Header Content */}
           <Animated.View
