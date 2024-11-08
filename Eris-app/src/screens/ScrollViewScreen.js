@@ -28,11 +28,9 @@ import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useSendNotification from "../hooks/useSendNotification";
 import { handleAccountLinking } from "../hooks/useLinkAnonymous";
 import { auth } from "../services/firebaseConfig";
-import { reload } from "firebase/auth";
-import { onAuthStateChanged } from "firebase/auth";
 
 const HEADER_MAX_HEIGHT = 240;
-const HEADER_MIN_HEIGHT = 60;
+const HEADER_MIN_HEIGHT = 70;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const ScrollViewScreen = ({ dayTime, isVerified}) => {
@@ -229,8 +227,12 @@ const ScrollViewScreen = ({ dayTime, isVerified}) => {
             className={`absolute left-0 right-0 bottom-0`}
             style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
           >
-            <View className="flex flex-row p-2 items-center h-full bg-blue-800">
-              <Text className="text-lg text-white font-bold">{`${dayTime} ${fullname}`}</Text>
+            <View className="flex flex-row px-4 space-x-2 items-center h-full bg-blue-800">
+              <View className="rounded-full border border-green-500"><Image source={{uri : currentUser?.img}} className="h-12 w-12 rounded-full"/></View>
+             <View className="space-y-0">
+                <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
+                <Text className="text-lg text-white font-bold">{`${fullname}` || `${currentUser?.customId}`}</Text>
+             </View>
             </View>
           </Animated.View>
         </Animated.View>
