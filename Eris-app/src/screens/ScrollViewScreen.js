@@ -52,6 +52,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     trackUserLocation();
@@ -263,7 +264,9 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
                             />
                           </Animated.View>
                         </View>
-                        <Text className="text-white text-lg">Slide to link an email</Text>
+                        <Text className="text-white text-lg">
+                          Slide to link an email
+                        </Text>
                       </>
                     ) : (
                       <>
@@ -284,7 +287,9 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
                             />
                           </Animated.View>
                         </View>
-                        <Text className="text-white text-lg">Slide for quick emergency report</Text>
+                        <Text className="text-white text-lg">
+                          Slide for quick emergency report
+                        </Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -298,22 +303,40 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
 
           {/* Sticky Header Content */}
           <Animated.View
-            className={`absolute left-0 right-0 bottom-0`}
+            className="absolute left-0 right-0 bottom-0"
             style={{ opacity: stickyHeaderOpacity, height: HEADER_MIN_HEIGHT }}
           >
-            <View className="flex flex-row px-4 space-x-2 items-center h-full bg-blue-800">
-              <View className="rounded-full border border-green-500">
-                <Image
-                  source={{ uri: currentUser?.img }}
-                  className="h-12 w-12 rounded-full"
+            <View className="flex flex-row items-center py-0 h-full justify-between px-4">
+              {!isSearching ? (
+                <View className="flex flex-row space-x-2 items-center bg-blue-800">
+                  <View className="rounded-full border border-green-500">
+                    <Image
+                      source={{ uri: currentUser?.img }}
+                      className="h-12 w-12 rounded-full"
+                    />
+                  </View>
+                  <View className="space-y-0">
+                    <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
+                    <Text className="text-lg text-white font-bold">
+                      {`${fullname}` || `${currentUser?.customId}`}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                  <TextInput
+                    className="flex-1 text-white text-lg bg-blue-900 rounded-full py-2 px-4"
+                    placeholder="Search"
+                    placeholderTextColor="white"
+                    autoFocus={true}
+                  />
+              )}
+              <TouchableOpacity className="px-2" onPress={() => setIsSearching(!isSearching)}>
+                <Icon
+                  name={isSearching ? "check" : "magnify"}
+                  size={24}
+                  color="white"
                 />
-              </View>
-              <View className="space-y-0">
-                <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
-                <Text className="text-lg text-white font-bold">
-                  {`${fullname}` || `${currentUser?.customId}`}
-                </Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </Animated.View>
         </Animated.View>

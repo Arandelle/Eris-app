@@ -8,12 +8,9 @@ import {
   Alert,
   RefreshControl,
 } from "react-native";
-import { database } from "../services/firebaseConfig";
-import { ref, serverTimestamp, push, update } from "firebase/database";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
-import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "../hooks/useSendNotification";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 
@@ -21,7 +18,6 @@ const Request = () => {
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
   const { sendNotification } = useSendNotification(description);
-  const [newRequestKey, setNewRequestKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
 
   const { currentUser } = useCurrentUser();
@@ -71,7 +67,7 @@ const Request = () => {
       }
     >
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
-     Submit Detailed Report
+       Submit Detailed Report
       </Text>
 
       {hasActiveRequest && (
@@ -93,6 +89,10 @@ const Request = () => {
             placeholder="Briefly describe the emergency"
           />
         </View>
+
+        <TouchableOpacity className="p-2 bg-blue-800 w-1/3 rounded">
+          <Text className="text-lg text-center text-white font-bold">Add Photo</Text>
+        </TouchableOpacity>
 
         <View>
           <Text className="text-lg mb-1 text-gray-600">Location:</Text>
