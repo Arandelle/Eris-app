@@ -3,17 +3,17 @@ import { useState, useEffect } from "react";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const useRoute = (responderPosition, selectedEmergency, setSelectedEmergency) => {
+const useRoute = (responderPosition, latitude, longitude) => {
 
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
 
   const fetchRoute = async () => {
-    if (!responderPosition || !selectedEmergency) return;
+    if (!responderPosition || !latitude || !longitude) return;
 
     try {
       const response = await fetch(
-        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteKey}&start=${responderPosition.longitude},${responderPosition.latitude}&end=${selectedEmergency.longitude},${selectedEmergency.latitude}`
+        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteKey}&start=${responderPosition.longitude},${responderPosition.latitude}&end=${longitude},${latitude}`
       );
       const data = await response.json();
 
@@ -32,10 +32,8 @@ const useRoute = (responderPosition, selectedEmergency, setSelectedEmergency) =>
   };
 
   useEffect(() => {
-    if (responderPosition && selectedEmergency) {
       fetchRoute();
-    }
-  }, [responderPosition, selectedEmergency]);
+  }, [responderPosition, latitude, longitude]);
 
   return {route,setRoute, distance,setDistance}
 };

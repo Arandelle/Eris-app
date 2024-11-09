@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   ScrollView,
@@ -13,6 +14,7 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
+  SafeAreaView,
 } from "react-native";
 import ImageViewer from "react-native-image-zoom-viewer";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -53,6 +55,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     trackUserLocation();
@@ -110,6 +113,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   };
 
   const handleConfirmReport = async () => {
+    setLoading(true)
     try {
       await submitEmergencyReport({
         currentUser,
@@ -121,6 +125,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
         responderData,
       });
       Alert.alert("Emergency reported", "Help is on the way!");
+      setLoading(false)
     } catch (error) {
       Alert.alert(
         "Error",
@@ -202,6 +207,14 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
       ])
     ).start();
   }, [slideAnim]);
+
+  if (loading)
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center">
+       <ActivityIndicator size={"large"} color={colors.blue[800]} animating={true}/>
+       <Text className="text-xl">Please stay calm...</Text>
+      </SafeAreaView>
+    );
 
   return (
     <>
