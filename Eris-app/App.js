@@ -14,8 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
-import ScrollViewScreen from "./src/screens/ScrollViewScreen";
-import PhoneAuth from "./src/screens/PhoneAuth";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const Stack = createNativeStackNavigator();
 
@@ -90,68 +89,70 @@ const App = () => {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          headerTitleAlign: "center",
-          headerTitleStyle: {
-            fontWeight: "900",
-            fontSize: 24,
-          },
-        }}
-      >
-        {user ? (
+   <GestureHandlerRootView>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              fontWeight: "900",
+              fontSize: 24,
+            },
+          }}
+        >
+          {user ? (
+              <>
+                <Stack.Screen
+                  name="ERIS"
+                  options={{ headerShown: false }}
+                  component={TabNavigator}
+                />
+                <Stack.Screen
+                  name="Emergency Records"
+                  component={TopBarNavigator}
+                  options={{
+                    headerShown: true
+                  }}
+                />
+                <Stack.Screen
+                  name="UpdateProfile"
+                  component={UpdateProfile}
+                  options={({ navigation }) => ({
+                    title: "Update your profile",
+                    headerShown: true,
+                    headerLeft: () => (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate("Profile")}
+                      >
+                        <Icon name="arrow-left-thick" size={25} color={"blue"} />
+                      </TouchableOpacity>
+                    ),
+                  })}
+                />
+              </>
+            ) : (
             <>
+            {/* <Stack.Screen
+                  name="Phone"
+                  options={{ headerShown: false }}
+                  component={PhoneAuth}
+                /> */}
+              <Stack.Screen name="Login" component={LoginForm} />
               <Stack.Screen
-                name="ERIS"
-                options={{ headerShown: false }}
-                component={TabNavigator}
-              />
-              <Stack.Screen
-                name="Emergency Records"
-                component={TopBarNavigator}
+                name="Signup"
+                component={SignupForm}
                 options={{
-                  headerShown: true
+                  headerShown: true,
+                  title: "Create your account",
+                  headerRight: () => <LoginButton />,
                 }}
               />
-              <Stack.Screen
-                name="UpdateProfile"
-                component={UpdateProfile}
-                options={({ navigation }) => ({
-                  title: "Update your profile",
-                  headerShown: true,
-                  headerLeft: () => (
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate("Profile")}
-                    >
-                      <Icon name="arrow-left-thick" size={25} color={"blue"} />
-                    </TouchableOpacity>
-                  ),
-                })}
-              />
             </>
-          ) : (
-          <>
-          {/* <Stack.Screen
-                name="Phone"
-                options={{ headerShown: false }}
-                component={PhoneAuth}
-              /> */}
-            <Stack.Screen name="Login" component={LoginForm} />
-            <Stack.Screen
-              name="Signup"
-              component={SignupForm}
-              options={{
-                headerShown: true,
-                title: "Create your account",
-                headerRight: () => <LoginButton />,
-              }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+   </GestureHandlerRootView>
   );
 };
 

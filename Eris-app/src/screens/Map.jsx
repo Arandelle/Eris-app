@@ -28,7 +28,8 @@ const Map = () => {
       >
         <View className="flex w-full h-full items-center justify-center">
           <Image source={Logo} alt="Loading..." />
-          <Text>Loading, please wait...</Text>
+          <Text>Map loading...</Text>
+          <Text className="font-bold">Try turning on your device's location</Text>
         </View>
       </ScrollView>
     );
