@@ -13,8 +13,6 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import ScrollViewScreen from "../screens/ScrollViewScreen";
 import { auth } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import BottomSheetExample from "../screens/BottomModal";
-
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const { currentUser } = useCurrentUser();
@@ -189,7 +187,6 @@ const TabNavigator = () => {
           <Profile {...props} setIsProfileComplete={setIsProfileComplete} />
         )}
       </Tab.Screen>
-      <Tab.Screen name="bottomSheet" component={BottomSheetExample} />
     </Tab.Navigator>
   );
 };
