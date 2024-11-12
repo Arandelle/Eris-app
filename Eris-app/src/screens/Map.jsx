@@ -1,12 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import {
-  Text,
-  View,
-  Image,
-  ScrollView,
-  RefreshControl,
-  StyleSheet,
-} from "react-native";
+import { Text, View, Image, ScrollView, RefreshControl } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import Logo from "../../assets/logo.png";
 import responderMarker from "../../assets/ambulance.png";
@@ -15,6 +8,8 @@ import useRoute from "../hooks/useRoute";
 import useCurrentUser from "../hooks/useCurrentUser";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import useFetchData from "../hooks/useFetchData";
+import colors from "../constant/colors";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const Map = () => {
   const { currentUser } = useCurrentUser();
@@ -28,6 +23,7 @@ const Map = () => {
   const responderDetails = responderData?.find(
     (user) => user.id === currentUser?.activeRequest?.responderId
   );
+
   const { img, firstname, lastname, customId } = responderDetails || {};
 
   const bottomSheetRef = useRef(null);
@@ -78,7 +74,7 @@ const Map = () => {
           <Marker
             coordinate={{ latitude, longitude }}
             title={"Your Location"}
-            pinColor="#42a5f5"
+            pinColor={colors.blue[800]}
           />
 
           {/* Responder Location Marker */}
@@ -86,7 +82,7 @@ const Map = () => {
             <Marker
               coordinate={responderLocation}
               title="Responder"
-              pinColor="red"
+              pinColor={colors.red[800]}
               onPress={openBottomSheet} // Open bottom sheet when marker is pressed
             >
               <Image source={responderMarker} className="h-12 w-12" />
@@ -109,48 +105,42 @@ const Map = () => {
           enablePanDownToClose={true}
         >
           <BottomSheetView style={{ flex: 1 }}>
-            <View className="px-6 py-4 my-4 bg-white shadow-lg border border-gray-200">
-              <View className="flex flex-row items-center space-x-4">
-                <View className="rounded-full overflow-hidden border-4 border-green-500">
+            <View className="">
+              <View className="flex flex-row py-2 px-6 space-x-4 items-center border-b border-b-gray-300">
+                <View className="bg-gray-100 rounded-lg p-3">
+                  <Icon name="map-marker" size={30} color={colors.red[400]} />
+                </View>
+                <View className="">
+                  <Text className="text-xl text-red-500 font-bold">
+                    {distance.toFixed(2)} km Distance
+                  </Text>
+                  <Text className="text-gray-400 font-bold">
+                    Bagtas, Tanza Cavite
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex flex-row h-28 items-center px-6 space-x-4 bg-white rounded-lg shadow-md">
+                <View className="rounded-full border-2 border-green-300 p-1">
                   <Image
                     source={{ uri: img }}
-                    className="h-20 w-20 rounded-full"
+                    className="h-14 w-14 rounded-full"
                   />
                 </View>
 
-                <View className="flex-1">
-                  <Text className="text-xl font-semibold text-gray-800">
-                    {`${firstname} ${lastname}`}
+                <View className="flex-1 space-y-2">
+                  <View>
+                    <Text className="text-xl font-semibold text-gray-800">
+                      {`${firstname} ${lastname}`}
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      ID: {customId}
+                    </Text>
+                  </View>
+                  <Text className="w-64 text-sm text-gray-600 leading-5">
+                    I’m on my way to your location. Please remain calm; I’ll be
+                    there to assist you shortly.
                   </Text>
-                  <Text className="text-sm text-gray-500">ID: {customId}</Text>
-
-                  <View className="mt-2">
-                    <Text className="text-base font-medium text-green-600">
-                      Distance: {distance.toFixed(2)} km
-                    </Text>
-                  </View>
-
-                  <View className="mt-3">
-                    <Text className="text-sm font-medium text-gray-800">
-                      Responder Location:
-                    </Text>
-                    <View className="flex flex-row items-center mt-1">
-                      <Text className="text-sm text-gray-500 w-1/3">
-                        Latitude:
-                      </Text>
-                      <Text className="text-sm text-gray-700">
-                        {responderLocation.latitude}
-                      </Text>
-                    </View>
-                    <View className="flex flex-row items-center mt-1">
-                      <Text className="text-sm text-gray-500 w-1/3">
-                        Longitude:
-                      </Text>
-                      <Text className="text-sm text-gray-700">
-                        {responderLocation.longitude}
-                      </Text>
-                    </View>
-                  </View>
                 </View>
               </View>
             </View>
