@@ -14,6 +14,7 @@
     "@expo/metro-runtime": "~3.2.3",
     "@gorhom/bottom-sheet": "^5.0.5",
     "@mapbox/polyline": "^1.2.1",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/geolocation": "^3.3.0",
     "@react-native-firebase/app": "^17.4.2",
     "@react-native-firebase/auth": "^17.4.2",
