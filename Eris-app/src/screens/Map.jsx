@@ -58,6 +58,7 @@ const Map = () => {
     );
   }
 
+
   return (
     <>
       <View className="flex-1">
@@ -85,7 +86,7 @@ const Map = () => {
               pinColor={colors.red[800]}
               onPress={openBottomSheet} // Open bottom sheet when marker is pressed
             >
-              <Image source={responderMarker} className="h-12 w-12" />
+              <Image source={responderMarker} className="h-10 w-10" />
             </Marker>
           )}
 
