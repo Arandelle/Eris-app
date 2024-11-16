@@ -16,7 +16,7 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
 } from "react-native";
-import ImageViewer from "react-native-image-zoom-viewer";
+import ImageViewer from "react-native-image-viewing";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constant/colors";
 import useFetchData from "../hooks/useFetchData";
@@ -55,7 +55,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     trackUserLocation();
@@ -113,7 +113,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   };
 
   const handleConfirmReport = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       await submitEmergencyReport({
         currentUser,
@@ -125,7 +125,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
         responderData,
       });
       Alert.alert("Emergency reported", "Help is on the way!");
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
       Alert.alert(
         "Error",
@@ -211,26 +211,24 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   if (loading)
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
-       <ActivityIndicator size={"large"} color={colors.blue[800]} animating={true}/>
-       <Text className="text-xl">Please stay calm...</Text>
+        <ActivityIndicator
+          size={"large"}
+          color={colors.blue[800]}
+          animating={true}
+        />
+        <Text className="text-xl">Please stay calm...</Text>
       </SafeAreaView>
     );
 
   return (
     <>
-      <Modal
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]} // Ensure it's an array, even for one image
+        imageIndex={0}
         visible={isImageModalVisible}
-        transparent={true}
-        onRequestClose={() => setIsImageModalVisible(false)} // Close modal when back button is pressed
-      >
-        <ImageViewer
-          imageUrls={[{ url: selectedImageUri }]} // Use selected image URL for viewing
-          onSwipeDown={() => setIsImageModalVisible(false)} // Close modal on swipe down
-          enableSwipeDown={true}
-          renderIndicator={() => null} // Hide the pagination
-          backgroundColor="rgba(0,0,0,0.8)"
-        />
-      </Modal>
+        onRequestClose={() => setIsImageModalVisible(false)} // Close viewer
+      />
+
       <View className="flex-1 bg-gray-200">
         <StatusBar
           barStyle="light-content"
@@ -336,14 +334,17 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
                   </View>
                 </View>
               ) : (
-                  <TextInput
-                    className="flex-1 text-white text-lg bg-blue-900 rounded-full py-2 px-4"
-                    placeholder="Search"
-                    placeholderTextColor="white"
-                    autoFocus={true}
-                  />
+                <TextInput
+                  className="flex-1 text-white text-lg bg-blue-900 rounded-full py-2 px-4"
+                  placeholder="Search"
+                  placeholderTextColor="white"
+                  autoFocus={true}
+                />
               )}
-              <TouchableOpacity className="px-2" onPress={() => setIsSearching(!isSearching)}>
+              <TouchableOpacity
+                className="px-2"
+                onPress={() => setIsSearching(!isSearching)}
+              >
                 <Icon
                   name={isSearching ? "check" : "magnify"}
                   size={24}
