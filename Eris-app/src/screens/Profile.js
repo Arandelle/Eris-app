@@ -21,10 +21,6 @@ const Profile = () => {
   const navigation = useNavigation();
   const [logout, setLogout] = useState(false);
 
-  const handleShowUpdateForm = () => {
-    navigation.navigate("UpdateProfile");
-  };
-
   const handleLogoutModal = () => {
     setLogout(!logout);
   };
@@ -32,8 +28,7 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.navigate("Login");
-    } catch (e) {
+     } catch (e) {
       console.error(e);
     }
   };
@@ -50,7 +45,7 @@ const Profile = () => {
               />
               <TouchableOpacity
                 className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
-                onPress={handleShowUpdateForm}
+                onPress={() => navigation.navigate("UpdateProfile")}
               >
                 <Icon name="pencil" size={18} color={"white"} />
               </TouchableOpacity>

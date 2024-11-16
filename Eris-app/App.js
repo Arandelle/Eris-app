@@ -8,7 +8,11 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { Text, TouchableOpacity, View, Alert, Image } from "react-native";
 import UpdateProfile from "./src/screens/UpdateProfile";
 import { auth, database } from "./src/services/firebaseConfig";
-import { onAuthStateChanged, sendEmailVerification, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  sendEmailVerification,
+  signOut,
+} from "firebase/auth";
 import { get, ref } from "firebase/database";
 import { useNavigation } from "@react-navigation/native";
 import Logo from "./assets/logo.png";
@@ -21,7 +25,7 @@ const Stack = createNativeStackNavigator();
 const LoginButton = () => {
   const navigation = useNavigation();
   return (
-    <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+    <TouchableOpacity onPress={() => navigation.goBack()}>
       <Text className="text-blue-600 font-extrabold text-lg">Login</Text>
     </TouchableOpacity>
   );
@@ -45,16 +49,22 @@ const App = () => {
             if (userSnapshot.exists()) {
               setUser(user);
 
-              if(!user.emailVerified){
-                Alert.alert("Email verification Pending", "Please verify your email address. Check your inbox for verification link", [{
-                  text: "Resend Email",
-                  onPress: () => sendEmailVerification(user)
-                }, {
-                  text: "Ok",
-                  style: "cancel"
-                }])
+              if (!user.emailVerified) {
+                Alert.alert(
+                  "Email verification Pending",
+                  "Please verify your email address. Check your inbox for verification link",
+                  [
+                    {
+                      text: "Resend Email",
+                      onPress: () => sendEmailVerification(user),
+                    },
+                    {
+                      text: "Ok",
+                      style: "cancel",
+                    },
+                  ]
+                );
               }
-
             } else {
               //if no user data found on database
               await signOut(auth);
@@ -74,10 +84,9 @@ const App = () => {
       }
       setLoading(false);
     });
-  
+
     return () => unsubscribe();
   }, []);
-  
 
   if (loading) {
     return (
@@ -89,7 +98,7 @@ const App = () => {
   }
 
   return (
-   <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
@@ -102,38 +111,31 @@ const App = () => {
           }}
         >
           {user ? (
-              <>
-                <Stack.Screen
-                  name="ERIS"
-                  options={{ headerShown: false }}
-                  component={TabNavigator}
-                />
-                <Stack.Screen
-                  name="Emergency Records"
-                  component={TopBarNavigator}
-                  options={{
-                    headerShown: true
-                  }}
-                />
-                <Stack.Screen
-                  name="UpdateProfile"
-                  component={UpdateProfile}
-                  options={({ navigation }) => ({
-                    title: "Update your profile",
-                    headerShown: true,
-                    headerLeft: () => (
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("Profile")}
-                      >
-                        <Icon name="arrow-left-thick" size={25} color={"blue"} />
-                      </TouchableOpacity>
-                    ),
-                  })}
-                />
-              </>
-            ) : (
             <>
-            {/* <Stack.Screen
+              <Stack.Screen
+                name="ERIS"
+                options={{ headerShown: false }}
+                component={TabNavigator}
+              />
+              <Stack.Screen
+                name="Emergency Records"
+                component={TopBarNavigator}
+                options={{
+                  headerShown: true,
+                }}
+              />
+              <Stack.Screen
+                name="UpdateProfile"
+                component={UpdateProfile}
+                options={() => ({
+                  title: "Update your profile",
+                  headerShown: true,
+                })}
+              />
+            </>
+          ) : (
+            <>
+              {/* <Stack.Screen
                   name="Phone"
                   options={{ headerShown: false }}
                   component={PhoneAuth}
@@ -152,7 +154,7 @@ const App = () => {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-   </GestureHandlerRootView>
+    </GestureHandlerRootView>
   );
 };
 

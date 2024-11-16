@@ -68,8 +68,6 @@ const LoginForm = () => {
           const userData = userSnapshot.val();
           // You can now use the userData as needed, e.g., storing in context or state
           console.log("User Data:", userData);
-
-          navigation.navigate("ERIS");
           ToastAndroid.show(
             "Login Successfully",
             ToastAndroid.SHORT,
@@ -153,128 +151,129 @@ const LoginForm = () => {
       className="flex-1"
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="space-y-10">
-          <View className="flex items-center mt-20">
-            <Image
-              source={require("../../assets/logo.png")}
-              className="h-24 w-24"
-            />
-          </View>
-          <View className="flex items-center">
-            <View className="w-full max-w-sm">
-              <Text className="text-center text-2xl text-blue-800 font-bold mb-3">
-                Welcome to Eris App!
-              </Text>
-              <View className="space-y-4">
-                <View className="space-y-2">
-                  <Text className="text-lg">Email</Text>
-                  <View className="relative z-10">
-                    <View className="flex items-center absolute top-4 left-3 z-50">
-                      <Icon name="email" size={20} color={colors.blue[800]} />
-                    </View>
-                    <TextInput
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      onChangeText={setEmail}
-                      value={email}
-                      placeholder="Enter your email"
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                    />
-                  </View>
-                </View>
-                <View className="space-y-2">
-                  <View className="flex flex-row items-center justify-between">
-                    <Text className="text-lg">Password</Text>
-                    <TouchableOpacity onPress={handleForgotPassword}>
-                      <Text className="text-lg underline">
-                        Forgot Password?
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {/** Password Input */}
-                  <View className="relative z-10">
-                    <View className="flex items-center absolute top-4 left-3 z-50">
-                      <Icon name="lock" size={20} color={colors.blue[800]} />
-                    </View>
-                    <TextInput
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      onChangeText={setPassword}
-                      value={password}
-                      placeholder="Enter your password"
-                      secureTextEntry={!showPass}
-                    />
-                    <TouchableOpacity
-                      className="absolute right-4 top-4 flex items-center"
-                      onPress={handleShowPass}
-                    >
-                      <Icon
-                        name={showPass ? "eye" : "eye-off"}
-                        size={20}
-                        color={colors.blue[800]}
+       <View className="flex-1 justify-between min-h-full">
+          <View className="space-y-10">
+            <View className="flex items-center mt-20">
+              <Image
+                source={require("../../assets/logo.png")}
+                className="h-24 w-24"
+              />
+            </View>
+            <View className="flex items-center">
+              <View className="w-full max-w-sm">
+                <Text className="text-center text-2xl text-blue-800 font-bold mb-3">
+                  Welcome to Eris App!
+                </Text>
+                <View className="space-y-4">
+                  <View className="space-y-2">
+                    <Text className="text-lg">Email</Text>
+                    <View className="relative z-10">
+                      <View className="flex items-center absolute top-4 left-3 z-50">
+                        <Icon name="email" size={20} color={colors.blue[800]} />
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        onChangeText={setEmail}
+                        value={email}
+                        placeholder="Enter your email"
+                        autoCapitalize="none"
+                        keyboardType="email-address"
                       />
-                    </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-                {/** Login button */}
-                <TouchableOpacity
-                  className="w-full bg-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
-                  onPress={handleLogin}
-                  disabled={loading}
-                >
-                  <Icon name="login" size={20} color={"white"} />
-                  <Text className="text-center text-lg text-white font-bold">
-                    {loading ? "Logging in..." : "Login"}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* button for anonymous*/}
-
-                <TouchableOpacity
-                  className="w-full bg-white border-2 border-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
-                  onPress={handleAnonymousLogin}
-                  disabled={loading}
-                >
-                  <Icon
-                    name="account-arrow-right"
-                    size={20}
-                    color={colors.blue[800]}
+                  <View className="space-y-2">
+                    <View className="flex flex-row items-center justify-between">
+                      <Text className="text-lg">Password</Text>
+                      <TouchableOpacity onPress={handleForgotPassword}>
+                        <Text className="text-lg underline">
+                          Forgot Password?
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    {/** Password Input */}
+                    <View className="relative z-10">
+                      <View className="flex items-center absolute top-4 left-3 z-50">
+                        <Icon name="lock" size={20} color={colors.blue[800]} />
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        onChangeText={setPassword}
+                        value={password}
+                        placeholder="Enter your password"
+                        secureTextEntry={!showPass}
+                      />
+                      <TouchableOpacity
+                        className="absolute right-4 top-4 flex items-center"
+                        onPress={handleShowPass}
+                      >
+                        <Icon
+                          name={showPass ? "eye" : "eye-off"}
+                          size={20}
+                          color={colors.blue[800]}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  {/** Login button */}
+                  <TouchableOpacity
+                    className="w-full bg-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
+                    onPress={handleLogin}
+                    disabled={loading}
+                  >
+                    <Icon name="login" size={20} color={"white"} />
+                    <Text className="text-center text-lg text-white font-bold">
+                      {loading ? "Logging in..." : "Login"}
+                    </Text>
+                  </TouchableOpacity>
+  
+                  {/* button for anonymous*/}
+  
+                  <TouchableOpacity
+                    className="w-full bg-white border-2 border-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
+                    onPress={handleAnonymousLogin}
+                    disabled={loading}
+                  >
+                    <Icon
+                      name="account-arrow-right"
+                      size={20}
+                      color={colors.blue[800]}
+                    />
+                    <Text className="text-center text-lg text-blue-800 font-bold">
+                      {loading ? "Please wait..." : "Login as Guest"}
+                    </Text>
+                  </TouchableOpacity>
+  
+                  {/* <TouchableOpacity
+                    className="w-full bg-white border-2 border-blue-800 p-3 rounded flex flex-row items-center justify-center space-x-4"
+                    onPress={() => navigation.navigate("Phone")}
+                    disabled={loading}
+                  >
+                  <Icon name="incognito" size={20} color={colors.blue[800]} />
+                    <Text className="text-center text-lg text-blue-800 font-bold">
+                      {loading ? "Please wait..." : "Login Phone"}
+                    </Text>
+                  </TouchableOpacity> */}
+  
+                  <ForgotPass
+                    visible={isPromptVisible}
+                    onClose={() => setPromptVisible(false)}
+                    onSubmit={handlePasswordReset}
                   />
-                  <Text className="text-center text-lg text-blue-800 font-bold">
-                    {loading ? "Please wait..." : "Login as Guest"}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* <TouchableOpacity
-                  className="w-full bg-white border-2 border-blue-800 p-3 rounded flex flex-row items-center justify-center space-x-4"
-                  onPress={() => navigation.navigate("Phone")}
-                  disabled={loading}
-                >
-                <Icon name="incognito" size={20} color={colors.blue[800]} />
-                  <Text className="text-center text-lg text-blue-800 font-bold">
-                    {loading ? "Please wait..." : "Login Phone"}
-                  </Text>
-                </TouchableOpacity> */}
-
-                <ForgotPass
-                  visible={isPromptVisible}
-                  onClose={() => setPromptVisible(false)}
-                  onSubmit={handlePasswordReset}
-                />
+                </View>
               </View>
             </View>
           </View>
-        </View>
+  
+            <View className="flex flex-col items-center justify-center space-x-2 p-2">
+              <Text className="text-lg">Don't have an account?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text className="text-blue-500 underline font-bold text-lg">
+                  Create an account
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-        <View className="absolute bottom-10 self-center">
-          <View className="flex flex-col items-center justify-center space-x-2 p-2">
-            <Text className="text-lg">Don't have an account?</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text className="text-blue-500 underline font-bold text-lg">
-                Create an account
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+       </View>
       </ScrollView>
     </ImageBackground>
   );
