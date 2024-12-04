@@ -28,7 +28,7 @@ const Map = () => {
 
   const bottomSheetRef = useRef(null);
 
-  const snapPoints = useMemo(() => ["30%"], []);
+  const snapPoints = useMemo(() => ["30%", "50%"], []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -99,6 +99,7 @@ const Map = () => {
             />
           )}
         </MapView>
+
         <BottomSheet
           ref={bottomSheetRef}
           index={responderLocation ? initialIndex : -1} // Start hidden
