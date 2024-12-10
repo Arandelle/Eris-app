@@ -18,8 +18,10 @@ import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import ImageViewer from "react-native-image-viewing";
 import { hotlineNumbers } from "../data/hotlines";
+import useFetchData from "../hooks/useFetchData";
 
 const Home = ({ setShowTabBar }) => {
+  const {data: hotlines} = useFetchData("hotlines");
   const [announcement, setAnnouncement] = useState([]);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
@@ -77,6 +79,8 @@ const Home = ({ setShowTabBar }) => {
     }
   };
 
+  console.log(hotlines);
+
   return (
     <>
       <Modal
@@ -110,14 +114,14 @@ const Home = ({ setShowTabBar }) => {
             Barangay Bagtas Hotline Numbers
           </Text>
           <View className="flex flex-row flex-wrap">
-            {hotlineNumbers?.map((item, key) => (
+            {hotlines?.map((item, key) => (
               <View
                 key={key}
                 className="w-1/2 p-1" // 1/3 width to fit three items per row
               >
                 <View className="border-2 border-blue-900">
                   <Text className="text-white text-center bg-blue-900 p-1 font-bold">
-                    {item.title.toUpperCase()}
+                    {item.types.toUpperCase()}
                   </Text>
                   <Pressable
                     onPress={() =>
@@ -180,6 +184,7 @@ const Home = ({ setShowTabBar }) => {
                 </View>
               </View>
             ))}
+            <Text>HEllo</Text>
         </View>
       </ScrollView>
     </>

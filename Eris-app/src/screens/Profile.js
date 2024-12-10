@@ -97,7 +97,7 @@ const Profile = () => {
                 <Text className="text-xl font-bold mb-2 ">
                   Gender:{" "}
                   <Text className="text-lg text-gray-500 font-bold">
-                    {currentUser?.gender ? currentUser?.gender : "Your gender"}
+                    {currentUser?.gender ? currentUser?.gender : "Update your gender"}
                   </Text>
                 </Text>
               </View>
