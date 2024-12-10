@@ -21,7 +21,6 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constant/colors";
 import useFetchData from "../hooks/useFetchData";
 import ProfileReminderModal from "../component/ProfileReminderModal";
-import { hotlineNumbers } from "../data/hotlines";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import useCurrentUser from "../hooks/useCurrentUser";
@@ -39,9 +38,10 @@ const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const ScrollViewScreen = ({ dayTime, isVerified }) => {
+const NewsFeed = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
+  const { data: hotlines} = useFetchData("hotlines");
   const { currentUser } = useCurrentUser();
   const [refreshing, setRefreshing] = useState(false);
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
@@ -329,7 +329,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
                   <View className="space-y-0">
                     <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
                     <Text className="text-lg text-white font-bold">
-                      {`${fullname}` || `${currentUser?.customId}`}
+                      {`${fullname}` || "How can we assist you today?"}
                     </Text>
                   </View>
                 </View>
@@ -373,20 +373,20 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
             </View>
 
             <View className="flex flex-row flex-wrap">
-              {hotlineNumbers?.map((item, key) => (
+              {hotlines?.map((item, key) => (
                 <View
                   key={key}
                   className="w-1/2 py-2" // 1/3 width to fit three items per row
                 >
                   <View className="border-2 border-blue-900">
                     <Text className="text-white text-center bg-blue-800 p-1 font-bold">
-                      {item.title.toUpperCase()}
+                      {item.types.toUpperCase()}
                     </Text>
                     <Pressable
                       onPress={() =>
                         openDialerOrEmail(
-                          item.number || item.email,
-                          item.number ? "phone" : "email"
+                          item.contact || item.email,
+                          item.contact ? "phone" : "email"
                         )
                       }
                     >
@@ -395,7 +395,7 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
                           item.email ? "p-1" : "text-xl"
                         }`}
                       >
-                        {item.number || item.email}
+                        {item.contact || item.email}
                       </Text>
                     </Pressable>
                     <Text className="text-center font-bold text-blue-900">
@@ -564,4 +564,4 @@ const ScrollViewScreen = ({ dayTime, isVerified }) => {
   );
 };
 
-export default ScrollViewScreen;
+export default NewsFeed;

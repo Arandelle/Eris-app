@@ -10,9 +10,10 @@ import { View } from "react-native";
 import { useNotificationData } from "../hooks/useNotificationData";
 import colors from "../constant/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
-import ScrollViewScreen from "../screens/ScrollViewScreen";
+import NewsFeed from "../screens/NewsFeed";
 import { auth } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const { currentUser } = useCurrentUser();
@@ -144,7 +145,7 @@ const TabNavigator = () => {
         }}
       >
         {(props) => (
-          <ScrollViewScreen
+          <NewsFeed
             {...props}
             dayTime={dayTime}
             isVerified={isVerified}
