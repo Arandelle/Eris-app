@@ -19,6 +19,7 @@ import Logo from "./assets/logo.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Clearance from "./src/screens/Clearance";
 
 const Stack = createNativeStackNavigator();
 
@@ -124,6 +125,15 @@ const App = () => {
                   headerShown: true,
                 }}
               />
+              <Stack.Screen
+                name="Clearance"
+                component={Clearance}
+                options={{
+                  headerShown: true,
+                  headerTitle: "Clearance Form"
+                }}
+              />
+
               <Stack.Screen
                 name="UpdateProfile"
                 component={UpdateProfile}

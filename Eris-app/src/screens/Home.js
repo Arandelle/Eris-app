@@ -17,7 +17,6 @@ import { database } from "../services/firebaseConfig";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import ImageViewer from "react-native-image-viewing";
-import { hotlineNumbers } from "../data/hotlines";
 import useFetchData from "../hooks/useFetchData";
 
 const Home = ({ setShowTabBar }) => {

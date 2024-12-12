@@ -28,7 +28,7 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-     } catch (e) {
+    } catch (e) {
       console.error(e);
     }
   };
@@ -97,7 +97,9 @@ const Profile = () => {
                 <Text className="text-xl font-bold mb-2 ">
                   Gender:{" "}
                   <Text className="text-lg text-gray-500 font-bold">
-                    {currentUser?.gender ? currentUser?.gender : "Update your gender"}
+                    {currentUser?.gender
+                      ? currentUser?.gender
+                      : "Update your gender"}
                   </Text>
                 </Text>
               </View>
@@ -120,21 +122,37 @@ const Profile = () => {
           </View>
 
           <View className="space-y-4">
-          {/**Emergency records */}
-            <TouchableOpacity className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg" onPress={() => navigation.navigate("Emergency Records")}>
-           <View className="flex flex-row space-x-5">
-              <Icon name="history" size={24} color={colors.blue[800]}/>
+            {/**Emergency records */}
+            <TouchableOpacity
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+              onPress={() => navigation.navigate("Emergency Records")}
+            >
+              <View className="flex flex-row space-x-5">
+                <Icon name="history" size={24} color={colors.blue[800]} />
                 <Text className="text-lg font-bold">Emergency Records</Text>
-           </View>
-              <Icon name="arrow-right" size={24} color={colors.blue[800]}/>
+              </View>
+              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
+            </TouchableOpacity>
+            {/**Request Certification */}
+            <TouchableOpacity
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+              onPress={() => navigation.navigate("Clearance")}
+            >
+              <View className="flex flex-row space-x-5">
+                <Icon name="file-document-edit-outline" size={24} color={colors.blue[800]} />
+                <Text className="text-lg font-bold">Request Barangay Clearance</Text>
+              </View>
+              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
             </TouchableOpacity>
 
-            <TouchableOpacity className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg" onPress={handleLogoutModal}>
-
-           <View className="flex flex-row space-x-5">
-              <Icon name="logout" size={24} color={colors.blue[800]}/>
+            <TouchableOpacity
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+              onPress={handleLogoutModal}
+            >
+              <View className="flex flex-row space-x-5">
+                <Icon name="logout" size={24} color={colors.blue[800]} />
                 <Text className="text-lg font-bold text-red-500">Logout</Text>
-           </View>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
