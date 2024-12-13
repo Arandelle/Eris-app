@@ -6,9 +6,8 @@ import { Input } from "react-native-elements";
 const CustomInput = ({ label, value, onChangeText, placeholder, errorMessage }) => {
 
   return (
-    <View className="w-full mb-4">
-      <Text className="text-lg mb-1 text-sky-600 font-bold">{label}</Text>
-
+    <View className="w-full space-y-2">
+      <Text className="text-lg text-sky-600 font-bold">{label}</Text>
       <TextInput
        className={`bg-gray-50 border text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2 ${errorMessage ? "border-red-300" : "border-gray-300"}`}
         value={value}

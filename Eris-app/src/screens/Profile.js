@@ -140,7 +140,7 @@ const Profile = () => {
             >
               <View className="flex flex-row space-x-5">
                 <Icon name="file-document-edit-outline" size={24} color={colors.blue[800]} />
-                <Text className="text-lg font-bold">Request Barangay Clearance</Text>
+                <Text className="text-lg font-bold">Request Barangay Certificate</Text>
               </View>
               <Icon name="arrow-right" size={24} color={colors.blue[800]} />
             </TouchableOpacity>
