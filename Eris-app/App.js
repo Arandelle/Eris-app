@@ -20,6 +20,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Clearance from "./src/screens/Clearance";
+import ChangePassModal from "./src/screens/ChangePassModal";
 
 const Stack = createNativeStackNavigator();
 
@@ -131,6 +132,14 @@ const App = () => {
                 options={{
                   headerShown: true,
                   headerTitle: "Clearance Form"
+                }}
+              />
+               <Stack.Screen
+                name="ChangePassword"
+                component={ChangePassModal}
+                options={{
+                  headerShown: true,
+                  headerTitle: "Change Password"
                 }}
               />
 

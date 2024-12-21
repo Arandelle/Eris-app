@@ -17,6 +17,7 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
 
 const Profile = () => {
+  const user = auth.currentUser;
   const { currentUser } = useCurrentUser();
   const navigation = useNavigation();
   const [logout, setLogout] = useState(false);
@@ -62,7 +63,7 @@ const Profile = () => {
                     .filter(Boolean)
                     .join(" ")}
                 </Text>
-                {auth.currentUser.emailVerified && (
+                {user.emailVerified && (
                   <View className="p-0.5 rounded-full border border-white bg-green-500">
                     <Icon name="check" size={12} color={"white"} />
                   </View>
@@ -144,6 +145,18 @@ const Profile = () => {
               </View>
               <Icon name="arrow-right" size={24} color={colors.blue[800]} />
             </TouchableOpacity>
+              {user.emailVerified && (
+                <TouchableOpacity
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+              onPress={() => navigation.navigate("ChangePassword")}
+            >
+              <View className="flex flex-row space-x-5">
+                <Icon name="lock" size={24} color={colors.blue[800]} />
+                <Text className="text-lg font-bold">Change Password</Text>
+              </View>
+              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
+            </TouchableOpacity>
+              )}
 
             <TouchableOpacity
               className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
