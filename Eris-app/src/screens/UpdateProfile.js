@@ -18,7 +18,13 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
 import useUploadImage from "./UploadImage";
-import { use } from "react";
+import { storage } from "../services/firebaseConfig";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from "firebase/storage";
 
 const UpdateProfile = () => {
   const { photo, selectPhoto } = useUploadImage();
@@ -31,7 +37,7 @@ const UpdateProfile = () => {
     lastname: "",
     gender: "Prefer not to say",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
-    imageFile: null
+    imageFile: null,
   });
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({ mobileNum: "", age: "" });
@@ -40,13 +46,17 @@ const UpdateProfile = () => {
   const genders = ["Male", "Female", "Prefer not to say"];
 
   useEffect(() => {
-    if(photo){
+    // This useEffect ensures the check icon appears immediately after the user selects an image from their gallery.
+    // It automatically updates the `userData` object with the chosen image,
+    // so the user doesn't need to click the image again to confirm their selection.
+    if (photo) {
       setUserData({
         ...userData,
-        img: photo
-      })
+        img: photo,
+        imageFile: photo,
+      });
     }
-  }, [photo])
+  }, [photo]);
 
   const imageUrls = [
     ...Array.from(
@@ -103,23 +113,47 @@ const UpdateProfile = () => {
 
   const handleUpdateProfile = async () => {
     setLoading(true);
+
+    let imageUrl = userData.img; // Default to current image URL
+
+    // Check if there's a new image to upload
+    if (userData.imageFile) {
+      const imageRef = storageRef(storage, `profile-images/${Date.now()}.jpg`);
+
+      try {
+        const response = await fetch(userData.imageFile);
+        const blob = await response.blob();
+        await uploadBytes(imageRef, blob);
+        imageUrl = await getDownloadURL(imageRef); // Get the new image URL
+
+      } catch (error) {
+        console.error("Error uploading profile image: ", error);
+        Alert.alert("Error", "Failed to upload profile image.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const updatedData = {
       ...userData,
+      img: imageUrl, // Use the uploaded image URL
       email: auth.currentUser.email,
       profileComplete: Boolean(
         userData.firstname &&
           userData.lastname &&
           userData.mobileNum &&
           userData.gender &&
-          userData.img
+          imageUrl
       ),
     };
+
     try {
-      await updateCurrentUser(updatedData);
-      await sendNotification("users", currentUser.id, "userProfileUpdate");
-      Alert.alert("Success", "Profile update successfully");
+      await updateCurrentUser(updatedData); // Update user profile in your database
+      await sendNotification("users", currentUser.id, "userProfileUpdate"); // Notify about profile update
+      Alert.alert("Success", "Profile updated successfully");
       navigation.goBack();
     } catch (error) {
+      console.error("Error updating profile: ", error);
       Alert.alert("Error", "Failed to update profile.");
     } finally {
       setLoading(false);
@@ -145,30 +179,32 @@ const UpdateProfile = () => {
                   <Icon name="plus" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
-              
-            {photo && (
-              <TouchableOpacity
-                onPress={() => setUserData({ ...userData, img: photo })}
-              >
-                <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center relative">
-                  {photo && (
-                    <Image
-                      source={{ uri: photo }}
-                      className="w-16 h-16 rounded-full"
-                    />
-                  )}
-                  {userData.img === photo && (
-                    <View className="absolute top-0 right-0 bg-white rounded-full">
-                      <Icon
-                        name="checkbox-marked-circle"
-                        size={20}
-                        color="green"
+
+              {photo && (
+                <TouchableOpacity
+                  onPress={() =>
+                    setUserData({ ...userData, img: photo, imageFile: photo })
+                  }
+                >
+                  <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center relative">
+                    {photo && (
+                      <Image
+                        source={{ uri: photo }}
+                        className="w-16 h-16 rounded-full"
                       />
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
+                    )}
+                    {userData.img === photo && userData.imageFile && (
+                      <View className="absolute top-0 right-0 bg-white rounded-full">
+                        <Icon
+                          name="checkbox-marked-circle"
+                          size={20}
+                          color="green"
+                        />
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
 
               {imageUrls.map((url) => (
                 <TouchableOpacity
