@@ -49,9 +49,10 @@ const App = () => {
             const userSnapshot = await get(userRef);
 
             if (userSnapshot.exists()) {
-              setUser(user);
+              setUser(user); //set user which is for the auth user (verified)
 
               if (!user.emailVerified) {
+                // this will trigger when it is anonymous adding email (not yet verified)
                 Alert.alert(
                   "Email verification Pending",
                   "Please verify your email address. Check your inbox for verification link",
@@ -61,7 +62,7 @@ const App = () => {
                       onPress: () => sendEmailVerification(user),
                     },
                     {
-                      text: "Ok",
+                      text: "Remind me later",
                       style: "cancel",
                     },
                   ]
@@ -131,15 +132,15 @@ const App = () => {
                 component={Clearance}
                 options={{
                   headerShown: true,
-                  headerTitle: "Clearance Form"
+                  headerTitle: "Clearance Form",
                 }}
               />
-               <Stack.Screen
+              <Stack.Screen
                 name="ChangePassword"
                 component={ChangePassModal}
                 options={{
                   headerShown: true,
-                  headerTitle: "Change Password"
+                  headerTitle: "Change Password",
                 }}
               />
 

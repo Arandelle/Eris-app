@@ -158,6 +158,7 @@ const Profile = () => {
             </TouchableOpacity>
               )}
 
+
             <TouchableOpacity
               className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
               onPress={handleLogoutModal}

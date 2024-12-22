@@ -17,10 +17,13 @@ import CustomInput from "../component/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
+import useUploadImage from "./UploadImage";
+import { use } from "react";
 
 const UpdateProfile = () => {
+  const { photo, selectPhoto } = useUploadImage();
   const navigation = useNavigation();
-  const {sendNotification} = useSendNotification()
+  const { sendNotification } = useSendNotification();
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     mobileNum: "",
@@ -28,13 +31,23 @@ const UpdateProfile = () => {
     lastname: "",
     gender: "Prefer not to say",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+    imageFile: null
   });
   const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState({ mobileNum: "", age: ""});
-  const [valid, setValid] = useState(true)
+  const [errors, setErrors] = useState({ mobileNum: "", age: "" });
+  const [valid, setValid] = useState(true);
 
   const genders = ["Male", "Female", "Prefer not to say"];
-  
+
+  useEffect(() => {
+    if(photo){
+      setUserData({
+        ...userData,
+        img: photo
+      })
+    }
+  }, [photo])
+
   const imageUrls = [
     ...Array.from(
       { length: 5 },
@@ -66,15 +79,15 @@ const UpdateProfile = () => {
   const validateInput = (field, value) => {
     const errorsCopy = { ...errors }; // Copy existing errors
 
-    if(value){
-      switch(field){
+    if (value) {
+      switch (field) {
         case "mobileNum":
           if (!/^(09\d{9}|\+639\d{9})$/.test(value)) {
             errorsCopy.mobileNum = "Please enter a valid PH contact number";
-            setValid(false)
+            setValid(false);
           } else {
             delete errorsCopy.mobileNum; // Clear error if valid
-            setValid(true)
+            setValid(true);
           }
           break;
       }
@@ -84,9 +97,9 @@ const UpdateProfile = () => {
   };
 
   const handleFieldChange = (field, value) => {
-    setUserData(prev => ({...prev, [field]: value}));
-    validateInput(field, value)
-  }
+    setUserData((prev) => ({ ...prev, [field]: value }));
+    validateInput(field, value);
+  };
 
   const handleUpdateProfile = async () => {
     setLoading(true);
@@ -105,7 +118,7 @@ const UpdateProfile = () => {
       await updateCurrentUser(updatedData);
       await sendNotification("users", currentUser.id, "userProfileUpdate");
       Alert.alert("Success", "Profile update successfully");
-      navigation.goBack()
+      navigation.goBack();
     } catch (error) {
       Alert.alert("Error", "Failed to update profile.");
     } finally {
@@ -126,12 +139,37 @@ const UpdateProfile = () => {
         <View className="p-4">
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar:</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex-row space-x-3 justify-center">
-              <TouchableOpacity>
+            <View className="flex flex-row items-center space-x-3 justify-center">
+              <TouchableOpacity onPress={selectPhoto}>
                 <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="plus" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
+              
+            {photo && (
+              <TouchableOpacity
+                onPress={() => setUserData({ ...userData, img: photo })}
+              >
+                <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center relative">
+                  {photo && (
+                    <Image
+                      source={{ uri: photo }}
+                      className="w-16 h-16 rounded-full"
+                    />
+                  )}
+                  {userData.img === photo && (
+                    <View className="absolute top-0 right-0 bg-white rounded-full">
+                      <Icon
+                        name="checkbox-marked-circle"
+                        size={20}
+                        color="green"
+                      />
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+
               {imageUrls.map((url) => (
                 <TouchableOpacity
                   key={url}
@@ -156,6 +194,7 @@ const UpdateProfile = () => {
               ))}
             </View>
           </ScrollView>
+
           <CustomInput
             label="First Name"
             value={userData.firstname}
@@ -195,7 +234,7 @@ const UpdateProfile = () => {
               </TouchableOpacity>
             ))}
           </View>
-           <TouchableOpacity
+          <TouchableOpacity
             className={`p-3 w-full rounded-2xl ${
               !valid ? "bg-gray-400" : "bg-green-500"
             }`}

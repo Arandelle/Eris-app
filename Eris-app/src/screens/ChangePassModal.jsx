@@ -59,8 +59,8 @@ const ChangePassModal = () => {
 
   return (
     <View className="p-4 space-y-4 bg-white h-screen">
-
-      <Text>Old Password</Text>
+      <Text>To enhance the security of your account, we recommend updating your password regularly. Please enter your current password and choose a new password.</Text>
+      <Text>Old Password *</Text>
         <TextInput
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Enter old Password"}
@@ -71,8 +71,9 @@ const ChangePassModal = () => {
               oldPassword: value,
             })
           }
+          secureTextEntry
         />
-        <Text>New Password</Text>
+        <Text>New Password *</Text>
         <TextInput
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Enter new password"}
@@ -83,8 +84,9 @@ const ChangePassModal = () => {
               newPassword: value,
             })
           }
+          secureTextEntry
         />
-        <Text>Re-enter password</Text>
+        <Text>Re-enter password *</Text>
         <TextInput
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Re-enter your new password"}
@@ -95,6 +97,7 @@ const ChangePassModal = () => {
               reEnterPass: value,
             })
           }
+          secureTextEntry
         />
       <TouchableOpacity className={`p-4 rounded-lg ${isComplete ? "bg-blue-500" : "bg-gray-500"}`}
       disabled={!isComplete}

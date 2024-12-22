@@ -66,8 +66,6 @@ const LoginForm = () => {
 
         if (userSnapshot.exists()) {
           const userData = userSnapshot.val();
-          // You can now use the userData as needed, e.g., storing in context or state
-          console.log("User Data:", userData);
           ToastAndroid.show(
             "Login Successfully",
             ToastAndroid.SHORT,
