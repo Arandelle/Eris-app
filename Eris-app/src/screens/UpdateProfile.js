@@ -27,7 +27,7 @@ import {
 } from "firebase/storage";
 
 const UpdateProfile = () => {
-  const { photo, selectPhoto } = useUploadImage();
+  const { photo, selectPhoto } = useUploadImage(); //hooks for uploading photo
   const navigation = useNavigation();
   const { sendNotification } = useSendNotification();
   const { currentUser, updateCurrentUser } = useCurrentUser();
@@ -66,7 +66,7 @@ const UpdateProfile = () => {
     ),
     ...Array.from(
       { length: 99 },
-      (_, i) => `https://robohash.org/${i + 1}.png`
+      (_, i) => `https://api.multiavatar.com/${i + 1}.png`
     ),
   ];
 
@@ -181,26 +181,26 @@ const UpdateProfile = () => {
     <SafeAreaView className="flex-1">
       <ScrollView>
         <View className="p-4">
-          <Text className="text-lg m-4 text-sky-600 font-bold">Avatar:</Text>
+          <Text className="text-lg  text-blue-800 font-bold">Avatar:</Text>
+
+          {/**List of avatar in horizontal */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex flex-row items-center space-x-3 justify-center">
+            <View className="flex py-4 flex-row items-center space-x-3 justify-center">
               <TouchableOpacity onPress={selectPhoto}>
-                <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
-                  <Icon name="plus" size={40} color={"gray"} />
+                <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
+                  <Icon name="camera" size={40} color={"gray"}/>
                 </View>
               </TouchableOpacity>
 
-              {photo && (
+              {currentUser?.img && (
                 <TouchableOpacity
                   onPress={() => setUserData({ ...userData, imageFile: photo })}
                 >
-                  <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center relative">
-                    {photo && (
+                  <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
                       <Image
-                        source={{ uri: photo }}
+                        source={{ uri: photo || currentUser?.img}}
                         className="w-16 h-16 rounded-full"
                       />
-                    )}
                     {userData.imageFile && (
                       <View className="absolute top-0 right-0 bg-white rounded-full">
                         <Icon
@@ -261,7 +261,7 @@ const UpdateProfile = () => {
             errorMessage={errors.mobileNum}
           />
 
-          <Text className="text-lg mb-1 text-sky-600 font-bold">
+          <Text className="text-lg mb-1 text-blue-800 font-bold">
             Select Gender:
           </Text>
           <View className="flex-row justify-around p-2 mb-2">
@@ -271,9 +271,9 @@ const UpdateProfile = () => {
                 onPress={() => setUserData({ ...userData, gender })}
                 className={`flex flex-row items-center my-1`}
               >
-                <View className="h-5 w-5 rounded-full border-2 border-blue-600 justify-center items-center">
+                <View className="h-6 w-6 rounded-full border-2 border-blue-800 justify-center items-center">
                   {userData.gender === gender && (
-                    <View className="h-3 w-3 rounded-full bg-blue-600" />
+                    <View className="h-3 w-3 rounded-full bg-blue-800" />
                   )}
                 </View>
                 <Text className="ml-2 font-bold">{gender}</Text>
@@ -282,7 +282,7 @@ const UpdateProfile = () => {
           </View>
           <TouchableOpacity
             className={`p-3 w-full rounded-2xl ${
-              !valid ? "bg-gray-400" : "bg-green-500"
+              !valid ? "bg-gray-400" : "bg-blue-800"
             }`}
             onPress={handleUpdateProfile}
             disabled={!valid}
