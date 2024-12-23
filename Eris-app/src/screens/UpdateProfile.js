@@ -23,7 +23,7 @@ import {
   ref as storageRef,
   uploadBytes,
   getDownloadURL,
-  deleteObject
+  deleteObject,
 } from "firebase/storage";
 
 const UpdateProfile = () => {
@@ -52,11 +52,11 @@ const UpdateProfile = () => {
     if (photo) {
       setUserData({
         ...userData,
-        img: photo,
-        imageFile: photo,
+        img: null, // Set img to null when a photo is selected to ensure the check icon doesn't appear for img.
+        imageFile: photo, // Set imageFile to the selected photo URI.
       });
     }
-  }, [photo]);
+  }, [photo]); // Depend on photo, so this useEffect runs every time photo changes.
 
   const imageUrls = [
     ...Array.from(
@@ -125,12 +125,22 @@ const UpdateProfile = () => {
         const blob = await response.blob();
         await uploadBytes(imageRef, blob);
         imageUrl = await getDownloadURL(imageRef); // Get the new image URL
-
       } catch (error) {
         console.error("Error uploading profile image: ", error);
         Alert.alert("Error", "Failed to upload profile image.");
         setLoading(false);
         return;
+      }
+    }
+
+    // Delete old image if exist
+    if (currentUser?.img) {
+      try {
+        const oldImageRef = storageRef(storage, currentUser?.img);
+        await deleteObject(oldImageRef);
+      } catch (deleteError) {
+        console.warn("Error deleting old image:", deleteError);
+        // Not a critical error, so we continue
       }
     }
 
@@ -182,9 +192,7 @@ const UpdateProfile = () => {
 
               {photo && (
                 <TouchableOpacity
-                  onPress={() =>
-                    setUserData({ ...userData, img: photo, imageFile: photo })
-                  }
+                  onPress={() => setUserData({ ...userData, imageFile: photo })}
                 >
                   <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center relative">
                     {photo && (
@@ -193,7 +201,7 @@ const UpdateProfile = () => {
                         className="w-16 h-16 rounded-full"
                       />
                     )}
-                    {userData.img === photo && userData.imageFile && (
+                    {userData.imageFile && (
                       <View className="absolute top-0 right-0 bg-white rounded-full">
                         <Icon
                           name="checkbox-marked-circle"
@@ -209,7 +217,9 @@ const UpdateProfile = () => {
               {imageUrls.map((url) => (
                 <TouchableOpacity
                   key={url}
-                  onPress={() => setUserData({ ...userData, img: url })}
+                  onPress={() =>
+                    setUserData({ ...userData, img: url, imageFile: null })
+                  }
                   className="relative"
                 >
                   <Image
