@@ -7,18 +7,23 @@ import {
   ScrollView,
   Alert,
   RefreshControl,
+  Image,
 } from "react-native";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
+import useUploadImage from "./UploadImage";
 
 const Request = () => {
+  const { photo, selectPhoto } = useUploadImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null);
   const { sendNotification } = useSendNotification(description);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
+  const [loading, setLoading] = useState(false); // Initialize loading state
 
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
@@ -32,12 +37,20 @@ const Request = () => {
     setHasActiveRequest(false);
   }, [currentUser]);
 
+  useEffect(() => {
+    if (photo) {
+      setImageFile(photo);
+    }
+  }, [photo]);
+
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true
     trackUserLocation();
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
+
     try {
       await submitEmergencyReport({
         currentUser,
@@ -46,19 +59,23 @@ const Request = () => {
         longitude,
         geoCodeLocation,
         description,
+        imageFile,
         sendNotification,
         hasActiveRequest,
-        responderData
+        responderData,
       });
-      
+      console.log(imageFile);
       Alert.alert("Emergency reported", "Help is on the way!");
       setDescription("");
+      setLoading(false);
+      setImageFile(null);
       setHasActiveRequest(true);
     } catch (error) {
       Alert.alert("Error", "Could not submit emergency report, please try again");
+      setLoading(false); // Ensure loading is set to false on error
     }
   };
-  
+
   return (
     <ScrollView
       className="flex-1 p-5 bg-gray-100"
@@ -67,13 +84,12 @@ const Request = () => {
       }
     >
       <Text className="font-bold text-xl text-center text-red-600 mb-5">
-       Submit Detailed Report
+        Submit Detailed Report
       </Text>
 
       {hasActiveRequest && (
         <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
-          You have an active emergency report. Please wait for it to be
-          resolved.
+          You have an active emergency report. Please wait for it to be resolved.
         </Text>
       )}
 
@@ -90,9 +106,15 @@ const Request = () => {
           />
         </View>
 
-        <TouchableOpacity className="p-2 bg-blue-800 w-1/3 rounded">
+        <TouchableOpacity className="p-2 bg-blue-800 w-1/3 rounded" onPress={selectPhoto}>
           <Text className="text-lg text-center text-white font-bold">Add Photo</Text>
         </TouchableOpacity>
+
+        {photo && imageFile && (
+          <View className="w-40 h-40 bg-gray-500">
+            <Image source={{ uri: photo }} className="w-full h-full" />
+          </View>
+        )}
 
         <View>
           <Text className="text-lg mb-1 text-gray-600">Location:</Text>
@@ -107,6 +129,7 @@ const Request = () => {
         <TouchableOpacity
           className="bg-red-600 p-3.5 rounded-md items-center"
           onPress={handleSubmit}
+          disabled={loading}
         >
           <Text className="text-white text-lg font-bold">Submit Emergency</Text>
         </TouchableOpacity>

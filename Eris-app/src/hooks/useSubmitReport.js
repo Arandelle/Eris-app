@@ -1,6 +1,12 @@
 import { ref, serverTimestamp, push, update } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { generateUniqueBarangayID } from "../helper/generateID";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { storage } from "../services/firebaseConfig";
 
 export const submitEmergencyReport = async ({
   currentUser,
@@ -8,6 +14,7 @@ export const submitEmergencyReport = async ({
   latitude,
   longitude,
   geoCodeLocation,
+  imageFile,
   description = "Emergency alert from quick response button",
   sendNotification, // Pass the notification function
   hasActiveRequest = false,
@@ -23,6 +30,21 @@ export const submitEmergencyReport = async ({
     throw new Error("You have an active emergency request pending.");
   }
 
+  let imageUrl = imageFile;
+    
+  if (imageFile) {
+    try {
+        const imageRef = storageRef(storage, `emergencyImages/${Date.now()}.jpg`);
+        const response = await fetch(imageFile);
+        const blob = await response.blob();
+        await uploadBytes(imageRef, blob);
+        imageUrl = await getDownloadURL(imageRef);
+    } catch (error) {
+        console.warn("Failed to upload image:", error.message);
+        imageUrl = ""; // Proceed without the image
+    }
+}  
+
   try {
     const emergencyID = await generateUniqueBarangayID("emergency");
 
@@ -30,6 +52,7 @@ export const submitEmergencyReport = async ({
       userId: currentUser.id,
       timestamp: serverTimestamp(),
       description,
+      imageUrl,
       status: "awaiting response",
       expiresAt: new Date(Date.now() + 30000).toISOString(),
       date: new Date().toISOString(),
