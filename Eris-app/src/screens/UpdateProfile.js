@@ -178,8 +178,8 @@ const UpdateProfile = () => {
     );
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1">
         <View className="p-4">
           <Text className="text-lg  text-blue-800 font-bold">Avatar:</Text>
 
@@ -188,7 +188,7 @@ const UpdateProfile = () => {
             <View className="flex py-4 flex-row items-center space-x-3 justify-center">
               <TouchableOpacity onPress={selectPhoto}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
-                  <Icon name="camera" size={40} color={"gray"}/>
+                  <Icon name="camera" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
 
@@ -197,10 +197,10 @@ const UpdateProfile = () => {
                   onPress={() => setUserData({ ...userData, imageFile: photo })}
                 >
                   <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
-                      <Image
-                        source={{ uri: photo || currentUser?.img}}
-                        className="w-16 h-16 rounded-full"
-                      />
+                    <Image
+                      source={{ uri: photo || currentUser?.img }}
+                      className="w-16 h-16 rounded-full"
+                    />
                     {userData.imageFile && (
                       <View className="absolute top-0 right-0 bg-white rounded-full">
                         <Icon
@@ -280,19 +280,22 @@ const UpdateProfile = () => {
               </TouchableOpacity>
             ))}
           </View>
-          <TouchableOpacity
-            className={`p-3 w-full rounded-2xl ${
-              !valid ? "bg-gray-400" : "bg-blue-800"
-            }`}
-            onPress={handleUpdateProfile}
-            disabled={!valid}
-          >
-            <Text className="text-center text-lg font-extrabold text-white">
-              Update Profile
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <View className="p-4">
+        <TouchableOpacity
+          className={`p-3 w-full rounded-2xl ${
+            !valid ? "bg-gray-400" : "bg-blue-800"
+          }`}
+          onPress={handleUpdateProfile}
+          disabled={!valid}
+        >
+          <Text className="text-center text-lg font-extrabold text-white">
+            Update Profile
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
