@@ -28,7 +28,7 @@ import {
 import CustomButton from "../component/CustomButton";
 
 const UpdateProfile = () => {
-  const { photo, selectPhoto } = useUploadImage(); //hooks for uploading photo
+  const { photo, choosePhoto } = useUploadImage(); //hooks for uploading photo
   const navigation = useNavigation();
   const { sendNotification } = useSendNotification();
   const { currentUser, updateCurrentUser } = useCurrentUser();
@@ -149,10 +149,7 @@ const UpdateProfile = () => {
       img: imageUrl, // Use the uploaded image URL
       email: auth.currentUser.email,
       profileComplete: Boolean(
-          userData.fullname &&
-          userData.mobileNum &&
-          userData.gender &&
-          imageUrl
+        userData.fullname && userData.mobileNum && userData.gender && imageUrl
       ),
     };
 
@@ -185,7 +182,7 @@ const UpdateProfile = () => {
           {/**List of avatar in horizontal */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex py-4 flex-row items-center space-x-3 justify-center">
-              <TouchableOpacity onPress={selectPhoto}>
+              <TouchableOpacity onPress={choosePhoto}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="camera" size={40} color={"gray"} />
                 </View>
@@ -275,9 +272,9 @@ const UpdateProfile = () => {
           </View>
         </View>
       </ScrollView>
-      <CustomButton 
-        isValid={valid} 
-        label="Update Profile" 
+      <CustomButton
+        isValid={valid}
+        label="Update Profile"
         onPress={handleUpdateProfile}
       />
     </SafeAreaView>

@@ -6,6 +6,7 @@ import { Alert } from "react-native";
 const useUploadImage = () => {
   const [photo, setPhoto] = useState(null);
 
+  // Function to select a photo from the gallery
   const selectPhoto = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -25,6 +26,7 @@ const useUploadImage = () => {
     }
   };
 
+  // Function to take a photo using the camera
   const takePhoto = async () => {
     console.log("Take photo");
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync(); // Request camera permission
@@ -44,7 +46,31 @@ const useUploadImage = () => {
     }
   };
 
-  return { photo, selectPhoto, takePhoto };
+  // Function to choose between gallery and camera
+  const choosePhoto = async () => {
+    Alert.alert(
+      "Choose an image source",
+      "Select an image source to upload",
+      [
+        {
+          text: "Gallery",
+          onPress: selectPhoto,
+        },
+        {
+          text: "Camera",
+          onPress: takePhoto,
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  return { photo,choosePhoto};
 };
 
 export default useUploadImage;

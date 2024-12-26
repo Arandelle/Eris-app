@@ -21,7 +21,7 @@ import PickerField from "../component/PickerField";
 import { set } from "firebase/database";
 
 const Request = () => {
-  const { photo, selectPhoto, takePhoto } = useUploadImage();
+  const { photo, choosePhoto } = useUploadImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -145,18 +145,7 @@ const Request = () => {
 
             <TouchableOpacity
               className="p-2 bg-blue-800 w-1/3 rounded"
-              onPress={() => {
-                Alert.alert(
-                  "Upload Photo",
-                  "Please choose an option to either select an existing photo from your gallery or take a new photo.",
-                  [
-                    { text: "Select Photo", onPress: selectPhoto },
-                    { text: "Take Photo", onPress: takePhoto },
-                    { text: "Cancel", style: "cancel" },
-                  ],
-                  { cancelable: true }
-                );
-              }}
+              onPress={choosePhoto}
             >
               <Text className="text-lg text-center text-white font-bold">
                 Add Photo
