@@ -1,22 +1,17 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  TextInput,
-} from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { ref, serverTimestamp, push } from "firebase/database";
+import { View, Text, SafeAreaView, ScrollView, Alert } from "react-native";
+import { ref, serverTimestamp, push, set } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
+import CustomButton from "../component/CustomButton";
+import TextInputStyle from "../component/TextInputStyle";
+import PickerField from "../component/PickerField"; // Ensure this path is correct
 
 const Clearance = () => {
   const navigate = useNavigation();
   const [isComplete, setIsComplete] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [clearanceData, setClearanceData] = useState({
     docsType: "Clearance",
     fullname: "",
@@ -74,6 +69,7 @@ const Clearance = () => {
       civilStatus &&
       moveInYear;
     setIsComplete(completeData);
+    setErrorMessage("Please complete all fields");
   }, [
     clearanceData.docsType,
     clearanceData.fullname,
@@ -84,17 +80,16 @@ const Clearance = () => {
   ]);
 
   return (
-    <SafeAreaView>
-      <ScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView style={{ flex: 1 }}>
         <View className="bg-white p-4 space-y-4">
-          <Text className="text-gray-500 text-sm mb-4">
+          <Text className="text-gray-500 text-sm">
             Please ensure that all information you provide in this form is
             correct and complete to the best of your knowledge.
           </Text>
-
-          <Text>Type of Certificate</Text>
-          <View className="bg-gray-50 mb-2 border text-gray-900 rounded-lg w-full border-gray-300">
-            <Picker
+          <View>
+            <PickerField
+              label="Type of Certificate"
               selectedValue={clearanceData.docsType}
               onValueChange={(value) =>
                 setClearanceData((prev) => ({
@@ -102,113 +97,108 @@ const Clearance = () => {
                   docsType: value,
                 }))
               }
-              style={{ height: 50 }}
-            >
-              <Picker.Item label="Clearance" value="Clearance" />
-              <Picker.Item label="Indigency" value="Indigency" />
-            </Picker>
+              items={[
+                { label: "Clearance", value: "Clearance" },
+                { label: "Indigency", value: "Indigency" },
+              ]}
+            />
           </View>
-
-          <Text>Full Name</Text>
-          <TextInput
-            className="w-full border border-gray-300 rounded-lg p-4"
-            placeholder="Enter your fullname"
-            value={clearanceData.fullname}
-            onChangeText={(value) =>
-              setClearanceData((prev) => ({
-                ...prev,
-                fullname: value,
-              }))
-            }
-          />
-          <Text>Age</Text>
-          <TextInput
-            className="w-full border border-gray-300 rounded-lg p-4"
-            placeholder="Enter your age"
-            value={clearanceData.age}
-            onChangeText={(value) =>
-              setClearanceData((prev) => ({
-                ...prev,
-                age: value,
-              }))
-            }
-          />
-          <Text>Address</Text>
-          <TextInput
-            className="w-full border border-gray-300 rounded-lg p-4"
-            placeholder="Enter your complete address"
-            value={clearanceData.address}
-            onChangeText={(value) =>
-              setClearanceData((prev) => ({
-                ...prev,
-                address: value,
-              }))
-            }
-          />
-          <Text>Gender</Text>
-          <View className="bg-gray-50 mb-2 border text-gray-900 rounded-lg w-full border-gray-300">
-            <Picker
+          <View>
+            <TextInputStyle
+              label={"Full Name"}
+              placeholder="Enter your full name"
+              value={clearanceData.fullname}
+              onChangeText={(value) =>
+                setClearanceData((prev) => ({
+                  ...prev,
+                  fullname: value,
+                }))
+              }
+            />
+          </View>
+          <View>
+            <TextInputStyle
+              label={"Age"}
+              placeholder="Enter your age"
+              value={clearanceData.age}
+              onChangeText={(value) =>
+                setClearanceData((prev) => ({
+                  ...prev,
+                  age: value,
+                }))
+              }
+            />
+          </View>
+          <View>
+            <TextInputStyle
+              label={"Address"}
+              placeholder="Enter your address"
+              value={clearanceData.address}
+              onChangeText={(value) =>
+                setClearanceData((prev) => ({
+                  ...prev,
+                  address: value,
+                }))
+              }
+            />
+          </View>
+          <View>
+            <PickerField
+              label="Gender"
               selectedValue={clearanceData.gender}
               onValueChange={(value) =>
                 setClearanceData((prev) => ({
                   ...prev,
-                  gender: value, // Update the type field
+                  gender: value,
                 }))
               }
-              style={{ height: 50 }}
-            >
-              <Picker.Item label="Female" value="Female" />
-              <Picker.Item label="Male" value="Male" />
-            </Picker>
+              items={[
+                { label: "Female", value: "Female" },
+                { label: "Male", value: "Male" },
+              ]}
+            />
           </View>
-          <Text>Civil Status</Text>
-          <View className="bg-gray-50 mb-2 border text-gray-900 rounded-lg w-full border-gray-300">
-            <Picker
+          <View>
+            <PickerField
+              label="Civil Status"
               selectedValue={clearanceData.civilStatus}
               onValueChange={(value) =>
                 setClearanceData((prev) => ({
                   ...prev,
-                  civilStatus: value, // Update the type field
+                  civilStatus: value,
                 }))
               }
-              style={{ height: 50 }}
-            >
-              <Picker.Item label="Single" value="Single" />
-              <Picker.Item label="Married" value="Married" />
-              <Picker.Item label="Widowed" value="Widowed" />
-              <Picker.Item label="Divorced" value="Widowed" />
-              <Picker.Item label="Separated" value="Separated" />
-            </Picker>
+              items={[
+                { label: "Single", value: "Single" },
+                { label: "Married", value: "Married" },
+                { label: "Divorced", value: "Divorced" },
+                { label: "Widowed", value: "Widowed" },
+              ]}
+            />
           </View>
-
-          <Text>Move-in Years</Text>
-          <View className="bg-gray-50 mb-2 border text-gray-900 rounded-lg w-full border-gray-300">
-            <Picker
+          <View>
+            <PickerField 
+              label="Move-in Year"
               selectedValue={clearanceData.moveInYear}
               onValueChange={(value) =>
                 setClearanceData((prev) => ({
                   ...prev,
-                  moveInYear: value, // Update the type field
+                  moveInYear: value,
                 }))
               }
-              style={{ height: 50 }}
-            >
-              {years.map((year) => (
-                <Picker.Item key={year} label={`${year}`} value={year} />
-              ))}
-            </Picker>
+              items={years.map((year) => ({
+                label: `${year}`,
+                value: year,
+              }))}
+            />
           </View>
-          <TouchableOpacity
-            className={`p-3 w-full rounded-2xl ${isComplete ? "bg-blue-500" : "bg-gray-500"}`}
-            onPress={handleSubmitData}
-            disabled={!isComplete}
-          >
-            <Text className="text-white text-center text-lg font-bold">
-              {`Request Barangay ${clearanceData.docsType}`}
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+      <CustomButton
+        isValid={isComplete}
+        label={ isComplete ? `Request ${clearanceData.docsType}` : errorMessage }
+        onPress={handleSubmitData}
+      />
     </SafeAreaView>
   );
 };

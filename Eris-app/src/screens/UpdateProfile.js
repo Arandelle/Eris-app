@@ -25,6 +25,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import CustomButton from "../component/CustomButton";
 
 const UpdateProfile = () => {
   const { photo, selectPhoto } = useUploadImage(); //hooks for uploading photo
@@ -33,8 +34,7 @@ const UpdateProfile = () => {
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     mobileNum: "",
-    firstname: "",
-    lastname: "",
+    fullname: "",
     gender: "Prefer not to say",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
     imageFile: null,
@@ -149,8 +149,7 @@ const UpdateProfile = () => {
       img: imageUrl, // Use the uploaded image URL
       email: auth.currentUser.email,
       profileComplete: Boolean(
-        userData.firstname &&
-          userData.lastname &&
+          userData.fullname &&
           userData.mobileNum &&
           userData.gender &&
           imageUrl
@@ -201,7 +200,7 @@ const UpdateProfile = () => {
                       source={{ uri: photo || currentUser?.img }}
                       className="w-16 h-16 rounded-full"
                     />
-                    {userData.imageFile && (
+                    {(userData.imageFile || currentUser?.img) && (
                       <View className="absolute top-0 right-0 bg-white rounded-full">
                         <Icon
                           name="checkbox-marked-circle"
@@ -242,16 +241,10 @@ const UpdateProfile = () => {
           </ScrollView>
 
           <CustomInput
-            label="First Name"
-            value={userData.firstname}
-            onChangeText={(value) => handleFieldChange("firstname", value)}
-            placeholder="Enter your firstname"
-          />
-          <CustomInput
-            label="Last Name"
-            value={userData.lastname}
-            onChangeText={(value) => handleFieldChange("lastname", value)}
-            placeholder="Enter your lastname"
+            label="Fullname"
+            value={userData.fullname}
+            onChangeText={(value) => handleFieldChange("fullname", value)}
+            placeholder="Enter your fullname"
           />
           <CustomInput
             label="Mobile phone"
@@ -282,20 +275,11 @@ const UpdateProfile = () => {
           </View>
         </View>
       </ScrollView>
-
-      <View className="p-4">
-        <TouchableOpacity
-          className={`p-3 w-full rounded-2xl ${
-            !valid ? "bg-gray-400" : "bg-blue-800"
-          }`}
-          onPress={handleUpdateProfile}
-          disabled={!valid}
-        >
-          <Text className="text-center text-lg font-extrabold text-white">
-            Update Profile
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <CustomButton 
+        isValid={valid} 
+        label="Update Profile" 
+        onPress={handleUpdateProfile}
+      />
     </SafeAreaView>
   );
 };

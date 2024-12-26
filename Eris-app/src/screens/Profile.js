@@ -56,12 +56,10 @@ const Profile = () => {
           )}
 
           <View className="text-2xl space-y-1 font-bold p-2">
-            {currentUser?.firstname || currentUser?.lastname ? (
+            {currentUser?.fullname ? (
               <View className="flex flex-row items-center space-x-2">
                 <Text className="text-xl text-white font-bold">
-                  {[currentUser?.firstname, currentUser?.lastname]
-                    .filter(Boolean)
-                    .join(" ")}
+                 {currentUser?.fullname}
                 </Text>
                 {user.emailVerified && (
                   <View className="p-0.5 rounded-full border border-white bg-green-500">
