@@ -16,6 +16,7 @@ export const submitEmergencyReport = async ({
   geoCodeLocation,
   imageFile,
   description = "Emergency alert from quick response button",
+  emergencyType,
   sendNotification, // Pass the notification function
   hasActiveRequest = false,
   responderData = [] // Pass responderData from the component
@@ -53,6 +54,7 @@ export const submitEmergencyReport = async ({
       timestamp: serverTimestamp(),
       description,
       imageUrl,
+      emergencyType,
       status: "awaiting response",
       expiresAt: new Date(Date.now() + 30000).toISOString(),
       date: new Date().toISOString(),

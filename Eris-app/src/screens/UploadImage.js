@@ -20,14 +20,31 @@ const useUploadImage = () => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
     }
   };
 
-  return { photo, selectPhoto };
+  const takePhoto = async () => {
+    console.log("Take photo");
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync(); // Request camera permission
+    if (!permissionResult.granted) {
+      Alert.alert("Permission to access camera is required!", "Please confirm");
+      return;
+    };
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if(!result.canceled) {
+      setPhoto(result.assets[0].uri);
+    }
+  };
+
+  return { photo, selectPhoto, takePhoto };
 };
 
 export default useUploadImage;

@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
   Image,
+  SafeAreaView,
 } from "react-native";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
@@ -15,12 +16,16 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useUploadImage from "./UploadImage";
+import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
+import PickerField from "../component/PickerField";
+import { set } from "firebase/database";
 
 const Request = () => {
-  const { photo, selectPhoto } = useUploadImage();
+  const { photo, selectPhoto, takePhoto } = useUploadImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [emergencyType, setEmergencyType] = useState("");
   const { sendNotification } = useSendNotification(description);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
   const [loading, setLoading] = useState(false); // Initialize loading state
@@ -60,6 +65,7 @@ const Request = () => {
         geoCodeLocation,
         description,
         imageFile,
+        emergencyType,
         sendNotification,
         hasActiveRequest,
         responderData,
@@ -71,70 +77,113 @@ const Request = () => {
       setImageFile(null);
       setHasActiveRequest(true);
     } catch (error) {
-      Alert.alert("Error", "Could not submit emergency report, please try again");
+      Alert.alert(
+        "Error",
+        "Could not submit emergency report, please try again"
+      );
       setLoading(false); // Ensure loading is set to false on error
     }
   };
 
   return (
-    <ScrollView
-      className="flex-1 p-5 bg-gray-100"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      <Text className="font-bold text-xl text-center text-red-600 mb-5">
-        Submit Detailed Report
-      </Text>
-
-      {hasActiveRequest && (
-        <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
-          You have an active emergency report. Please wait for it to be resolved.
-        </Text>
-      )}
-
-      <View className="space-y-5">
-        <View>
-          <Text className="text-lg mb-1 text-gray-500">Description (Optional)</Text>
-          <TextInput
-            className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
-            multiline
-            numberOfLines={4}
-            onChangeText={setDescription}
-            value={description}
-            placeholder="Briefly describe the emergency"
-          />
-        </View>
-
-        <TouchableOpacity className="p-2 bg-blue-800 w-1/3 rounded" onPress={selectPhoto}>
-          <Text className="text-lg text-center text-white font-bold">Add Photo</Text>
-        </TouchableOpacity>
-
-        {photo && imageFile && (
-          <View className="w-40 h-40 bg-gray-500">
-            <Image source={{ uri: photo }} className="w-full h-full" />
-          </View>
-        )}
-
-        <View>
-          <Text className="text-lg mb-1 text-gray-600">Location:</Text>
-          <TextInput
-            className="border p-2.5 rounded-md border-gray-300 bg-gray-300 text-lg text-gray-900"
-            onChangeText={geoCodeLocation}
-            value={location}
-            placeholder="Your current location"
-            editable={false} // Read-only
-          />
-        </View>
-        <TouchableOpacity
-          className="bg-red-600 p-3.5 rounded-md items-center"
-          onPress={handleSubmit}
-          disabled={loading}
+    <>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          className="flex-1 p-5 bg-gray-100"
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
         >
-          <Text className="text-white text-lg font-bold">Submit Emergency</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <Text className="font-bold text-xl text-center text-red-600 mb-5">
+            Submit Detailed Report
+          </Text>
+
+          {hasActiveRequest && (
+            <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
+              You have an active emergency report. Please wait for it to be
+              resolved.
+            </Text>
+          )}
+
+          <View className="space-y-5">
+            <View className="space-y-4">
+              <Text>Description (Optional)</Text>
+              <TextInput
+                className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
+                multiline
+                numberOfLines={4}
+                onChangeText={setDescription}
+                value={description}
+                placeholder="Briefly describe the emergency"
+              />
+            </View>
+
+            <View>
+              <PickerField
+                label="Emergency Type"
+                value={emergencyType}
+                onValueChange={(emergencyType) =>
+                  setEmergencyType(emergencyType)
+                }
+                items={[
+                  { label: "Fire", value: "fire" },
+                  { label: "Medical", value: "medical" },
+                  { label: "Crime", value: "crime" },
+                  { label: "Natural Disaster", value: "natural disaster" },
+                  { label: "Other", value: "other" },
+                ]}
+              />
+            </View>
+            <View>
+              <TextInputStyle
+                label="Location"
+                value={geoCodeLocation}
+                placeholder="Enter location"
+                editable={false}
+              />
+            </View>
+
+            <TouchableOpacity
+              className="p-2 bg-blue-800 w-1/3 rounded"
+              onPress={() => {
+                Alert.alert(
+                  "Upload Photo",
+                  "Please choose an option to either select an existing photo from your gallery or take a new photo.",
+                  [
+                    { text: "Select Photo", onPress: selectPhoto },
+                    { text: "Take Photo", onPress: takePhoto },
+                    { text: "Cancel", style: "cancel" },
+                  ],
+                  { cancelable: true }
+                );
+              }}
+            >
+              <Text className="text-lg text-center text-white font-bold">
+                Add Photo
+              </Text>
+            </TouchableOpacity>
+
+            
+            {photo && imageFile && (
+              <View className="w-40 h-40 bg-gray-500">
+                <Image source={{ uri: photo }} className="w-full h-full" />
+              </View>
+            )}
+          </View>
+        </ScrollView>
+        <View className="p-5">
+          <TouchableOpacity
+            className="bg-red-600 p-3.5 rounded-md items-center"
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            <Text className="text-white text-lg font-bold">
+              Submit Emergency
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </>
   );
 };
 
