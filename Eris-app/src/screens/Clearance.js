@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { View, Text, SafeAreaView, ScrollView, Alert } from "react-native";
 import { ref, serverTimestamp, push, set } from "firebase/database";
-import { database } from "../services/firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import CustomButton from "../component/CustomButton";
 import TextInputStyle from "../component/TextInputStyle";
 import PickerField from "../component/PickerField"; // Ensure this path is correct
+import  useCurrentUser  from "../hooks/useCurrentUser";
 
 const Clearance = () => {
+  const {currentUser} = useCurrentUser();
   const navigate = useNavigation();
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -33,6 +35,7 @@ const Clearance = () => {
       status: "pending",
       date: new Date().toISOString(),
       timestamp: serverTimestamp(), // Make sure timestamp is set at submission
+      userId: currentUser?.customId,
     };
 
     const clearanceRef = ref(database, "requestClearance");
@@ -79,6 +82,18 @@ const Clearance = () => {
     clearanceData.moveInYear,
   ]);
 
+  useEffect(() => {
+
+    if(currentUser){
+      setClearanceData((prev) => ({
+        ...prev,
+        fullname: currentUser.fullname || "",
+        age: currentUser.age  || "",
+        address: currentUser.address  || "",
+      }));
+    }
+  }, [currentUser]);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView style={{ flex: 1 }}>
@@ -86,6 +101,7 @@ const Clearance = () => {
           <Text className="text-gray-500 text-sm">
             Please ensure that all information you provide in this form is
             correct and complete to the best of your knowledge.
+            {currentUser?.fullname}
           </Text>
           <View>
             <PickerField

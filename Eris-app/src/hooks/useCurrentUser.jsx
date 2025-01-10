@@ -1,10 +1,10 @@
-import useResponderData from './useFetchData'
+import useFetchData from './useFetchData'
 import { auth, database } from '../services/firebaseConfig';
 import {ref, update} from "firebase/database"
 
 const useCurrentUser = () => {
 
-    const {data: userData} = useResponderData("users");
+    const {data: userData} = useFetchData("users");
     const userInfo = auth.currentUser;
     const currentUser = userData.find((user) => user.id === userInfo?.uid) || null;
 
