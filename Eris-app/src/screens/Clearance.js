@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { View, Text, SafeAreaView, ScrollView, Alert } from "react-native";
-import { ref, serverTimestamp, push, set } from "firebase/database";
+import { ref, serverTimestamp, push, set, get } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import CustomButton from "../component/CustomButton";
 import TextInputStyle from "../component/TextInputStyle";
 import PickerField from "../component/PickerField"; // Ensure this path is correct
-import  useCurrentUser  from "../hooks/useCurrentUser";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const Clearance = () => {
-  const {currentUser} = useCurrentUser();
+  const { currentUser } = useCurrentUser();
   const navigate = useNavigation();
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [clearanceData, setClearanceData] = useState({
     docsType: "Clearance",
     fullname: "",
@@ -83,14 +84,32 @@ const Clearance = () => {
   ]);
 
   useEffect(() => {
-
-    if(currentUser){
+    if (currentUser) {
       setClearanceData((prev) => ({
         ...prev,
         fullname: currentUser.fullname || "",
-        age: currentUser.age  || "",
-        address: currentUser.address  || "",
+        age: currentUser.age || "",
+        address: currentUser.address || "",
       }));
+
+      const checkPendingRequest = async () => {
+        try {
+          const clearanceRef = ref(database, "requestClearance");
+          const snapshot = await get(clearanceRef);
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const pendingRequest = Object.values(data).some(
+              (request) =>
+                request.userId === currentUser.customId &&
+                request.status === "pending"
+            );
+            setHasPendingRequest(pendingRequest);
+          }
+        } catch (error) {
+          console.error("Error checking pending requests:", error);
+        }
+      };
+      checkPendingRequest();
     }
   }, [currentUser]);
 
@@ -103,15 +122,17 @@ const Clearance = () => {
             correct and complete to the best of your knowledge.
             {currentUser?.fullname}
           </Text>
+          {hasPendingRequest && (
+            <Text className="text-red-500">
+              You have a pending request. Please wait.
+            </Text>
+          )}
           <View>
             <PickerField
               label="Type of Certificate"
               selectedValue={clearanceData.docsType}
               onValueChange={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  docsType: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, docsType: value }))
               }
               items={[
                 { label: "Clearance", value: "Clearance" },
@@ -125,10 +146,7 @@ const Clearance = () => {
               placeholder="Enter your full name"
               value={clearanceData.fullname}
               onChangeText={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  fullname: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, fullname: value }))
               }
             />
           </View>
@@ -138,10 +156,7 @@ const Clearance = () => {
               placeholder="Enter your age"
               value={clearanceData.age}
               onChangeText={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  age: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, age: value }))
               }
             />
           </View>
@@ -151,10 +166,7 @@ const Clearance = () => {
               placeholder="Enter your address"
               value={clearanceData.address}
               onChangeText={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  address: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, address: value }))
               }
             />
           </View>
@@ -163,10 +175,7 @@ const Clearance = () => {
               label="Gender"
               selectedValue={clearanceData.gender}
               onValueChange={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  gender: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, gender: value }))
               }
               items={[
                 { label: "Female", value: "Female" },
@@ -179,10 +188,7 @@ const Clearance = () => {
               label="Civil Status"
               selectedValue={clearanceData.civilStatus}
               onValueChange={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  civilStatus: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, civilStatus: value }))
               }
               items={[
                 { label: "Single", value: "Single" },
@@ -193,27 +199,26 @@ const Clearance = () => {
             />
           </View>
           <View>
-            <PickerField 
+            <PickerField
               label="Move-in Year"
               selectedValue={clearanceData.moveInYear}
               onValueChange={(value) =>
-                setClearanceData((prev) => ({
-                  ...prev,
-                  moveInYear: value,
-                }))
+                setClearanceData((prev) => ({ ...prev, moveInYear: value }))
               }
-              items={years.map((year) => ({
-                label: `${year}`,
-                value: year,
-              }))}
+              items={years.map((year) => ({ label: `${year}`, value: year }))}
             />
           </View>
         </View>
       </ScrollView>
       <CustomButton
-        isValid={isComplete}
-        label={ isComplete ? `Request ${clearanceData.docsType}` : errorMessage }
+        isValid={isComplete && !hasPendingRequest}
+        label={
+          isComplete && !hasPendingRequest
+            ? `Request ${clearanceData.docsType}`
+            : errorMessage
+        }
         onPress={handleSubmitData}
+        disabled={hasPendingRequest}
       />
     </SafeAreaView>
   );
