@@ -8,13 +8,18 @@ import CustomButton from "../component/CustomButton";
 import TextInputStyle from "../component/TextInputStyle";
 import PickerField from "../component/PickerField"; // Ensure this path is correct
 import useCurrentUser from "../hooks/useCurrentUser";
+import useFetchDocuments from "../hooks/useFetchDocuments";
 
 const Clearance = () => {
   const { currentUser } = useCurrentUser();
   const navigate = useNavigation();
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [isPendingOrReady, setIsPendingOrReady] = useState({
+    pending: false,
+    ready: false,
+  });
+  const { documents, loading, error } = useFetchDocuments();
   const [clearanceData, setClearanceData] = useState({
     docsType: "Clearance",
     fullname: "",
@@ -83,6 +88,8 @@ const Clearance = () => {
     clearanceData.moveInYear,
   ]);
 
+  // Check if there is a pending or ready request for the user
+  // fill the form with the user's data
   useEffect(() => {
     if (currentUser) {
       setClearanceData((prev) => ({
@@ -92,26 +99,23 @@ const Clearance = () => {
         address: currentUser.address || "",
       }));
 
-      const checkPendingRequest = async () => {
-        try {
-          const clearanceRef = ref(database, "requestClearance");
-          const snapshot = await get(clearanceRef);
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            const pendingRequest = Object.values(data).some(
-              (request) =>
-                request.userId === currentUser.customId &&
-                request.status === "pending"
-            );
-            setHasPendingRequest(pendingRequest);
-          }
-        } catch (error) {
-          console.error("Error checking pending requests:", error);
+      const checkPendingRequest = () => {
+        if (documents.length > 0) {
+          const pendingRequest = documents.find(
+            (doc) => doc.status === "pending"
+          );
+          const readyRequest = documents.find(
+            (doc) => doc.status === "ready for pickup"
+          );
+          setIsPendingOrReady({
+            pending: pendingRequest,
+            ready: readyRequest,
+          });
         }
       };
       checkPendingRequest();
     }
-  }, [currentUser]);
+  }, [currentUser, documents]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -122,11 +126,17 @@ const Clearance = () => {
             correct and complete to the best of your knowledge.
             {currentUser?.fullname}
           </Text>
-          {hasPendingRequest && (
+          {isPendingOrReady.pending && (
             <Text className="text-red-500">
               You have a pending request. Please wait.
             </Text>
           )}
+          {isPendingOrReady.ready && (
+            <Text className="text-green-500">
+              Your last request is ready for pick-up.
+            </Text>
+          )}
+
           <View>
             <PickerField
               label="Type of Certificate"
@@ -211,14 +221,14 @@ const Clearance = () => {
         </View>
       </ScrollView>
       <CustomButton
-        isValid={isComplete && !hasPendingRequest}
+        isValid={isComplete && !isPendingOrReady}
         label={
-          isComplete && !hasPendingRequest
+          isComplete && !isPendingOrReady
             ? `Request ${clearanceData.docsType}`
             : errorMessage
         }
         onPress={handleSubmitData}
-        disabled={hasPendingRequest}
+        disabled={isPendingOrReady}
       />
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,11 +15,15 @@ import { signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
+import useFetchDocuments from "../hooks/useFetchDocuments";
+import { use } from "react";
 
 const Profile = () => {
   const user = auth.currentUser;
-  const { currentUser } = useCurrentUser();
   const navigation = useNavigation();
+  const { currentUser } = useCurrentUser();
+  const {documents} = useFetchDocuments();
+  const [readyForPickup, setReadyForPickup] = useState(true);
   const [logout, setLogout] = useState(false);
 
   const handleLogoutModal = () => {
@@ -33,6 +37,19 @@ const Profile = () => {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+
+    if(documents.length > 0){
+      const readyDocs = documents.filter((doc) => doc.status === "ready for pickup");
+      if(readyDocs.length > 0){
+        setReadyForPickup(true);
+      }else{
+        setReadyForPickup(false);
+      }
+    }
+
+  },[documents]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -141,7 +158,7 @@ const Profile = () => {
                 <Icon name="file-document-edit-outline" size={24} color={colors.blue[800]} />
                 <Text className="text-lg font-bold">Request Barangay Certificate</Text>
               </View>
-              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
+              <Icon name={readyForPickup ? "alert-circle" : "arrow-right"} size={24} color={readyForPickup ? colors.red[500] : colors.blue[800]} />
             </TouchableOpacity>
               {user.emailVerified && (
                 <TouchableOpacity

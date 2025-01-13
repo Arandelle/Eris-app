@@ -13,22 +13,33 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import NewsFeed from "../screens/NewsFeed";
 import { auth } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import useFetchDocuments from "../hooks/useFetchDocuments";
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const { currentUser } = useCurrentUser();
+  const {documents} = useFetchDocuments();
   const { notificationsCount } = useNotificationData();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [dayTime, setDayTime] = useState("");
   const [showTabBar, setShowTabBar] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [isReadyForPickup, setIsReadyForPickup] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
       setIsProfileComplete(currentUser.profileComplete);
     }
-  }, [currentUser]);
+    if(documents.length > 0){
+      const readyDocs = documents.filter((doc) => doc.status === "ready for pickup");
+      if(readyDocs.length > 0){
+        setIsReadyForPickup(true);
+      }else{
+        setIsReadyForPickup(false);
+      }
+    }
+  }, [currentUser, documents]);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -181,7 +192,7 @@ const TabNavigator = () => {
         options={{
           title: "Profile",
           headerShown: true,
-          tabBarBadge: !isProfileComplete ? true : null,
+          tabBarBadge: !isProfileComplete || isReadyForPickup ? true : null,
         }}
       >
         {(props) => (
