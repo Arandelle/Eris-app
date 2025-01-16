@@ -60,25 +60,17 @@ const Clearance = () => {
   };
 
   useEffect(() => {
-    const {
-      docsType,
-      fullname,
-      age,
-      address,
-      gender,
-      civilStatus,
-      moveInYear,
-    } = clearanceData;
-    const completeData =
-      docsType &&
-      fullname &&
-      age &&
-      address &&
-      gender &&
-      civilStatus &&
-      moveInYear;
+    const { docsType, fullname, age, address, gender, civilStatus, moveInYear } = clearanceData;
+    const completeData = docsType && fullname && age && address && gender && civilStatus && moveInYear;
+    
+    if(isPendingOrReady.pending){
+      setIsComplete(false);
+      setErrorMessage("Last request is pending");
+    } else{
     setIsComplete(completeData);
     setErrorMessage("Please complete all fields");
+    }
+
   }, [
     clearanceData.docsType,
     clearanceData.fullname,
@@ -86,6 +78,7 @@ const Clearance = () => {
     clearanceData.gender,
     clearanceData.civilStatus,
     clearanceData.moveInYear,
+    isPendingOrReady
   ]);
 
   // Check if there is a pending or ready request for the user
@@ -221,9 +214,9 @@ const Clearance = () => {
         </View>
       </ScrollView>
       <CustomButton
-        isValid={isComplete && !isPendingOrReady}
+        isValid={isComplete && !isPendingOrReady.pending}
         label={
-          isComplete && !isPendingOrReady
+          isComplete && !isPendingOrReady.pending
             ? `Request ${clearanceData.docsType}`
             : errorMessage
         }
