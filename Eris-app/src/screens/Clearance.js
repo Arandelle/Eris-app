@@ -12,6 +12,7 @@ import useFetchDocuments from "../hooks/useFetchDocuments";
 
 const Clearance = () => {
   const { currentUser } = useCurrentUser();
+  const user = auth.currentUser;
   const navigate = useNavigation();
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -41,7 +42,8 @@ const Clearance = () => {
       status: "pending",
       date: new Date().toISOString(),
       timestamp: serverTimestamp(), // Make sure timestamp is set at submission
-      userId: currentUser?.customId,
+      customUserId: currentUser?.customId,
+      userId: user.uid,
     };
 
     const clearanceRef = ref(database, "requestClearance");

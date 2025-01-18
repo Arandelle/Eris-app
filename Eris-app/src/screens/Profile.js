@@ -16,14 +16,13 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
 import useFetchDocuments from "../hooks/useFetchDocuments";
-import { use } from "react";
 
 const Profile = () => {
   const user = auth.currentUser;
   const navigation = useNavigation();
   const { currentUser } = useCurrentUser();
   const {documents} = useFetchDocuments();
-  const [readyForPickup, setReadyForPickup] = useState(true);
+  const [readyForPickup, setReadyForPickup] = useState(false);
   const [logout, setLogout] = useState(false);
 
   const handleLogoutModal = () => {

@@ -21,7 +21,7 @@ const useFetchDocuments = () => {
             const data = [];
             snapshot.forEach((doc) => {
               const docData = doc.val();
-              if (docData.userId === currentUser?.customId) {
+              if (docData.customUserId === currentUser?.customId) {
                 data.push({ ...docData, id: doc.key });
               }
             });
