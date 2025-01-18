@@ -238,17 +238,37 @@ const UpdateProfile = () => {
           </ScrollView>
 
           <CustomInput
+            type="email"
+            label="Email"
+            value={userData.email}
+            placeholder="Enter your fullname"
+          />
+          <CustomInput
+            type="mobile phone"
+            label="Mobile phone"
+            value={userData.mobileNum}
+            onChangeText={(value) => handleFieldChange("mobileNum", value)}
+            placeholder="Enter your mobile number"
+            errorMessage={errors.mobileNum}
+          />
+          <CustomInput
             label="Fullname"
             value={userData.fullname}
             onChangeText={(value) => handleFieldChange("fullname", value)}
             placeholder="Enter your fullname"
           />
           <CustomInput
-            label="Mobile phone"
-            value={userData.mobileNum}
-            onChangeText={(value) => handleFieldChange("mobileNum", value)}
-            placeholder="Enter your mobile number"
-            errorMessage={errors.mobileNum}
+            type="age"
+            label="Age"
+            value={userData.age}
+            onChangeText={(value) => handleFieldChange("age", value)}
+            placeholder="Enter your age"
+          />
+          <CustomInput
+            label="Address"
+            value={userData.address}
+            onChangeText={(value) => handleFieldChange("address", value)}
+            placeholder="Enter your address"
           />
 
           <Text className="text-lg mb-1 text-blue-800 font-bold">
