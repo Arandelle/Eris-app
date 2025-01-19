@@ -41,6 +41,7 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const NewsFeed = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
+  const { data: adminData} = useFetchData("admins");
   const { data: hotlines} = useFetchData("hotlines");
   const { currentUser } = useCurrentUser();
   const [refreshing, setRefreshing] = useState(false);
@@ -56,6 +57,10 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const getAdminsDetails = (userId) => {
+    return adminData.find((user) => user.id === userId);
+  }
 
   useEffect(() => {
     trackUserLocation();
@@ -406,8 +411,11 @@ const NewsFeed = ({ dayTime, isVerified }) => {
               ))}
             </View>
             {announcement.length > 0 &&
-              announcement.map((item, key) => (
-                <View
+              announcement.map((item, key) => {
+                const adminDetails = getAdminsDetails(item.userId);
+
+                return (
+                  <View
                   key={key}
                   className="rounded-lg bg-white border-0.5 border-gray-800 shadow-2xl"
                 >
@@ -452,18 +460,19 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                     <View className="pt-2 flex flex-row items-center space-x-3">
                       <Image
                         source={{
-                          uri: "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+                          uri: adminDetails?.imageUrl,
                         }}
                         className="h-10 w-10 rounded-full"
                       />
                       <View>
-                        <Text className="font-bold text-blue-500">Admin</Text>
+                        <Text className="font-bold text-blue-500">{adminDetails.fullname}</Text>
                         <Text>{getTimeDifference(item.timestamp)}</Text>
                       </View>
                     </View>
                   </View>
                 </View>
-              ))}
+                );
+            })}
           </View>
         </ScrollView>
         <Animated.View style={{ opacity: stickyHeaderOpacity }}>
