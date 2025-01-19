@@ -41,8 +41,8 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const NewsFeed = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
-  const { data: adminData} = useFetchData("admins");
-  const { data: hotlines} = useFetchData("hotlines");
+  const { data: adminData } = useFetchData("admins");
+  const { data: hotlines } = useFetchData("hotlines");
   const { currentUser } = useCurrentUser();
   const [refreshing, setRefreshing] = useState(false);
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
@@ -60,7 +60,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
 
   const getAdminsDetails = (userId) => {
     return adminData.find((user) => user.id === userId);
-  }
+  };
 
   useEffect(() => {
     trackUserLocation();
@@ -416,68 +416,78 @@ const NewsFeed = ({ dayTime, isVerified }) => {
 
                 return (
                   <View
-                  key={key}
-                  className="rounded-lg bg-white border-0.5 border-gray-800 shadow-2xl"
-                >
-                  <TouchableOpacity
-                    onPress={() => handleImageClick(item.imageUrl)}
+                    key={key}
+                    className="rounded-lg bg-white border-0.5 border-gray-800 shadow-2xl"
                   >
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      className=" h-52 rounded-t-lg"
-                      resizeMode="cover"
-                    />
-                  </TouchableOpacity>
-                  <View className="p-4 space-y-2">
-                    <Text className="font-bold text-blue-500">
-                      {formatDate(item.date)}
-                    </Text>
-                    <Pressable
-                      onPress={() => openDialerOrEmail(item.links, "links")}
+                    <TouchableOpacity
+                      onPress={() => handleImageClick(item.imageUrl)}
                     >
-                      <View className="flex-row items-center">
-                        <Text
-                          className={`font-bold text-lg ${
-                            item.links ? "underline" : ""
-                          }`}
-                        >
-                          {item.title.toUpperCase()}
-                        </Text>
-                        {item.links && (
-                          <Icon
-                            name="eye"
-                            size={20}
-                            style={{ marginLeft: 5 }}
-                            color={colors.gray[600]}
-                          />
-                        )}
-                      </View>
-                    </Pressable>
-
-                    <Text className="text-gray-600 text-lg">
-                      {item.description}
-                    </Text>
-                    <View className="pt-2 flex flex-row items-center space-x-3">
                       <Image
-                        source={{
-                          uri: adminDetails?.imageUrl,
-                        }}
-                        className="h-10 w-10 rounded-full"
+                        source={{ uri: item.imageUrl }}
+                        className=" h-52 rounded-t-lg"
+                        resizeMode="cover"
                       />
-                      <View>
-                        <Text className="font-bold text-blue-500">{adminDetails.fullname}</Text>
-                        <Text>{getTimeDifference(item.timestamp)}</Text>
+                    </TouchableOpacity>
+                    <View className="p-4 space-y-2">
+                      <Text className="font-bold text-blue-500">
+                        {formatDate(item.date)}
+                      </Text>
+                      <Pressable
+                        onPress={() => openDialerOrEmail(item.links, "links")}
+                      >
+                        <View className="flex-row items-center">
+                          <Text
+                            className={`font-bold text-lg ${
+                              item.links ? "underline" : ""
+                            }`}
+                          >
+                            {item.title.toUpperCase()}
+                          </Text>
+                          {item.links && (
+                            <Icon
+                              name="eye"
+                              size={20}
+                              style={{ marginLeft: 5 }}
+                              color={colors.gray[600]}
+                            />
+                          )}
+                        </View>
+                      </Pressable>
+
+                      <Text className="text-gray-600 text-lg">
+                        {item.description}
+                      </Text>
+                      <View className="pt-2 flex flex-row items-center space-x-3">
+                        <Image
+                          source={{
+                            uri: adminDetails?.imageUrl,
+                          }}
+                          className="h-10 w-10 rounded-full"
+                        />
+                        <View>
+                          <Text className="font-bold text-blue-500">
+                            {adminDetails?.fullname}
+                          </Text>
+                          <Text>{getTimeDifference(item.timestamp)}</Text>
+                        </View>
                       </View>
                     </View>
                   </View>
-                </View>
                 );
-            })}
+              })}
           </View>
         </ScrollView>
-        <Animated.View style={{ opacity: stickyHeaderOpacity }}>
+        <Animated.View
+          style={{
+            opacity: stickyHeaderOpacity,
+            position: "absolute",
+            bottom: 20,
+            right: 20,
+            zIndex: 1000,
+          }}
+        >
           <TouchableOpacity
-            className="absolute bottom-5 right-5 bg-blue-800 p-4 rounded-full shadow-lg"
+            className=" bg-blue-800 p-4 rounded-full shadow-lg"
             onPress={scrollToTop}
           >
             <Icon name="arrow-up" size={30} color="white" />
