@@ -33,23 +33,25 @@ import {
   PanGestureHandler,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import useViewImage from "../hooks/useViewImage";
+import {useNavigation} from '@react-navigation/native';
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const NewsFeed = ({ dayTime, isVerified }) => {
+  const navigation = useNavigation();
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
   const { data: adminData } = useFetchData("admins");
   const { data: hotlines } = useFetchData("hotlines");
+  const { isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal } = useViewImage();
   const { currentUser } = useCurrentUser();
   const [refreshing, setRefreshing] = useState(false);
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
   const { sendNotification } = useSendNotification();
-  const [isImageModalVisible, setIsImageModalVisible] = useState(false); // State to control modal visibility
-  const [selectedImageUri, setSelectedImageUri] = useState(""); // State to hold the image URI to be shown in modal
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
   const [email, setEmail] = useState("");
@@ -95,11 +97,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
     [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
     { useNativeDriver: false }
   );
-
-  const handleImageClick = (imageUri) => {
-    setSelectedImageUri(imageUri);
-    setIsImageModalVisible(true); // Show the image modal
-  };
 
   const openDialerOrEmail = (value, type) => {
     if (type === "phone") {
@@ -231,7 +228,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
         images={[{ uri: selectedImageUri }]} // Ensure it's an array, even for one image
         imageIndex={0}
         visible={isImageModalVisible}
-        onRequestClose={() => setIsImageModalVisible(false)} // Close viewer
+        onRequestClose={closeImageModal} // Close viewer
       />
 
       <View className="flex-1 bg-gray-200">
@@ -326,10 +323,12 @@ const NewsFeed = ({ dayTime, isVerified }) => {
               {!isSearching ? (
                 <View className="flex flex-row space-x-2 items-center bg-blue-800">
                   <View className="rounded-full border border-green-500">
-                    <Image
-                      source={{ uri: currentUser?.img }}
-                      className="h-12 w-12 rounded-full"
-                    />
+                    <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+                      <Image
+                        source={{ uri: currentUser?.img }}
+                        className="h-12 w-12 rounded-full"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View className="space-y-0">
                     <Text className="text-gray-200 font-bold">{`${dayTime}`}</Text>
@@ -458,12 +457,14 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                         {item.description}
                       </Text>
                       <View className="pt-2 flex flex-row items-center space-x-3">
-                        <Image
-                          source={{
-                            uri: adminDetails?.imageUrl,
-                          }}
-                          className="h-10 w-10 rounded-full"
-                        />
+                        <TouchableOpacity onPress={() => handleImageClick(adminDetails?.imageUrl)}>
+                          <Image
+                            source={{
+                              uri: adminDetails?.imageUrl,
+                            }}
+                            className="h-10 w-10 rounded-full"
+                          />
+                        </TouchableOpacity>
                         <View>
                           <Text className="font-bold text-blue-500">
                             {adminDetails?.fullname}

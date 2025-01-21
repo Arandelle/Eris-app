@@ -16,6 +16,8 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
 import useFetchDocuments from "../hooks/useFetchDocuments";
+import useViewImage from "../hooks/useViewImage";
+import ImageViewer from "react-native-image-viewing";
 
 const Profile = () => {
   const user = auth.currentUser;
@@ -24,6 +26,7 @@ const Profile = () => {
   const {documents} = useFetchDocuments();
   const [readyForPickup, setReadyForPickup] = useState(false);
   const [logout, setLogout] = useState(false);
+  const {isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal } = useViewImage();
 
   const handleLogoutModal = () => {
     setLogout(!logout);
@@ -53,13 +56,21 @@ const Profile = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]}
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={closeImageModal}
+      />
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
           {currentUser?.img ? (
             <View className="relative border border-white rounded-full">
-              <Image
-                source={{ uri: currentUser.img }}
-                className="h-24 w-24  rounded-full"
-              />
+              <TouchableOpacity onPress={() => handleImageClick(currentUser?.img)}>
+                <Image
+                  source={{ uri: currentUser.img }}
+                  className="h-24 w-24  rounded-full"
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
                 onPress={() => navigation.navigate("UpdateProfile")}
