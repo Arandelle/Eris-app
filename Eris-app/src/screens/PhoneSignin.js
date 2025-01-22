@@ -15,15 +15,17 @@ export default function PhoneSignin() {
     try {
       console.log("Sending verification code to:", phoneNumber);
       const phoneProvider = new PhoneAuthProvider(auth);
-      const verificationId = await phoneProvider.verifyPhoneNumber(
-        phoneNumber,
-        recaptchaVerifier.current
-      );
-      setVerificationId(verificationId);
-      Alert.alert('Success', 'Verification code sent to your phone.');
+
+      if (recaptchaVerifier.current) {
+        const verificationId = await phoneProvider.verifyPhoneNumber(phoneNumber, recaptchaVerifier.current);
+        setVerificationId(verificationId);
+        Alert.alert('Success', 'Verification code sent to your phone.');
+      } else {
+        Alert.alert("Error", "Recaptcha is not ready.");
+      }
     } catch (error) {
       console.error("Error during verification:", error.message);
-      Alert.alert('Error', error.message);
+      Alert.alert('Errors', error.message);
     }
   };
 
@@ -35,7 +37,7 @@ export default function PhoneSignin() {
       Alert.alert('Success', 'Phone authentication successful!');
     } catch (error) {
       console.error("Error during code verification:", error.message);
-      Alert.alert('Error', 'Invalid verification code.');
+      Alert.alert('Error', 'Invalid verification code or user data not found.');
     }
   };
 

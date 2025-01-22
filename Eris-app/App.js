@@ -21,6 +21,7 @@ import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Clearance from "./src/screens/Clearance";
 import ChangePassModal from "./src/screens/ChangePassModal";
+import PhoneSignin from "./src/screens/PhoneSignin";
 
 const Stack = createNativeStackNavigator();
 
@@ -169,6 +170,11 @@ const App = () => {
                   title: "Create your account",
                   headerRight: () => <LoginButton />,
                 }}
+              />
+              <Stack.Screen
+                name="Phone"
+                options={{ headerShown: false }}
+                component={PhoneSignin} 
               />
             </>
           )}
