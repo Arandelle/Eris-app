@@ -73,6 +73,5 @@
     "@babel/core": "^7.20.0",
     "@react-native-community/cli": "latest",
     "tailwindcss": "^3.3.2"
-  },
-  "private": true
+  }
 }
