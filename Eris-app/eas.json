@@ -3,6 +3,10 @@
     "version": ">= 10.1.1"
   },
   "build": {
+    "debug": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },  
     "development": {
       "developmentClient": true,
       "distribution": "internal"
