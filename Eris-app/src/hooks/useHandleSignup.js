@@ -9,6 +9,7 @@ import { serverTimestamp, set, ref } from "firebase/database";
 import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "./useSendNotification";
 import { useNavigation } from "@react-navigation/native";
+import ErrorMessages from "../helper/ErrorMessages";
 
 const useHandleSignup = () => {
   const [error, setError] = useState("");
@@ -57,7 +58,7 @@ const useHandleSignup = () => {
 
       // Handle navigation or other logic after successful signup
     } catch (error) {
-      Alert.alert("Error signing up", error.message);
+      ErrorMessages(error);
       setError(error.message);
       console.error("Error signing up:", error);
     }

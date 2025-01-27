@@ -1,5 +1,8 @@
 {
   "expo": {
+" developmentClient": {
+      "development": true
+    },
     "name": "Eris-app",
     "slug": "Eris-app",
     "version": "1.0.0",

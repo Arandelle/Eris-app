@@ -23,6 +23,7 @@ import ForgotPass from "./ForgotPass";
 import { generateUniqueBarangayID } from "../helper/generateID";
 import colors from "../constant/colors";
 import useSendNotification from "../hooks/useSendNotification";
+import ErrorMessages from "../helper/ErrorMessages";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -80,7 +81,7 @@ const LoginForm = () => {
         await auth.signOut();
       }
     } catch (error) {
-      Alert.alert("Login Error", error.message);
+      ErrorMessages(error);
     } finally {
       setLoading(false);
     }
@@ -121,10 +122,7 @@ const LoginForm = () => {
 
     } catch (error) {
       console.error("Anonymous login error:", error);
-      Alert.alert(
-        "Login Error",
-        "Unable to login as guest. Please try again or use email login."
-      );
+      ErrorMessages(error);
     } finally {
       setLoading(false);
     }
