@@ -1,52 +1,42 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-import { getAuth, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import { app } from '../services/firebaseConfig';
+import auth from '@react-native-firebase/auth'; // Import Firebase Auth from React Native Firebase
 
 export default function PhoneSignin() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationId, setVerificationId] = useState(null);
   const [verificationCode, setVerificationCode] = useState('');
-  const recaptchaVerifier = React.useRef(null);
-  const auth = getAuth(app);
 
   const sendVerificationCode = async () => {
     try {
-      console.log("Sending verification code to:", phoneNumber);
-      const phoneProvider = new PhoneAuthProvider(auth);
-
-      if (recaptchaVerifier.current) {
-        const verificationId = await phoneProvider.verifyPhoneNumber(phoneNumber, recaptchaVerifier.current);
-        setVerificationId(verificationId);
-        Alert.alert('Success', 'Verification code sent to your phone.');
-      } else {
-        Alert.alert("Error", "Recaptcha is not ready.");
-      }
+      console.log('Sending verification code to:', phoneNumber);
+      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setVerificationId(confirmation.verificationId);
+      Alert.alert('Success', 'Verification code sent to your phone.');
     } catch (error) {
-      console.error("Error during verification:", error.message);
-      Alert.alert('Errors', error.message);
+      console.error('Error during verification:', error.message);
+      Alert.alert('Error', error.message);
     }
   };
 
   const verifyCode = async () => {
     try {
-      console.log("Verifying code:", verificationCode);
-      const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-      await signInWithCredential(auth, credential);
-      Alert.alert('Success', 'Phone authentication successful!');
+      console.log('Verifying code:', verificationCode);
+      if (verificationId) {
+        const credential = auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+        await auth().signInWithCredential(credential);
+        Alert.alert('Success', 'Phone authentication successful!');
+      } else {
+        Alert.alert('Error', 'No verification ID found.');
+      }
     } catch (error) {
-      console.error("Error during code verification:", error.message);
+      console.error('Error during code verification:', error.message);
       Alert.alert('Error', 'Invalid verification code or user data not found.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={app.options}
-      />
       {!verificationId ? (
         <>
           <Text style={styles.label}>Enter Phone Number:</Text>

@@ -156,11 +156,6 @@ const App = () => {
             </>
           ) : (
             <>
-              {/* <Stack.Screen
-                  name="Phone"
-                  options={{ headerShown: false }}
-                  component={PhoneAuth}
-                /> */}
               <Stack.Screen name="Login" component={LoginForm} />
               <Stack.Screen
                 name="Signup"
