@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.mycorp.myapp"
+      "bundleIdentifier": "com.arandelle.erisapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.mycorp.myapp"
+      "package": "com.arandelle.erisapp"
     },
     "web": {
       "favicon": "./assets/logo.png"
