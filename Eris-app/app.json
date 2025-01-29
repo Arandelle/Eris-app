@@ -12,16 +12,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.arandelle.erisapp"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "googleServicesFile": "./google-services.json",
       "package": "com.arandelle.erisapp"
     },
     "web": {
@@ -38,26 +35,6 @@
     "updates": {
       "url": "https://u.expo.dev/3315e16a-f78d-45c8-bb3b-329e77c84511"
     },
-    "plugins": [
-      "expo-font",
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-firebase/crashlytics",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ]
-    ],
     "owner": "arandelle",
     "newArchEnabled": true
   }
