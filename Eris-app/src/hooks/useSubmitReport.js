@@ -14,9 +14,9 @@ export const submitEmergencyReport = async ({
   latitude,
   longitude,
   geoCodeLocation,
-  imageFile,
+  imageFile = null,
   description = "Emergency alert from quick response button",
-  emergencyType,
+  emergencyType = "Immediate Report",
   sendNotification, // Pass the notification function
   hasActiveRequest = false,
   responderData = [] // Pass responderData from the component
