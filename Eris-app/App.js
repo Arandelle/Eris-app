@@ -25,15 +25,6 @@ import PhoneSignin from "./src/screens/PhoneSignin";
 
 const Stack = createNativeStackNavigator();
 
-const LoginButton = () => {
-  const navigation = useNavigation();
-  return (
-    <TouchableOpacity onPress={() => navigation.goBack()}>
-      <Text className="text-blue-600 font-extrabold text-lg">Login</Text>
-    </TouchableOpacity>
-  );
-};
-
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -163,7 +154,6 @@ const App = () => {
                 options={{
                   headerShown: true,
                   title: "Create your account",
-                  headerRight: () => <LoginButton />,
                 }}
               />
               <Stack.Screen

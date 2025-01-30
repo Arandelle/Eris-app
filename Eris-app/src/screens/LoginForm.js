@@ -222,20 +222,15 @@ const LoginForm = () => {
                     </Text>
                   </TouchableOpacity>
   
-                  {/* button for anonymous*/}
-  
+                  {/* Guest login button */}
                   <TouchableOpacity
-                    className="w-full bg-white border-2 border-blue-800 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
+                    className="w-full bg-gray-50 border border-gray-300 p-3 rounded-lg flex flex-row items-center justify-center space-x-4"
                     onPress={handleAnonymousLogin}
                     disabled={loading}
                   >
-                    <Icon
-                      name="account-arrow-right"
-                      size={20}
-                      color={colors.blue[800]}
-                    />
+                    <Icon name="account-circle" size={20} color={colors.blue[800]} />
                     <Text className="text-center text-lg text-blue-800 font-bold">
-                      {loading ? "Please wait..." : "Login as Guest"}
+                      {loading ? "Please wait..." : "Continue as Guest"}
                     </Text>
                   </TouchableOpacity>
   

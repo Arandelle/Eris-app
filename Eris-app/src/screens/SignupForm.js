@@ -62,7 +62,7 @@ const SignupForm = () => {
                   Email
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleCreateAccount}>
+              {/* <TouchableOpacity onPress={handleCreateAccount}>
                 <Text
                   className={`text-xl ${
                     !createType
@@ -72,7 +72,7 @@ const SignupForm = () => {
                 >
                   Phone
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <View className="space-y-2">
               <Text className="text-lg">{createType ? "Email" : "Phone"}</Text>
