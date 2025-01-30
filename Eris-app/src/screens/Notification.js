@@ -114,6 +114,11 @@ const NotificationItem = ({ notification }) => {
             case "car-emergency":
               navigation.navigate("Emergency Records", { screen: "on-going" });
               break;
+            case "close-circle":
+            case "clipboard-check-outline":
+            case "check-circle":
+              navigation.navigate("Clearance");
+              break;
             default:
               break;
           }
