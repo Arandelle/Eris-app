@@ -65,11 +65,14 @@ const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
   const { currentUser} = useCurrentUser()
   const { data: responderData } = useResponderData("responders");
+  const { data: admin } = useResponderData("admins");
   const { handleSpecificNotification } = useNotificationData();
 
   const responderDetails = responderData.find(
     (responder) => responder.id === notification.responderId
   );
+
+  const adminDetails = admin.find((admin) => admin.id === notification.adminId);
 
   const notificationImg = {
     "account-check": currentUser?.img,
@@ -85,6 +88,9 @@ const NotificationItem = ({ notification }) => {
     "hospital-box": "bg-orange-500",
     "shield-check": "bg-green-500",
     "car-emergency": "bg-red-500",
+    "close-circle" : "bg-red-500",
+    "clipboard-check-outline" : "bg-gray-500",
+    "check-circle" : "bg-green-500"
   };
 
   return (
@@ -121,7 +127,7 @@ const NotificationItem = ({ notification }) => {
           <View className="relative">
             <View>
               <Image
-                source={{ uri: notificationImg[notification.icon] }}
+                source={{ uri: notificationImg[notification.icon] || adminDetails?.imageUrl}}
                 className="rounded-full h-16 w-16 border-4 border-blue-500"
               />
               <View
