@@ -1,18 +1,26 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import useFetchRecords from "../hooks/useFetchRecords";
 import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
+import ImageViewer from "react-native-image-viewing";
+import { useMemo } from "react";
+import useViewImage from "../hooks/useViewImage";
 
 const Records = ({ status }) => {
   const { emergencyHistory } = useFetchRecords({ status });
-  emergencyHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const sortedData = useMemo(() => {
+    return [...emergencyHistory].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+  });
 
   return (
     <View className="p-2 bg-white">
       <ScrollView>
         <View className="space-y-2">
-          {emergencyHistory.length > 0 ? (
-            emergencyHistory.map((emergency) => (
+          {sortedData.length > 0 ? (
+            sortedData.map((emergency) => (
               <View className="space-y-2">
                 <RecordItem emergency={emergency} />
               </View>
@@ -31,9 +39,16 @@ const Records = ({ status }) => {
 const RecordItem = ({ emergency }) => {
   const { data: responderData } = useFetchData("responders");
 
-  const responder = responderData.find(
+  const responderDetails = responderData?.find(
     (responder) => responder.id === emergency.responderId
   );
+
+  const {
+    handleImageClick,
+    selectedImageUri,
+    isImageModalVisible,
+    closeImageModal,
+  } = useViewImage();
 
   const emergencyStatus = {
     "awaiting response": "bg-orange-100 text-orange-600",
@@ -43,83 +58,91 @@ const RecordItem = ({ emergency }) => {
   };
 
   return (
-    <View className="border border-gray-300 rounded-lg">
-      <View className="flex flex-row space-x-2 p-4">
-        {emergency.status !== "awaiting response" && (
-          <>
-            <Image
-              source={{ uri: responder?.img }}
-              className="h-12 w-12 rounded-full"
-            />
+    <>
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]}
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={closeImageModal}
+      />
+      <View className="border border-gray-300 rounded-lg">
+        <View className="flex flex-row space-x-2 p-4">
+          {emergency.status !== "awaiting response" && (
+            <>
+              <TouchableOpacity
+                onPress={() => handleImageClick(responderDetails?.img)}
+              >
+                <Image
+                  source={{ uri: responderDetails?.img }}
+                  className="h-12 w-12 rounded-full"
+                />
+              </TouchableOpacity>
+              <View>
+                <Text className="text-lg font-bold">
+                  {responderDetails?.fullname || "responderDetails name"}
+                </Text>
+                <Text className="text-sm text-gray-400">
+                  {responderDetails?.customId}
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+
+        <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
+          <Text
+            className={`font-bold ${
+              emergencyStatus[emergency.status]
+            } py-1 px-3 rounded-lg self-start`}
+          >
+            {emergency.status.toUpperCase()}
+          </Text>
+
+          <View className="space-y-2 p-1">
             <View>
-              <Text className="text-lg font-bold">
-                {`${responder?.firstname} ${responder?.lastname}` ||
-                  "Loading..."}
-              </Text>
-              <Text className="text-sm text-gray-400">
-                {responder?.customId}
-              </Text>
+              <RowStyle label={"Emergency Id"} value={emergency.emergencyId} />
             </View>
-          </>
-        )}
-      </View>
+            <View>
+              <RowStyle label={"Description"} value={emergency.description} />
+            </View>
+            <View>
+              <RowStyle label={"Location"} value={emergency.location.address} />
+            </View>
+            <View>
+              <RowStyle
+                label={"Date Reported"}
+                value={formatDateWithTime(emergency.date)}
+              />
+            </View>
 
-      <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
-        <Text
-          className={`font-bold ${
-            emergencyStatus[emergency.status]
-          } py-1 px-3 rounded-lg self-start`}
-        >
-          {emergency.status.toUpperCase()}
-        </Text>
-
-        <View className="space-y-2 p-1">
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Description:</Text>
-            <Text className="flex-1 font-bold">{emergency.description}</Text>
-          </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Location:</Text>
-            <Text className="flex-1 font-bold">
-              {emergency.location.address}
-            </Text>
-          </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Reported At:</Text>
-            <Text className="flex-1 font-bold">
-              {formatDateWithTime(emergency.date)}
-            </Text>
-          </View>
-          {emergency.responseTime && (
-            <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">
-              Response Time:
-            </Text>
-            <Text className="flex-1 font-bold">
-              {formatDateWithTime(emergency.responseTime)}
-            </Text>
-          </View>
-          )}
-          {emergency.dateResolved && (
-            <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">
-              Date Resolved:
-            </Text>
-            <Text className="flex-1 font-bold">
-              {formatDateWithTime(emergency.dateResolved)}
-            </Text>
-          </View>
-          )}
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>
-            <Text className="flex-1 font-bold">{emergency?.emergencyId}</Text>
+            {emergency.responseTime && (
+              <View>
+                <RowStyle
+                  label={"Response Time"}
+                  value={formatDateWithTime(emergency.responseTime)}
+                />
+              </View>
+            )}
+            {emergency.dateResolved && (
+              <View>
+                <RowStyle
+                  label={"Dete Resolved"}
+                  value={formatDateWithTime(emergency.dateResolved)}
+                />
+              </View>
+            )}
           </View>
         </View>
       </View>
+    </>
+  );
+};
+
+const RowStyle = ({ label, value }) => {
+  return (
+    <View className="flex flex-row">
+      <Text className="w-1/3 font-bold text-gray-500">{label}</Text>
+      <Text className="flex-1 font-bold">{value}</Text>
     </View>
   );
 };
