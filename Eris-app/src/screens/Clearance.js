@@ -76,6 +76,7 @@ const Clearance = () => {
   }, [
     clearanceData.docsType,
     clearanceData.fullname,
+    clearanceData.age,
     clearanceData.address,
     clearanceData.gender,
     clearanceData.civilStatus,
