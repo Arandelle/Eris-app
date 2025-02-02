@@ -160,6 +160,7 @@ const Clearance = () => {
             <TextInputStyle
               label={"Age"}
               placeholder="Enter your age"
+              keyboardType="phone-pad" 
               value={clearanceData.age}
               onChangeText={(value) =>
                 setClearanceData((prev) => ({ ...prev, age: value }))

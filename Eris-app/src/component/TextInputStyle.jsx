@@ -1,6 +1,6 @@
 import { TextInput, Text, View } from "react-native";
 
-const TextInputStyle = ({ label, placeholder, value, onChangeText }) => {
+const TextInputStyle = ({ label, placeholder, value, onChangeText, keyboardType}) => {
   return (
     <View className="space-y-2">
       <Text>{label}</Text>
@@ -9,6 +9,7 @@ const TextInputStyle = ({ label, placeholder, value, onChangeText }) => {
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
+        keyboardType={keyboardType || "default"}
       />
     </View>
   );

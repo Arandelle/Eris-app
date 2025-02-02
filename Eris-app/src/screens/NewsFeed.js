@@ -231,6 +231,8 @@ const NewsFeed = ({ dayTime, isVerified }) => {
         onRequestClose={closeImageModal} // Close viewer
       />
 
+      <ProfileReminderModal />
+
       <View className="flex-1 bg-gray-200">
         <StatusBar
           barStyle="light-content"

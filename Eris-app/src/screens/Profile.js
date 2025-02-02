@@ -149,7 +149,8 @@ const Profile = () => {
 
           <View className="space-y-4">
             {/**Emergency records */}
-            <TouchableOpacity
+            {user.emailVerified && (
+              <TouchableOpacity
               className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
               onPress={() => navigation.navigate("Emergency Records")}
             >
@@ -159,6 +160,8 @@ const Profile = () => {
               </View>
               <Icon name="arrow-right" size={24} color={colors.blue[800]} />
             </TouchableOpacity>
+            )}
+            
             {/**Request Certification */}
             <TouchableOpacity
               className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"

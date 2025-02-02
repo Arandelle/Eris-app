@@ -241,7 +241,7 @@ const UpdateProfile = () => {
             type="email"
             label="Email"
             value={userData.email}
-            placeholder="Enter your fullname"
+            placeholder="no email found"
           />
           <CustomInput
             type="mobile phone"
