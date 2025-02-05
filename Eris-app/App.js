@@ -22,6 +22,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Clearance from "./src/screens/Clearance";
 import ChangePassModal from "./src/screens/ChangePassModal";
 import PhoneSignin from "./src/screens/PhoneSignin";
+import { OfflineProvider } from "./src/context/OfflineContext";
 
 const Stack = createNativeStackNavigator();
 
@@ -93,79 +94,81 @@ const App = () => {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            headerTitleAlign: "center",
-            headerTitleStyle: {
-              fontWeight: "900",
-              fontSize: 24,
-            },
-          }}
-        >
-          {user ? (
-            <>
-              <Stack.Screen
-                name="ERIS"
-                options={{ headerShown: false }}
-                component={TabNavigator}
-              />
-              <Stack.Screen
-                name="Emergency Records"
-                component={TopBarNavigator}
-                options={{
-                  headerShown: true,
-                }}
-              />
-              <Stack.Screen
-                name="Clearance"
-                component={Clearance}
-                options={{
-                  headerShown: true,
-                  headerTitle: "Clearance Form",
-                }}
-              />
-              <Stack.Screen
-                name="ChangePassword"
-                component={ChangePassModal}
-                options={{
-                  headerShown: true,
-                  headerTitle: "Change Password",
-                }}
-              />
-
-              <Stack.Screen
-                name="UpdateProfile"
-                component={UpdateProfile}
-                options={() => ({
-                  title: "Update your profile",
-                  headerShown: true,
-                })}
-              />
-            </>
-          ) : (
-            <>
-              <Stack.Screen name="Login" component={LoginForm} />
-              <Stack.Screen
-                name="Signup"
-                component={SignupForm}
-                options={{
-                  headerShown: true,
-                  title: "Create your account",
-                }}
-              />
-              <Stack.Screen
-                name="Phone"
-                options={{ headerShown: false }}
-                component={PhoneSignin} 
-              />
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </GestureHandlerRootView>
+    <OfflineProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              headerTitleAlign: "center",
+              headerTitleStyle: {
+                fontWeight: "900",
+                fontSize: 24,
+              },
+            }}
+          >
+            {user ? (
+              <>
+                <Stack.Screen
+                  name="ERIS"
+                  options={{ headerShown: false }}
+                  component={TabNavigator}
+                />
+                <Stack.Screen
+                  name="Emergency Records"
+                  component={TopBarNavigator}
+                  options={{
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="Clearance"
+                  component={Clearance}
+                  options={{
+                    headerShown: true,
+                    headerTitle: "Clearance Form",
+                  }}
+                />
+                <Stack.Screen
+                  name="ChangePassword"
+                  component={ChangePassModal}
+                  options={{
+                    headerShown: true,
+                    headerTitle: "Change Password",
+                  }}
+                />
+  
+                <Stack.Screen
+                  name="UpdateProfile"
+                  component={UpdateProfile}
+                  options={() => ({
+                    title: "Update your profile",
+                    headerShown: true,
+                  })}
+                />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Login" component={LoginForm} />
+                <Stack.Screen
+                  name="Signup"
+                  component={SignupForm}
+                  options={{
+                    headerShown: true,
+                    title: "Create your account",
+                  }}
+                />
+                <Stack.Screen
+                  name="Phone"
+                  options={{ headerShown: false }}
+                  component={PhoneSignin} 
+                />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </OfflineProvider>
   );
 };
 
