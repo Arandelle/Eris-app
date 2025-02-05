@@ -165,6 +165,7 @@ const LoginForm = () => {
             </View>
             <View className="flex items-center">
               <View className="w-full max-w-sm">
+              {isOffline && <Text style={{ color: 'red' }}>⚠️ You are offline! Data will stored locally and sync once online</Text>}
                 <Text className="text-center text-2xl text-blue-800 font-bold mb-3">
                   Welcome to Eris App!
                 </Text>
