@@ -107,7 +107,7 @@ const LoginForm = () => {
       const userId = await generateUniqueBarangayID("user");
 
       // Create a basic profile for anonymous user
-      const userRef = ref(database, `users/${user.uid}`);
+      const userRef = ref(database, `users/${user?.uid}`);
       await set(userRef, {
         customId: userId,
         profileComplete: false,
@@ -116,7 +116,7 @@ const LoginForm = () => {
         img: imageUrl,
       });
 
-      console.log("Anonymous user created:", user.uid);
+      console.log("Anonymous user created:", user?.uid);
 
       navigation.navigate("ERIS");
       ToastAndroid.show(
@@ -125,8 +125,8 @@ const LoginForm = () => {
         ToastAndroid.BOTTOM
       );
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-      await sendNotification("admins", adminId, "userGuest", user.uid);
-      await sendNotification("users", user.uid, "welcomeGuest");
+      await sendNotification("admins", adminId, "userGuest", user?.uid);
+      await sendNotification("users", user?.uid, "welcomeGuest");
 
     } catch (error) {
       console.error("Anonymous login error:", error);

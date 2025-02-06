@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -14,8 +14,10 @@ import NewsFeed from "../screens/NewsFeed";
 import { auth } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import useFetchDocuments from "../hooks/useFetchDocuments";
+import { OfflineContext } from "../context/OfflineContext";
 
 const TabNavigator = () => {
+  const {isOffline} = useContext(OfflineContext);
   const Tab = createBottomTabNavigator();
   const { currentUser } = useCurrentUser();
   const {documents} = useFetchDocuments();
@@ -163,11 +165,15 @@ const TabNavigator = () => {
           />
         )}
       </Tab.Screen>
-      <Tab.Screen
+
+      {!isOffline && (
+        <Tab.Screen
         name="Map"
         component={Map}
         options={{ title: "Map", headerShown: false }}
       ></Tab.Screen>
+      )}
+     
       {isVerified && (
         <Tab.Screen
           name="Report"
@@ -178,8 +184,8 @@ const TabNavigator = () => {
           }}
         />
       )}
-
-      <Tab.Screen
+      {!isOffline &&  (
+        <Tab.Screen
         name="Notification"
         component={Notification}
         options={{
@@ -187,6 +193,7 @@ const TabNavigator = () => {
           tabBarBadge: notificationsCount === 0 ? null : notificationsCount,
         }}
       />
+      )}
       <Tab.Screen
         name="Profile"
         options={{

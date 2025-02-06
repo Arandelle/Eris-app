@@ -1,12 +1,12 @@
+import { View, Text } from "react-native";
+import Hotlines from "./Hotlines";
+
 const OfflineMode = () => {
-
   return (
-    <View className="flex items-center justify-center h-60 w-screen">
-        <Text>
-            Hi! you are currently offline, stay calm and use our hotlines number to dial
-        </Text>
+    <View className="flex items-center justify-center p-4">
+      <Hotlines />
     </View>
-  )
-}
+  );
+};
 
-export default OfflineMode
+export default OfflineMode;

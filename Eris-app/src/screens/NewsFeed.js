@@ -10,7 +10,6 @@ import {
   StatusBar,
   Pressable,
   Image,
-  Linking,
   Modal,
   TextInput,
   TouchableWithoutFeedback,
@@ -35,6 +34,8 @@ import {
 } from "react-native-gesture-handler";
 import useViewImage from "../hooks/useViewImage";
 import {useNavigation} from '@react-navigation/native';
+import Hotlines from "./Hotlines";
+import openLink from "../helper/openLink";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
@@ -45,7 +46,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const { data: announcement } = useFetchData("announcement");
   const { data: responderData } = useFetchData("responders");
   const { data: adminData } = useFetchData("admins");
-  const { data: hotlines } = useFetchData("hotlines");
   const { isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal } = useViewImage();
   const { currentUser } = useCurrentUser();
   const [refreshing, setRefreshing] = useState(false);
@@ -97,16 +97,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
     [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
     { useNativeDriver: false }
   );
-
-  const openDialerOrEmail = (value, type) => {
-    if (type === "phone") {
-      Linking.openURL(`tel:${value}`);
-    } else if (type === "email") {
-      Linking.openURL(`mailto:${value}`);
-    } else if (type === "links") {
-      Linking.openURL(value);
-    }
-  };
 
   const scrollToTop = () => {
     if (scrollViewRef.current) {
@@ -371,46 +361,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
           }}
         >
           <View className="flex-1 p-3 bg-white space-y-3">
-            {/* <ProfileReminderModal /> */}
-            <View className="bg-red-50 mt-3 p-4 rounded-md shadow-md">
-              <Text className="text-center text-2xl text-red-500 font-extrabold">
-                Barangay Bagtas Hotline Numbers
-              </Text>
-            </View>
-
-            <View className="flex flex-row flex-wrap">
-              {hotlines?.map((item, key) => (
-                <View
-                  key={key}
-                  className="w-1/2 py-2" // 1/3 width to fit three items per row
-                >
-                  <View className="border-2 border-blue-900">
-                    <Text className="text-white text-center bg-blue-800 p-1 font-bold">
-                      {item.types.toUpperCase()}
-                    </Text>
-                    <Pressable
-                      onPress={() =>
-                        openDialerOrEmail(
-                          item.contact || item.email,
-                          item.contact ? "phone" : "email"
-                        )
-                      }
-                    >
-                      <Text
-                        className={`text-red-500 font-extrabold text-center underline ${
-                          item.email ? "p-1" : "text-xl"
-                        }`}
-                      >
-                        {item.contact || item.email}
-                      </Text>
-                    </Pressable>
-                    <Text className="text-center font-bold text-blue-900">
-                      {item.name}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+            <Hotlines/>
             {announcement.length > 0 &&
               announcement.map((item, key) => {
                 const adminDetails = getAdminsDetails(item.userId);
@@ -434,7 +385,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                         {formatDate(item.date)}
                       </Text>
                       <Pressable
-                        onPress={() => openDialerOrEmail(item.links, "links")}
+                        onPress={() => openLink(item.links, "links")}
                       >
                         <View className="flex-row items-center">
                           <Text

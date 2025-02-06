@@ -26,14 +26,18 @@ export const OfflineProvider = ({ children }) => {
   // **Dynamic function to save data**
   const saveStoredData = async (key, data) => {
     try {
-      await AsyncStorage.setItem(key, JSON.stringify(data));
-      setStoredData((prev) => ({ ...prev, [key]: data }));
-      console.log("Offline Mode", `${key} saved successfully!`);
+      const existingData = storedData[key];
+      if (JSON.stringify(existingData) !== JSON.stringify(data)) {
+        await AsyncStorage.setItem(key, JSON.stringify(data));
+        setStoredData((prev) => ({ ...prev, [key]: data }));
+        console.log("Offline Mode", `${key} saved successfully!`);
+      }
     } catch (error) {
       Alert.alert("Error", `Failed to save ${key}.`);
       console.error(error);
     }
   };
+  
 
   // **Dynamic function to load data**
   const loadStoredData = async (key) => {
@@ -49,9 +53,23 @@ export const OfflineProvider = ({ children }) => {
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
-    await loadStoredData("offlineRequest");
-    await loadStoredData("loggedInUser");
+    const keys = ["offlineRequest", "users", "hotlines"];
+    let allData = {};
+  
+    for (const key of keys) {
+      try {
+        const storedValue = await AsyncStorage.getItem(key);
+        if (storedValue) {
+          allData[key] = JSON.parse(storedValue);
+        }
+      } catch (error) {
+        console.error(`Error loading ${key}:`, error);
+      }
+    }
+  
+    setStoredData(allData); // Update state once with all data
   };
+  
 
   // **Remove stored data dynamically**
   const removeStoredData = async (key) => {
