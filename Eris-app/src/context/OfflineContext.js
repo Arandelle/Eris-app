@@ -7,69 +7,92 @@ export const OfflineContext = createContext();
 
 export const OfflineProvider = ({ children }) => {
   const [isOffline, setIsOffline] = useState(false);
-  const [offlineData, setOfflineData] = useState(null);
+  const [storedData, setStoredData] = useState({});
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(!state.isConnected);
 
-      // sync data when back online
       if (state.isConnected) {
-        sendStoredData();
+        syncOfflineData();
       }
     });
 
-    loadOfflineData();
+    loadAllStoredData(); // Load all stored data when the app starts
 
     return () => unsubscribe();
   }, []);
 
-  // save data locally when offline
-  const saveOfflineData = async (data) => {
+  // **Dynamic function to save data**
+  const saveStoredData = async (key, data) => {
     try {
-      await AsyncStorage.setItem("offlineRequest", JSON.stringify(data));
-      setOfflineData(data);
-      Alert.alert("Offline Mode: ", "Data saved offline!");
+      await AsyncStorage.setItem(key, JSON.stringify(data));
+      setStoredData((prev) => ({ ...prev, [key]: data }));
+      console.log("Offline Mode", `${key} saved successfully!`);
     } catch (error) {
-      Alert.alert("Error", "Failed to saved offline data.");
+      Alert.alert("Error", `Failed to save ${key}.`);
+      console.error(error);
     }
   };
 
-  // load saved offline data
-  const loadOfflineData = async () => {
-    try{
-        const storedData = await AsyncStorage.getItem('offlineRequest');
-        if(storedData){
-            setOfflineData(JSON.parse(storedData));
-        }
-
-    }catch(error){
-        Alert.alert("Error loading offline data", `${error}`);
+  // **Dynamic function to load data**
+  const loadStoredData = async (key) => {
+    try {
+      const storedValue = await AsyncStorage.getItem(key);
+      if (storedValue) {
+        setStoredData((prev) => ({ ...prev, [key]: JSON.parse(storedValue) }));
+      }
+    } catch (error) {
+      console.error(`Error loading ${key}:`, error);
     }
   };
 
-  // send stored Data when online
+  // **Load all necessary stored data on app start**
+  const loadAllStoredData = async () => {
+    await loadStoredData("offlineRequest");
+    await loadStoredData("loggedInUser");
+  };
 
-  const sendStoredData = async () => {
-    if(offlineData){
-        try{
-            console.log('Sending offline data', offlineData);
-
-            // send to firebase or API (replace with actual API call)
-
-            await AsyncStorage.removeItem('offlineRequest');
-            setOfflineData(null);
-            Alert.alert('Online', 'Offline data synced successfully!');
-        }catch(error){
-            Alert.alert("Error syncing offline data", error);
-    }
+  // **Remove stored data dynamically**
+  const removeStoredData = async (key) => {
+    try {
+      await AsyncStorage.removeItem(key);
+      setStoredData((prev) => {
+        const updatedData = { ...prev };
+        delete updatedData[key];
+        return updatedData;
+      });
+      Alert.alert("Success", `${key} removed successfully!`);
+    } catch (error) {
+      console.error(`Error removing ${key}:`, error);
     }
   };
 
-  return(
-    <OfflineContext.Provider value={{isOffline, saveOfflineData}}>
-        {children}
+  // **Sync offline data when back online**
+  const syncOfflineData = async () => {
+    if (storedData.offlineRequest) {
+      try {
+        console.log("Syncing offline request:", storedData.offlineRequest);
+        // Send to Firebase or API
+        await removeStoredData("offlineRequest");
+        Alert.alert("Online", "Offline data synced successfully!");
+      } catch (error) {
+        console.error("Error syncing offline data:", error);
+      }
+    }
+  };
+
+  return (
+    <OfflineContext.Provider
+      value={{
+        isOffline,
+        saveStoredData,
+        loadStoredData,
+        removeStoredData,
+        storedData,
+      }}
+    >
+      {children}
     </OfflineContext.Provider>
   );
-
 };
