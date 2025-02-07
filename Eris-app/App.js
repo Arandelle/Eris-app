@@ -18,7 +18,7 @@ import Logo from "./assets/logo.png";
 import TopBarNavigator from "./src/navigation/TopBarNavigator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Clearance from "./src/screens/Clearance";
-import ChangePassModal from "./src/screens/ChangePassModal";
+import ChangePassModal from "./src/component/ChangePassModal";
 import PhoneSignin from "./src/screens/PhoneSignin";
 import { OfflineContext, OfflineProvider } from "./src/context/OfflineContext";
 import OfflineMode from "./src/screens/OfflineMode";

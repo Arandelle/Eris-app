@@ -10,7 +10,7 @@ const Hotlines = () => {
 
   return (
     <>
-      <View className="py-4">
+      <View className={`${isOffline ? "py-4" : ""}`}>
         {loading ? (
           <Text className="text-center text-gray-500 mt-3">Loading...</Text>
         ) : hotlines.length === 0 ? (

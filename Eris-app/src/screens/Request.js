@@ -15,7 +15,7 @@ import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
-import useUploadImage from "./UploadImage";
+import useUploadImage from "../helper/UploadImage";
 import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
 import PickerField from "../component/PickerField";
 import { set } from "firebase/database";

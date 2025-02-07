@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
-import CustomInput from "../component/CustomInput";
+import CustomInput from "./CustomInput";
 import { useState } from "react";
 import { auth } from "../services/firebaseConfig";
 import {

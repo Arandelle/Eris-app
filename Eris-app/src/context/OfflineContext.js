@@ -11,7 +11,7 @@ export const OfflineProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOffline(state.isConnected);
+      setIsOffline(!state.isConnected);
 
       if (state.isConnected) {
         syncOfflineData();

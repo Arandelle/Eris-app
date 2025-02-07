@@ -17,7 +17,7 @@ import CustomInput from "../component/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useSendNotification from "../hooks/useSendNotification";
-import useUploadImage from "./UploadImage";
+import useUploadImage from "../helper/UploadImage";
 import { storage } from "../services/firebaseConfig";
 import {
   ref as storageRef,
