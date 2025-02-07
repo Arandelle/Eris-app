@@ -48,7 +48,7 @@ const MainAppp = () => {
           saveStoredData("users", user);
         } else {
           try {
-            const userRef = ref(database, `users/${user.uid}`);
+            const userRef = ref(database, `users/${user?.uid}`);
             const userSnapshot = await get(userRef);
 
             if (userSnapshot.exists()) {
@@ -116,7 +116,7 @@ const MainAppp = () => {
             },
           }}
         >
-          {user || (isOffline && storedData) ? (
+          {user || (isOffline && storedData.user) ? (
             <>
               <Stack.Screen
                 name="ERIS"

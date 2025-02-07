@@ -12,7 +12,7 @@ const useLocationTracking = (userData, setRefreshing =false) => {
 
   const updateLocationInFirebase = async (lat, long, address) => {
     const user = auth.currentUser;
-    const userLocationRef = ref(database, `users/${user.uid}/location`);
+    const userLocationRef = ref(database, `users/${user?.uid}/location`);
     try {
       await update(userLocationRef, {
         latitude: lat,
@@ -79,7 +79,7 @@ const useLocationTracking = (userData, setRefreshing =false) => {
 
     const fetchResponderLocation = () => {
       const user = auth.currentUser;
-      const activeRequestRef = ref(database, `users/${user.uid}/activeRequest`);
+      const activeRequestRef = ref(database, `users/${user?.uid}/activeRequest`);
 
       const unsubscribe = onValue(activeRequestRef, (snapshot) => {
         const activeRequestData = snapshot.val();

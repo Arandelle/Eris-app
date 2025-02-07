@@ -70,7 +70,7 @@ const LoginForm = () => {
 
       if (user.emailVerified) {
         // Fetch the user data from Firebase Realtime Database using UID
-        const userRef = ref(database, `users/${user.uid}`);
+        const userRef = ref(database, `users/${user?.uid}`);
         const userSnapshot = await get(userRef);
 
         if (userSnapshot.exists()) {

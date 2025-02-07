@@ -194,7 +194,8 @@ const TabNavigator = () => {
         }}
       />
       )}
-      <Tab.Screen
+      {!isOffline && (
+        <Tab.Screen
         name="Profile"
         options={{
           title: "Profile",
@@ -206,6 +207,7 @@ const TabNavigator = () => {
           <Profile {...props} setIsProfileComplete={setIsProfileComplete} />
         )}
       </Tab.Screen>
+      )}
     </Tab.Navigator>
   );
 };

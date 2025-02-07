@@ -11,8 +11,14 @@ const useFetchData = (dataType) => {
   useEffect(() => {
     if (isOffline) {
       // If offline, load stored data immediately
+      // store or convert the object to array
       if (storedData[dataType]) {
-        setData(storedData[dataType]);
+        const offlineData = Object.keys(storedData[dataType]).map((key) => ({
+          id: key,
+          ...storedData[dataType][key],
+        }));
+
+        setData(offlineData);
       }
       setLoading(false);
       return; // Stop execution, don't fetch from Firebase
