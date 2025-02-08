@@ -101,11 +101,13 @@ export const OfflineProvider = ({ children }) => {
         console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
         return;
+      } else{
+        Alert.alert("Back Online", "Sorry your last request was expired!")
       }
   
       try {
         console.log("Syncing offline request:", requestData);
-        await submitEmergencyReport(requestData);
+        await submitEmergencyReport({...requestData });
         await removeStoredData("offlineRequest");
   
         Alert.alert("Online", "Your pending emergency request has been sent!");

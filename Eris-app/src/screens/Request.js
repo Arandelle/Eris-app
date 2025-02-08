@@ -69,6 +69,9 @@ const Request = () => {
       imageFile,
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
+      sendNotification,
+      hasActiveRequest: false,
+      responderData: []
     };
 
     if (isOffline) {
