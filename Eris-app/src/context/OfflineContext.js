@@ -14,7 +14,7 @@ export const OfflineProvider = ({ children }) => {
       setIsOffline(!state.isConnected);
 
       if (state.isConnected) {
-        syncOfflineData();
+        syncOfflineData(); // it will send the data from offLineRequest to firebase when back online (isConnected) 
       }
     });
 
@@ -53,7 +53,7 @@ export const OfflineProvider = ({ children }) => {
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
-    const keys = ["offlineRequest", "users", "hotlines"];
+    const keys = ["offlineRequest", "users", "hotlines", "announcement", "admins"];
     let allData = {};
   
     for (const key of keys) {
