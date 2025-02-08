@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,8 +19,10 @@ import useUploadImage from "../helper/UploadImage";
 import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
 import PickerField from "../component/PickerField";
 import { set } from "firebase/database";
+import { OfflineContext } from "../context/OfflineContext";
 
 const Request = () => {
+  const { isOffline, saveStoredData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
@@ -56,16 +58,30 @@ const Request = () => {
   const handleSubmit = async () => {
     setLoading(true);
 
+    // Create emergency request data
+    const requestData = {
+      currentUser,
+      location,
+      latitude,
+      longitude,
+      geoCodeLocation,
+      description,
+      imageFile,
+      emergencyType,
+      timestamp: Date.now(), // Store timestamp for expiration check
+    };
+
+    if (isOffline) {
+      await saveStoredData("offlineRequest", requestData);
+
+      Alert.alert("Offline Mode", "You are offline. Your request has been saved and will be sent once you are back online. (Valid for 30 mins)");
+      setLoading(false);
+      return;
+    }
+
     try {
       await submitEmergencyReport({
-        currentUser,
-        location,
-        latitude,
-        longitude,
-        geoCodeLocation,
-        description,
-        imageFile,
-        emergencyType,
+        ...requestData,
         sendNotification,
         hasActiveRequest,
         responderData,
@@ -152,7 +168,6 @@ const Request = () => {
               </Text>
             </TouchableOpacity>
 
-            
             {photo && imageFile && (
               <View className="w-40 h-40 bg-gray-500">
                 <Image source={{ uri: photo }} className="w-full h-full" />

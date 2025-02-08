@@ -2,12 +2,14 @@ import { useState, useEffect, createContext } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { submitEmergencyReport } from "../hooks/useSubmitReport";
 
 export const OfflineContext = createContext();
 
 export const OfflineProvider = ({ children }) => {
   const [isOffline, setIsOffline] = useState(false);
   const [storedData, setStoredData] = useState({});
+
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -88,17 +90,31 @@ export const OfflineProvider = ({ children }) => {
 
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
+    const now = Date.now();
+    const THIRTY_MINUTES = 30 * 60 * 1000;
+  
     if (storedData.offlineRequest) {
-      try {
-        console.log("Syncing offline request:", storedData.offlineRequest);
-        // Send to Firebase or API
+      const { timestamp, ...requestData } = storedData.offlineRequest;
+  
+      // Check if request is still valid (within 30 minutes)
+      if (now - timestamp > THIRTY_MINUTES) {
+        console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
-        Alert.alert("Online", "Offline data synced successfully!");
+        return;
+      }
+  
+      try {
+        console.log("Syncing offline request:", requestData);
+        await submitEmergencyReport(requestData);
+        await removeStoredData("offlineRequest");
+  
+        Alert.alert("Online", "Your pending emergency request has been sent!");
       } catch (error) {
         console.error("Error syncing offline data:", error);
       }
     }
   };
+  
 
   return (
     <OfflineContext.Provider

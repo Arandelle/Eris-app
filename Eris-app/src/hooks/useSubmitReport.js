@@ -19,9 +19,9 @@ export const submitEmergencyReport = async ({
   emergencyType = "Immediate Report",
   sendNotification, // Pass the notification function
   hasActiveRequest = false,
-  responderData = [] // Pass responderData from the component
+  responderData = [], // Pass responderData from the component
 }) => {
-  if (!currentUser) {
+  if (!currentUser || !currentUser.id) {
     throw new Error("No user is signed in.");
   }
   if (!location) {
@@ -32,19 +32,19 @@ export const submitEmergencyReport = async ({
   }
 
   let imageUrl = imageFile;
-    
+
   if (imageFile) {
     try {
-        const imageRef = storageRef(storage, `emergencyImages/${Date.now()}.jpg`);
-        const response = await fetch(imageFile);
-        const blob = await response.blob();
-        await uploadBytes(imageRef, blob);
-        imageUrl = await getDownloadURL(imageRef);
+      const imageRef = storageRef(storage, `emergencyImages/${Date.now()}.jpg`);
+      const response = await fetch(imageFile);
+      const blob = await response.blob();
+      await uploadBytes(imageRef, blob);
+      imageUrl = await getDownloadURL(imageRef);
     } catch (error) {
-        console.warn("Failed to upload image:", error.message);
-        imageUrl = ""; // Proceed without the image
+      console.warn("Failed to upload image:", error.message);
+      imageUrl = ""; // Proceed without the image
     }
-}  
+  }
 
   try {
     const emergencyID = await generateUniqueBarangayID("emergency");
@@ -56,7 +56,7 @@ export const submitEmergencyReport = async ({
       imageUrl,
       emergencyType,
       status: "awaiting response",
-      expiresAt: new Date(Date.now() + 30000).toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min validity
       date: new Date().toISOString(),
       emergencyId: emergencyID,
       location: {
@@ -77,8 +77,7 @@ export const submitEmergencyReport = async ({
       ...newRequest,
       id: newRequestKey,
     };
-    updates[`users/${currentUser.id}/emergencyHistory/${newRequestKey}`] =
-      newRequest;
+    updates[`users/${currentUser.id}/emergencyHistory/${newRequestKey}`] = newRequest;
 
     // Update Firebase
     await update(ref(database), updates);
@@ -98,11 +97,11 @@ export const submitEmergencyReport = async ({
     await sendNotification("users", currentUser.id, "userReport");
 
     // Notify responders
-    responderData.forEach(async (responder) => {
+    for (const responder of responderData) {
       if (responder.profileComplete) {
         await sendNotification("responders", responder.id, "responderReport");
       }
-    });
+    }
 
     return newRequestKey;
   } catch (error) {
