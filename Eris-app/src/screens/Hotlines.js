@@ -12,10 +12,10 @@ const Hotlines = () => {
     <>
       <View className={`${isOffline ? "py-4" : ""}`}>
         {loading ? (
-          <Text className="text-center text-gray-500 mt-3">Loading...</Text>
+          <Text className="text-center text-gray-500 mt-3">🔃 Loading...</Text>
         ) : hotlines.length === 0 ? (
           <Text className="text-center text-gray-500 mt-3">
-            No hotlines available.
+           🚫 No hotlines available.
           </Text>
         ) : (
           <>
@@ -26,7 +26,7 @@ const Hotlines = () => {
             )}
             <View className="bg-blue-800 mt-3 p-2 border-2 shadow-md">
               <Text className="text-center text-xl text-white font-extrabold">
-                Hotline Numbers
+                📞 Hotline Numbers
               </Text>
             </View>
             <View className="flex flex-row flex-wrap">

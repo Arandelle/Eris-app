@@ -279,7 +279,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                 </Animated.View>
               </PanGestureHandler>
               <Text className="text-gray-50 font-thin text-md">
-                Quick response bell
+              🔴 Fire, crime, and emergencies need quick response.
               </Text>
             </Animated.View>
           </GestureHandlerRootView>
