@@ -40,6 +40,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const navigation = useNavigation();
   const { data: responderData } = useFetchData("responders");
   const { currentUser } = useCurrentUser();
+  const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
@@ -51,6 +52,15 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.activeRequest) {
+      setHasActiveRequest(true);
+    } else{
+      setHasActiveRequest(false);
+    }
+    
+  }, [currentUser, refreshing]);
 
   useEffect(() => {
     trackUserLocation();
@@ -98,6 +108,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
         longitude,
         geoCodeLocation,
         sendNotification,
+        hasActiveRequest,
         responderData,
       });
       Alert.alert("Emergency reported", "Help is on the way!");
@@ -105,8 +116,9 @@ const NewsFeed = ({ dayTime, isVerified }) => {
     } catch (error) {
       Alert.alert(
         "Error",
-        "Could not submit emergency alert, please try again"
+        `Could not submit emergency alert, please try again ${error}`
       );
+      setLoading(false);
     }
   };
 

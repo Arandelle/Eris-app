@@ -101,8 +101,6 @@ export const OfflineProvider = ({ children }) => {
         console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
         return;
-      } else{
-        Alert.alert("Back Online", "Sorry your last request was expired!")
       }
   
       try {

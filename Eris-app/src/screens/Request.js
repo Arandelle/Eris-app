@@ -18,7 +18,6 @@ import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useUploadImage from "../helper/UploadImage";
 import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
 import PickerField from "../component/PickerField";
-import { set } from "firebase/database";
 import { OfflineContext } from "../context/OfflineContext";
 
 const Request = () => {
@@ -40,9 +39,11 @@ const Request = () => {
   useEffect(() => {
     if (currentUser?.activeRequest) {
       setHasActiveRequest(true);
+    } else{
+      setHasActiveRequest(false);
     }
-    setHasActiveRequest(false);
-  }, [currentUser]);
+    
+  }, [currentUser, refreshing]);
 
   useEffect(() => {
     if (photo) {
@@ -70,7 +71,7 @@ const Request = () => {
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
-      hasActiveRequest: false,
+      hasActiveRequest,
       responderData: []
     };
 
@@ -80,14 +81,11 @@ const Request = () => {
       Alert.alert("Offline Mode", "You are offline. Your request has been saved and will be sent once you are back online. (Valid for 30 mins)");
       setLoading(false);
       return;
-    }
+    } 
 
     try {
       await submitEmergencyReport({
         ...requestData,
-        sendNotification,
-        hasActiveRequest,
-        responderData,
       });
       console.log(imageFile);
       Alert.alert("Emergency reported", "Help is on the way!");
@@ -98,7 +96,7 @@ const Request = () => {
     } catch (error) {
       Alert.alert(
         "Error",
-        "Could not submit emergency report, please try again"
+        `Could not submit emergency report, please try again ${error}`
       );
       setLoading(false); // Ensure loading is set to false on error
     }
