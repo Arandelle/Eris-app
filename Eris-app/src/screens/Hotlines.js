@@ -21,7 +21,7 @@ const Hotlines = () => {
           <>
             {isOffline && (
               <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
-                ⚠️ You are currently offline
+                ⚠️ Your network is unstable
               </Text>
             )}
             <View className="bg-blue-800 mt-3 p-2 border-2 shadow-md">

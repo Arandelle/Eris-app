@@ -21,8 +21,10 @@ import { OfflineContext } from "../context/OfflineContext";
 import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 const Request = () => {
+  const navigation = useNavigation();
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
   const {
@@ -46,29 +48,26 @@ const Request = () => {
 
   useEffect(() => {
     const checkActiveRequest = async () => {
-       try{
+      try {
+        const checkIfHasRequest = await AsyncStorage.getItem(
+          "hasActiveRequest"
+        );
 
-        const checkIfHasRequest = await AsyncStorage.getItem("hasActiveRequest");
- 
         if (currentUser?.activeRequest) {
           setHasActiveRequest(true);
           await AsyncStorage.setItem("hasActiveRequest", JSON.stringify(true));
-        } else if(isOffline && checkIfHasRequest){
+        } else if (isOffline && checkIfHasRequest) {
           setHasActiveRequest(true);
-        }
-        else {
+        } else {
           setHasActiveRequest(false);
           await AsyncStorage.removeItem("hasActiveRequest");
         }
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+      }
+    };
 
-       }catch(error){
-        Alert.alert("Error", `${error}`)
-       }
-      
-    }
-
-    checkActiveRequest(); 
-
+    checkActiveRequest();
   }, [currentUser, refreshing]);
 
   useEffect(() => {
@@ -77,10 +76,24 @@ const Request = () => {
     }
   }, [photo]);
 
-  const handleRefresh = () => {
-    setRefreshing(true); // Set refreshing to true
-    trackUserLocation();
+  const handleRefresh = async () => {
+    setRefreshing(true); // Start refresh animation
+  
+    if (isOffline) {
+      setLoading(true);
+    } else {
+     await trackUserLocation();
+    }
+  
+    setTimeout(() =>{ 
+      setLoading(false);
+      setRefreshing(false); 
+      if(isOffline){
+        Alert.alert("Network unstable", "Try checking your internet!"); }
+      },
+      2000); // Stop refreshing after 1 sec
   };
+  
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -88,16 +101,17 @@ const Request = () => {
     // Create emergency request data
     const requestData = {
       currentUser: currentUser || storedData.currentUser,
-      location,
+      location: location || storedData.currentUser.location.address,
       latitude: latitude || storedData.currentUser.location.latitude,
       longitude: longitude || storedData.currentUser.location.latitude,
-      geoCodeLocation: geoCodeLocation || storedData.currentUser.location.address,
+      geoCodeLocation:
+        geoCodeLocation || storedData.currentUser.location.address,
       description,
       imageFile,
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
-      hasActiveRequest : false,
+      hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
     };
 
@@ -131,6 +145,14 @@ const Request = () => {
     }
   };
 
+  if(loading){
+    return (
+      <View className="flex items-center justify-center h-full">
+        <Text>Loading please wait...</Text>
+      </View>
+    )
+  }
+
   return (
     <>
       <ImageViewer
@@ -150,19 +172,24 @@ const Request = () => {
             <Text className="font-bold text-xl text-center text-red-600 mb-5">
               Submit Detailed Report
             </Text>
-           <View className="space-y-2 my-2">
+            <View className="space-y-2 my-2">
               {isOffline && (
                 <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
                   ⚠️ Your network is unstable
                 </Text>
               )}
               {hasActiveRequest && (
-                <Text className="bg-red-100 p-4 text-red-500 font-extrabold mb-5 rounded-md shadow-md">
-                  ⚠️ You have an active emergency report. Please wait for it to be
-                  resolved
-                </Text>
+                <View className="bg-red-100 p-4 shadow-md rounded-md">
+                  <Text className="text-red-500 text-justify font-extrabold">
+                    ⚠️ You have an active emergency report. Please wait for it
+                    to be resolved 
+                    <TouchableOpacity onPress={() => navigation.navigate("Emergency Records")}>
+                      <Text className="underline"> See details</Text>
+                    </TouchableOpacity>
+                  </Text>
+                </View>
               )}
-           </View>
+            </View>
 
             <View className="space-y-5">
               <View>
