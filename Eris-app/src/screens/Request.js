@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -20,11 +19,17 @@ import TextInputStyle from "../component/TextInputStyle"; // Ensure this import 
 import PickerField from "../component/PickerField";
 import { OfflineContext } from "../context/OfflineContext";
 import useViewImage from "../hooks/useViewImage";
+import ImageViewer from "react-native-image-viewing";
 
 const Request = () => {
   const { isOffline, saveStoredData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
-  const {isImageModalVisible, selectedImageUri,  handleImageClick, closeImageModal} = useViewImage();
+  const {
+    isImageModalVisible,
+    selectedImageUri,
+    handleImageClick,
+    closeImageModal,
+  } = useViewImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -41,10 +46,9 @@ const Request = () => {
   useEffect(() => {
     if (currentUser?.activeRequest) {
       setHasActiveRequest(true);
-    } else{
+    } else {
       setHasActiveRequest(false);
     }
-    
   }, [currentUser, refreshing]);
 
   useEffect(() => {
@@ -74,16 +78,19 @@ const Request = () => {
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
       hasActiveRequest,
-      responderData: []
+      responderData: [],
     };
 
     if (isOffline) {
       await saveStoredData("offlineRequest", requestData);
 
-      Alert.alert("Offline Mode", "You are offline. Your request has been saved and will be sent once you are back online. (Valid for 30 mins)");
+      Alert.alert(
+        "Offline Mode",
+        "You are offline. Your request has been saved and will be sent once you are back online. (Valid for 30 mins)"
+      );
       setLoading(false);
       return;
-    } 
+    }
 
     try {
       await submitEmergencyReport({
@@ -106,6 +113,12 @@ const Request = () => {
 
   return (
     <>
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]}
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={closeImageModal}
+      />
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           className="flex-1 bg-gray-100"
@@ -113,18 +126,24 @@ const Request = () => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-        <View className="p-5">
+          <View className="p-5">
             <Text className="font-bold text-xl text-center text-red-600 mb-5">
               Submit Detailed Report
             </Text>
-  
-            {hasActiveRequest && (
-              <Text className="bg-red-50 p-4 text-red-500 font-extrabold mb-5 rounded-sm shadow-md">
-                ⚠️ You have an active emergency report. Please wait for it to be
-                resolved.
-              </Text>
-            )}
-  
+           <View className="space-y-2">
+              {isOffline && (
+                <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
+                  ⚠️ Your network is unstable
+                </Text>
+              )}
+              {hasActiveRequest && (
+                <Text className="bg-red-100 p-4 text-red-500 font-extrabold mb-5 rounded-md shadow-md">
+                  ⚠️ You have an active emergency report. Please wait for it to be
+                  resolved
+                </Text>
+              )}
+           </View>
+
             <View className="space-y-5">
               <View>
                 <PickerField
@@ -150,23 +169,22 @@ const Request = () => {
                   editable={false}
                 />
               </View>
-                <View>
-                  <TextInputStyle
+              <View>
+                <TextInputStyle
                   label={"Description (Optional)"}
-                    placeholder="Briefly describe the emergency"
-                    multiline
-                    numberOfLines={4}
-                    onChangeText={setDescription}
-                    value={description}
-                  
-                  />
-                </View>
-                {photo && imageFile && (
-               <TouchableOpacity onPress={() => handleImageClick(photo)}>
+                  placeholder="Briefly describe the emergency"
+                  multiline
+                  numberOfLines={4}
+                  onChangeText={setDescription}
+                  value={description}
+                />
+              </View>
+              {photo && imageFile && (
+                <TouchableOpacity onPress={() => handleImageClick(photo)}>
                   <View className="w-40 h-40 bg-gray-500">
                     <Image source={{ uri: photo }} className="w-full h-full" />
                   </View>
-               </TouchableOpacity>
+                </TouchableOpacity>
               )}
               <TouchableOpacity
                 className="p-4 bg-blue-800 rounded-md flex "
@@ -177,11 +195,13 @@ const Request = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-        </View>
+          </View>
         </ScrollView>
         <View className="px-5 py-4">
           <TouchableOpacity
-            className={`${hasActiveRequest ? "bg-red-200" : "bg-red-600"} p-3.5 rounded-md items-center`}
+            className={`${
+              hasActiveRequest ? "bg-red-200" : "bg-red-600"
+            } p-3.5 rounded-md items-center`}
             onPress={handleSubmit}
             disabled={loading || hasActiveRequest}
           >

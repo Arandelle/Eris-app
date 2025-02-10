@@ -20,7 +20,7 @@ const Hotlines = () => {
         ) : (
           <>
             {isOffline && (
-              <Text className="text-center bg-gray-700 text-white font-bold p-4 rounded-md">
+              <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
                 ⚠️ You are currently offline
               </Text>
             )}
