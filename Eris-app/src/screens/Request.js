@@ -19,10 +19,12 @@ import useUploadImage from "../helper/UploadImage";
 import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
 import PickerField from "../component/PickerField";
 import { OfflineContext } from "../context/OfflineContext";
+import useViewImage from "../hooks/useViewImage";
 
 const Request = () => {
   const { isOffline, saveStoredData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
+  const {isImageModalVisible, selectedImageUri,  handleImageClick, closeImageModal} = useViewImage();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -106,81 +108,82 @@ const Request = () => {
     <>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
-          className="flex-1 p-5 bg-gray-100"
+          className="flex-1 bg-gray-100"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          <Text className="font-bold text-xl text-center text-red-600 mb-5">
-            Submit Detailed Report
-          </Text>
-
-          {hasActiveRequest && (
-            <Text className="text-lg bg-green-100 p-4 text-gray-900 mb-5 rounded-md">
-              You have an active emergency report. Please wait for it to be
-              resolved.
-            </Text>
-          )}
-
-          <View className="space-y-5">
-            <View className="space-y-4">
-              <Text>Description (Optional)</Text>
-              <TextInput
-                className="border p-2.5 rounded-md border-gray-300 bg-white text-sm"
-                multiline
-                numberOfLines={4}
-                onChangeText={setDescription}
-                value={description}
-                placeholder="Briefly describe the emergency"
-              />
-            </View>
-
-            <View>
-              <PickerField
-                label="Emergency Type"
-                value={emergencyType}
-                onValueChange={(emergencyType) =>
-                  setEmergencyType(emergencyType)
-                }
-                items={[
-                  { label: "Fire", value: "fire" },
-                  { label: "Medical", value: "medical" },
-                  { label: "Crime", value: "crime" },
-                  { label: "Natural Disaster", value: "natural disaster" },
-                  { label: "Other", value: "other" },
-                ]}
-              />
-            </View>
-            <View>
-              <TextInputStyle
-                label="Location"
-                value={geoCodeLocation}
-                placeholder="Enter location"
-                editable={false}
-              />
-            </View>
-
-            <TouchableOpacity
-              className="p-2 bg-blue-800 w-1/3 rounded"
-              onPress={choosePhoto}
-            >
-              <Text className="text-lg text-center text-white font-bold">
-                Add Photo
-              </Text>
-            </TouchableOpacity>
-
-            {photo && imageFile && (
-              <View className="w-40 h-40 bg-gray-500">
-                <Image source={{ uri: photo }} className="w-full h-full" />
-              </View>
-            )}
-          </View>
-        </ScrollView>
         <View className="p-5">
+            <Text className="font-bold text-xl text-center text-red-600 mb-5">
+              Submit Detailed Report
+            </Text>
+  
+            {hasActiveRequest && (
+              <Text className="bg-red-50 p-4 text-red-500 font-extrabold mb-5 rounded-sm shadow-md">
+                ⚠️ You have an active emergency report. Please wait for it to be
+                resolved.
+              </Text>
+            )}
+  
+            <View className="space-y-5">
+              <View>
+                <PickerField
+                  label="Emergency Type"
+                  value={emergencyType}
+                  onValueChange={(emergencyType) =>
+                    setEmergencyType(emergencyType)
+                  }
+                  items={[
+                    { label: "Medical 🚑", value: "medical" },
+                    { label: "Fire 🚒", value: "fire" },
+                    { label: "Crime 🕵️‍♂️", value: "crime" },
+                    { label: "Natural Disaster 🌪️", value: "natural disaster" },
+                    { label: "Other ⚠️", value: "other" },
+                  ]}
+                />
+              </View>
+              <View>
+                <TextInputStyle
+                  label="Location"
+                  value={geoCodeLocation}
+                  placeholder="Enter location"
+                  editable={false}
+                />
+              </View>
+                <View>
+                  <TextInputStyle
+                  label={"Description (Optional)"}
+                    placeholder="Briefly describe the emergency"
+                    multiline
+                    numberOfLines={4}
+                    onChangeText={setDescription}
+                    value={description}
+                  
+                  />
+                </View>
+                {photo && imageFile && (
+               <TouchableOpacity onPress={() => handleImageClick(photo)}>
+                  <View className="w-40 h-40 bg-gray-500">
+                    <Image source={{ uri: photo }} className="w-full h-full" />
+                  </View>
+               </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                className="p-4 bg-blue-800 rounded-md flex "
+                onPress={choosePhoto}
+              >
+                <Text className="text-center w-full flex text-white font-bold">
+                  Add Photo 📷
+                </Text>
+              </TouchableOpacity>
+            </View>
+        </View>
+        </ScrollView>
+        <View className="px-5 py-4">
           <TouchableOpacity
-            className="bg-red-600 p-3.5 rounded-md items-center"
+            className={`${hasActiveRequest ? "bg-red-200" : "bg-red-600"} p-3.5 rounded-md items-center`}
             onPress={handleSubmit}
-            disabled={loading}
+            disabled={loading || hasActiveRequest}
           >
             <Text className="text-white text-lg font-bold">
               Submit Emergency
