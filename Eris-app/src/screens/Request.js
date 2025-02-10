@@ -20,9 +20,10 @@ import PickerField from "../component/PickerField";
 import { OfflineContext } from "../context/OfflineContext";
 import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Request = () => {
-  const { isOffline, saveStoredData } = useContext(OfflineContext);
+  const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
   const {
     isImageModalVisible,
@@ -44,11 +45,30 @@ const Request = () => {
     useLocationTracking(currentUser, setRefreshing);
 
   useEffect(() => {
-    if (currentUser?.activeRequest) {
-      setHasActiveRequest(true);
-    } else {
-      setHasActiveRequest(false);
+    const checkActiveRequest = async () => {
+       try{
+
+        const checkIfHasRequest = await AsyncStorage.getItem("hasActiveRequest");
+ 
+        if (currentUser?.activeRequest) {
+          setHasActiveRequest(true);
+          await AsyncStorage.setItem("hasActiveRequest", JSON.stringify(true));
+        } else if(isOffline && checkIfHasRequest){
+          setHasActiveRequest(true);
+        }
+        else {
+          setHasActiveRequest(false);
+          await AsyncStorage.removeItem("hasActiveRequest");
+        }
+
+       }catch(error){
+        Alert.alert("Error", `${error}`)
+       }
+      
     }
+
+    checkActiveRequest(); 
+
   }, [currentUser, refreshing]);
 
   useEffect(() => {
@@ -67,18 +87,18 @@ const Request = () => {
 
     // Create emergency request data
     const requestData = {
-      currentUser,
+      currentUser: currentUser || storedData.currentUser,
       location,
-      latitude,
-      longitude,
-      geoCodeLocation,
+      latitude: latitude || storedData.currentUser.location.latitude,
+      longitude: longitude || storedData.currentUser.location.latitude,
+      geoCodeLocation: geoCodeLocation || storedData.currentUser.location.address,
       description,
       imageFile,
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
-      hasActiveRequest,
-      responderData: [],
+      hasActiveRequest : false,
+      responderData: responderData || storedData.responders,
     };
 
     if (isOffline) {
@@ -130,7 +150,7 @@ const Request = () => {
             <Text className="font-bold text-xl text-center text-red-600 mb-5">
               Submit Detailed Report
             </Text>
-           <View className="space-y-2">
+           <View className="space-y-2 my-2">
               {isOffline && (
                 <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
                   ⚠️ Your network is unstable

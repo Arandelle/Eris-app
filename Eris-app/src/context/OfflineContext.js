@@ -29,6 +29,7 @@ export const OfflineProvider = ({ children }) => {
   const saveStoredData = async (key, data) => {
     try {
       const existingData = storedData[key];
+      
       if (JSON.stringify(existingData) !== JSON.stringify(data)) {
         await AsyncStorage.setItem(key, JSON.stringify(data));
         setStoredData((prev) => ({ ...prev, [key]: data }));
@@ -55,7 +56,7 @@ export const OfflineProvider = ({ children }) => {
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
-    const keys = ["offlineRequest", "users", "hotlines", "announcement", "admins"];
+    const keys = ["offlineRequest", "currentUser", "hotlines", "announcement", "admins"];
     let allData = {};
   
     for (const key of keys) {
@@ -100,6 +101,7 @@ export const OfflineProvider = ({ children }) => {
       if (now - timestamp > THIRTY_MINUTES) {
         console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
+        Alert.alert("Time Limit", "Your last emergency report exceeded to time limit, please report new emergency if needed!")
         return;
       }
   

@@ -1,9 +1,11 @@
 import useFetchData from './useFetchData'
 import { auth, database } from '../services/firebaseConfig';
 import {ref, update} from "firebase/database"
+import { useContext, useEffect } from 'react';
+import { OfflineContext } from '../context/OfflineContext';
 
 const useCurrentUser = () => {
-
+    const {saveStoredData} = useContext(OfflineContext);
     const {data: userData} = useFetchData("users");
     const userInfo = auth.currentUser;
     const currentUser = userData.find((user) => user.id === userInfo?.uid) || null;
@@ -19,7 +21,14 @@ const useCurrentUser = () => {
                 console.error("Error updating: ", error)
             }
         }
-    }
+    };
+
+    // save current user to AsyncStorage everytime current user updates
+    useEffect(() => {
+        if(currentUser){
+            saveStoredData("currentUser", currentUser);
+        }
+    }, [currentUser]);
 
   return {currentUser, updateCurrentUser}
 }
