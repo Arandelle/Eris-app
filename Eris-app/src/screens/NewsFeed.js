@@ -13,6 +13,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   SafeAreaView,
+  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constant/colors";
@@ -196,6 +197,11 @@ const NewsFeed = ({ dayTime, isVerified }) => {
     ).start();
   }, [slideAnim]);
 
+  const handleRefresh = async () =>{
+    setLoading(true);
+    setTimeout(() => setLoading(false), 2000);
+  }
+
   if (loading)
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
@@ -349,6 +355,9 @@ const NewsFeed = ({ dayTime, isVerified }) => {
           contentContainerStyle={{
             paddingTop: HEADER_MAX_HEIGHT,
           }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
+          }
         >
         {/** Main content hotlines and announcement */}
           <View className="flex-1 p-3 bg-white space-y-3">
