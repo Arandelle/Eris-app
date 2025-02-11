@@ -37,7 +37,7 @@ const useFetchRecords = ({status}) => {
       }
     }, [status])
 
-  return {emergencyHistory}
+  return {emergencyHistory, loading}
 }
 
 export default useFetchRecords

@@ -21,13 +21,19 @@ import { OfflineContext } from "../context/OfflineContext";
 import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import MyBottomSheet from "../helper/MyBottomSheet";
+import MyBottomSheet from "../component/MyBottomSheet";
+import useFetchRecords from "../hooks/useFetchRecords";
+import EmergencyDetailsSheet from "../component/EmergencyDetailsSheet";
 
 const Request = () => {
   const bottomSheetRef = useRef(null);
-  const navigation = useNavigation();
+  const { currentUser } = useCurrentUser();
+  const { data: responderData } = useFetchData("responders");
+  const { emergencyHistory } = useFetchRecords({ status: "awaiting response" || "on-going" });
+  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
+    useLocationTracking(currentUser, setRefreshing);
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
+  const { sendNotification } = useSendNotification(description);
   const { photo, choosePhoto } = useUploadImage();
   const {
     isImageModalVisible,
@@ -35,40 +41,50 @@ const Request = () => {
     handleImageClick,
     closeImageModal,
   } = useViewImage();
+
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
+  const [activeRequestId, setActiveRequestId] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [emergencyType, setEmergencyType] = useState("");
-  const { sendNotification } = useSendNotification(description);
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
   const [loading, setLoading] = useState(false); // Initialize loading state
-
-  const { currentUser } = useCurrentUser();
-  const { data: responderData } = useFetchData("responders");
-  const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
-    useLocationTracking(currentUser, setRefreshing);
 
   useEffect(() => {
     const checkActiveRequest = async () => {
       try {
-        const checkIfHasRequest = await AsyncStorage.getItem(
-          "hasActiveRequest"
+        const activeRequestData = await AsyncStorage.getItem(
+          "activeRequestData"
         );
+
+        let parsedData = null;
+        if (activeRequestData) {
+          parsedData = JSON.parse(activeRequestData);
+        }
 
         if (currentUser?.activeRequest) {
           setHasActiveRequest(true);
-          await AsyncStorage.setItem("hasActiveRequest", JSON.stringify(true));
-        } else if (isOffline && checkIfHasRequest) {
+          setActiveRequestId(currentUser?.activeRequest?.requestId);
+          await AsyncStorage.setItem(
+            "activeRequestData",
+            JSON.stringify({
+              hasActiveRequest: true,
+              requestId: currentUser.activeRequest.requestId,
+            })
+          );
+        } else if (isOffline && parsedData?.hasActiveRequest) {
           setHasActiveRequest(true);
+          setActiveRequestId(parsedData?.requestId);
         } else {
           setHasActiveRequest(false);
-          await AsyncStorage.removeItem("hasActiveRequest");
+          setActiveRequestId("");
+          await AsyncStorage.removeItem("activeRequestData");
         }
       } catch (error) {
         Alert.alert("Error", `${error}`);
       }
     };
-
+    console.log("active request id:", activeRequestId);
     checkActiveRequest();
   }, [currentUser, refreshing]);
 
@@ -104,7 +120,7 @@ const Request = () => {
       currentUser: currentUser || storedData.currentUser,
       location: location || storedData.currentUser.location.address,
       latitude: latitude || storedData.currentUser.location.latitude,
-      longitude: longitude || storedData.currentUser.location.latitude,
+      longitude: longitude || storedData.currentUser.location.longitude,
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.address,
       description,
@@ -146,6 +162,11 @@ const Request = () => {
     }
   };
 
+  const reportDetails =
+    emergencyHistory.length > 0
+      ? emergencyHistory.find((report) => report.id === activeRequestId)
+      : null;
+
   if (loading) {
     return (
       <View className="flex items-center justify-center h-full">
@@ -153,6 +174,14 @@ const Request = () => {
       </View>
     );
   }
+
+  const StatusBadge = () => (
+    <View className="bg-blue-100 px-3 py-1 rounded-full self-start">
+      <Text className="text-blue-800 font-semibold text-sm">
+        {reportDetails?.status}
+      </Text>
+    </View>
+  );
 
   return (
     <>
@@ -185,7 +214,7 @@ const Request = () => {
                     ⚠️ You have an active emergency report. Please wait for it
                     to be resolved
                     <TouchableOpacity
-                      onPress={() => navigation.navigate("Emergency Records")}
+                      onPress={() => bottomSheetRef.current?.openBottomSheet()}
                     >
                       <Text className="underline"> See details</Text>
                     </TouchableOpacity>
@@ -231,18 +260,27 @@ const Request = () => {
               </View>
               {photo && imageFile ? (
                 <View className="flex flex-row justify-center space-x-4">
-                <View className="w-60 h-60">
+                  <View className="w-60 h-60">
                     <TouchableOpacity onPress={() => handleImageClick(photo)}>
-                      <Image source={{ uri: photo }} className="w-full h-full" />
+                      <Image
+                        source={{ uri: photo }}
+                        className="w-full h-full"
+                      />
                     </TouchableOpacity>
-                </View>
+                  </View>
                   <View className="flex flex-col space-y-2">
-                  <TouchableOpacity className="p-2 bg-green-500 border border-green-600" onPress={choosePhoto}>
-                    <Text className="text-white font-bold">Edit 📝</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity className="p-2 border border-red-500" onPress={() => setImageFile(null)}>
-                    <Text>Delete❌</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      className="p-2 bg-green-500 border border-green-600"
+                      onPress={choosePhoto}
+                    >
+                      <Text className="text-white font-bold">Edit 📝</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="p-2 border border-red-500"
+                      onPress={() => setImageFile(null)}
+                    >
+                      <Text>Delete❌</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               ) : (
@@ -258,7 +296,8 @@ const Request = () => {
             </View>
           </View>
         </ScrollView>
-        <TouchableOpacity onPress={() => bottomSheetRef.current?.openBottomSheet()}><Text>Click to show bottom modal</Text></TouchableOpacity>
+        
+        {/** submit button */}
         <View className="px-5 py-4">
           <TouchableOpacity
             className={`${
@@ -272,14 +311,10 @@ const Request = () => {
             </Text>
           </TouchableOpacity>
         </View>
-          
-          
-        <MyBottomSheet children={
-          <View>
-            <Text>Hello guys</Text>
-          </View>
-        } 
-          index={true}
+            
+        {/** detatils of emergency report */}
+        <MyBottomSheet
+          children={<EmergencyDetailsSheet reportDetails={reportDetails} />}
           ref={bottomSheetRef}
         />
       </SafeAreaView>
