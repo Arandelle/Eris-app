@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -22,8 +22,10 @@ import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import MyBottomSheet from "../helper/MyBottomSheet";
 
 const Request = () => {
+  const bottomSheetRef = useRef(null);
   const navigation = useNavigation();
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
   const { photo, choosePhoto } = useUploadImage();
@@ -256,6 +258,7 @@ const Request = () => {
             </View>
           </View>
         </ScrollView>
+        <TouchableOpacity onPress={() => bottomSheetRef.current?.openBottomSheet()}><Text>Click to show bottom modal</Text></TouchableOpacity>
         <View className="px-5 py-4">
           <TouchableOpacity
             className={`${
@@ -269,6 +272,16 @@ const Request = () => {
             </Text>
           </TouchableOpacity>
         </View>
+          
+          
+        <MyBottomSheet children={
+          <View>
+            <Text>Hello guys</Text>
+          </View>
+        } 
+          index={true}
+          ref={bottomSheetRef}
+        />
       </SafeAreaView>
     </>
   );
