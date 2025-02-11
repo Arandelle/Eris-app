@@ -78,22 +78,21 @@ const Request = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
-  
+
     if (isOffline) {
       setLoading(true);
     } else {
-     await trackUserLocation();
+      await trackUserLocation();
     }
-  
-    setTimeout(() =>{ 
+
+    setTimeout(() => {
       setLoading(false);
-      setRefreshing(false); 
-      if(isOffline){
-        Alert.alert("Network unstable", "Try checking your internet!"); }
-      },
-      2000); // Stop refreshing after 1 sec
+      setRefreshing(false);
+      if (isOffline) {
+        Alert.alert("Network unstable", "Try checking your internet!");
+      }
+    }, 2000); // Stop refreshing after 1 sec
   };
-  
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -145,12 +144,12 @@ const Request = () => {
     }
   };
 
-  if(loading){
+  if (loading) {
     return (
       <View className="flex items-center justify-center h-full">
         <Text>Loading please wait...</Text>
       </View>
-    )
+    );
   }
 
   return (
@@ -182,8 +181,10 @@ const Request = () => {
                 <View className="bg-red-100 p-4 shadow-md rounded-md">
                   <Text className="text-red-500 text-justify font-extrabold">
                     ⚠️ You have an active emergency report. Please wait for it
-                    to be resolved 
-                    <TouchableOpacity onPress={() => navigation.navigate("Emergency Records")}>
+                    to be resolved
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Emergency Records")}
+                    >
                       <Text className="underline"> See details</Text>
                     </TouchableOpacity>
                   </Text>
@@ -226,21 +227,32 @@ const Request = () => {
                   value={description}
                 />
               </View>
-              {photo && imageFile && (
-                <TouchableOpacity onPress={() => handleImageClick(photo)}>
-                  <View className="w-40 h-40 bg-gray-500">
-                    <Image source={{ uri: photo }} className="w-full h-full" />
+              {photo && imageFile ? (
+                <View className="flex flex-row justify-center space-x-4">
+                <View className="w-60 h-60">
+                    <TouchableOpacity onPress={() => handleImageClick(photo)}>
+                      <Image source={{ uri: photo }} className="w-full h-full" />
+                    </TouchableOpacity>
+                </View>
+                  <View className="flex flex-col space-y-2">
+                  <TouchableOpacity className="p-2 bg-green-500 border border-green-600" onPress={choosePhoto}>
+                    <Text className="text-white font-bold">Edit 📝</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity className="p-2 border border-red-500" onPress={() => setImageFile(null)}>
+                    <Text>Delete❌</Text>
+                  </TouchableOpacity>
                   </View>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  className="p-4 bg-blue-800 rounded-md flex "
+                  onPress={choosePhoto}
+                >
+                  <Text className="text-center w-full flex text-white font-bold">
+                    Add Photo 📷
+                  </Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity
-                className="p-4 bg-blue-800 rounded-md flex "
-                onPress={choosePhoto}
-              >
-                <Text className="text-center w-full flex text-white font-bold">
-                  Add Photo 📷
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

@@ -24,7 +24,7 @@ const Hotlines = () => {
                 ⚠️ Your network is unstable
               </Text>
             )}
-            <View className="bg-blue-800 mt-3 p-2 border-2 shadow-md">
+            <View className="bg-blue-800 border-blue-900 mt-3 p-2 border-2 shadow-md rounded-md">
               <Text className="text-center text-xl text-white font-extrabold">
                 📞 Hotline Numbers
               </Text>
@@ -32,7 +32,7 @@ const Hotlines = () => {
             <View className="flex flex-row flex-wrap">
               {hotlines.map((item, key) => (
                 <View key={key} className="w-1/2 py-2">
-                  <View className="border-2 border-blue-900">
+                  <View className="border-2 border-blue-900 rounded-md">
                     <Text className="text-white text-center bg-blue-800 p-1 font-bold">
                       {item.types.toUpperCase()}
                     </Text>
