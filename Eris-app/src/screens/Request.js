@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -32,7 +32,11 @@ const Request = () => {
   const bottomSheetRef = useRef(null);
   const { currentUser, userInfo} = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
-  const { emergencyHistory } = useFetchRecords({ status: "awaiting response" || "on-going" });
+
+  const statuses = useMemo(() => ["awaiting response", "on-going"], []);
+
+  const { emergencyHistory } = useFetchRecords({ status: statuses});
+  
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
