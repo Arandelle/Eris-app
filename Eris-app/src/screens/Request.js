@@ -24,10 +24,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyBottomSheet from "../component/MyBottomSheet";
 import useFetchRecords from "../hooks/useFetchRecords";
 import EmergencyDetailsSheet from "../component/EmergencyDetailsSheet";
+import { get, ref, remove } from "firebase/database";
+import { database, storage } from "../services/firebaseConfig";
+import {deleteObject, ref as storageRef} from "firebase/storage";
 
 const Request = () => {
   const bottomSheetRef = useRef(null);
-  const { currentUser } = useCurrentUser();
+  const { currentUser, userInfo} = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
   const { emergencyHistory } = useFetchRecords({ status: "awaiting response" || "on-going" });
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
@@ -96,21 +99,24 @@ const Request = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
-
+  
     if (isOffline) {
       setLoading(true);
-    } else {
-      await trackUserLocation();
-    }
-
-    setTimeout(() => {
-      setLoading(false);
       setRefreshing(false);
-      if (isOffline) {
-        Alert.alert("Network unstable", "Try checking your internet!");
+      Alert.alert("Network unstable", "Try checking your internet!");
+    } else {
+      try {
+        await trackUserLocation();
+      } catch (error) {
+        Alert.alert("Location tracking failed", "Please try again.");
+      } finally {
+        setRefreshing(false);
       }
-    }, 2000); // Stop refreshing after 1 sec
+    }
+  
+    setLoading(false); // Ensure this is set correctly
   };
+  
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -162,6 +168,47 @@ const Request = () => {
     }
   };
 
+  const handleDeleteClick = () => {
+    Alert.alert("Cancel Report?", "Are you sure you want to cancel your emergency report?", [{
+      text: "Confirm",
+      onPress: () => handleDeleteReport(activeRequestId),
+    }, {
+      text: "Cancel",
+    }]);
+  }
+
+  const handleDeleteReport = async (id) => {
+    const activeRequestRef = ref(database, `users/${userInfo?.uid}/activeRequest`);
+    const reportRef = ref(database, `users/${userInfo?.uid}/emergencyHistory/${id}`);
+    setLoading(true);
+    try{
+      if(id){
+        const snapshot = await get(reportRef);
+
+        if(snapshot.exists()){
+          const reportData = snapshot.val();
+          const imagePath = reportData.imageUrl;
+          
+          await remove(reportRef);
+          await remove(activeRequestRef);
+
+          if(imagePath){
+            const imageRef = storageRef(storage, imagePath);
+            await deleteObject(imageRef);
+          };
+
+          Alert.alert("Deleted", "You have successfully deleted your request");
+          setLoading(false);
+        }
+        setLoading(false);
+      }
+    }catch(error){
+      Alert.alert("Error", error);
+      setLoading(false);
+    }
+
+  }
+
   const reportDetails =
     emergencyHistory.length > 0
       ? emergencyHistory.find((report) => report.id === activeRequestId)
@@ -173,15 +220,7 @@ const Request = () => {
         <Text>Loading please wait...</Text>
       </View>
     );
-  }
-
-  const StatusBadge = () => (
-    <View className="bg-blue-100 px-3 py-1 rounded-full self-start">
-      <Text className="text-blue-800 font-semibold text-sm">
-        {reportDetails?.status}
-      </Text>
-    </View>
-  );
+  };
 
   return (
     <>
@@ -314,7 +353,7 @@ const Request = () => {
             
         {/** detatils of emergency report */}
         <MyBottomSheet
-          children={<EmergencyDetailsSheet reportDetails={reportDetails} />}
+          children={<EmergencyDetailsSheet reportDetails={reportDetails} onCancel={handleDeleteClick} />}
           ref={bottomSheetRef}
         />
       </SafeAreaView>

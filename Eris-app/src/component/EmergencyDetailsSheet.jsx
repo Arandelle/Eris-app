@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { formatDateWithTime } from '../helper/FormatDate';
 import { getTimeDifference } from '../helper/getTimeDifference';
 
-const EmergencyDetailsSheet = ({ reportDetails }) => {
+const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
   if (!reportDetails) return null;
 
   const StatusBadge = () => (
@@ -16,7 +16,7 @@ const EmergencyDetailsSheet = ({ reportDetails }) => {
 
   return (
     <View className="flex p-6">
-      {/* Header with Emergency Type and Status */}
+      {/* Header with Emergency Type, Status, and Cancel Button */}
       <View className="border-b border-gray-200 pb-4">
         <View className="flex-row items-center justify-between">
           <View>
@@ -27,10 +27,19 @@ const EmergencyDetailsSheet = ({ reportDetails }) => {
               ID: {reportDetails.emergencyId}
             </Text>
           </View>
-          <StatusBadge />
+          <View className="flex-row items-center space-x-2">
+            <TouchableOpacity 
+              onPress={onCancel}
+              className="bg-red-100 px-3 py-1 rounded-full"
+            >
+              <Text className="text-red-600 font-semibold text-sm">
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <View><StatusBadge /></View>
+          </View>
         </View>
       </View>
-
       {/* Time and Date Section */}
       <View className="py-4 space-y-4">
         <View className="space-y-1">
@@ -41,7 +50,6 @@ const EmergencyDetailsSheet = ({ reportDetails }) => {
             {formatDateWithTime(reportDetails.date)}
           </Text>
         </View>
-
         {/* Location Section */}
         <View className="space-y-1">
           <Text className="text-gray-700 font-semibold">
@@ -51,7 +59,6 @@ const EmergencyDetailsSheet = ({ reportDetails }) => {
             {reportDetails.location?.address}
           </Text>
         </View>
-
         {/* Description Section */}
         {reportDetails.description && (
           <View className="space-y-1">
@@ -64,7 +71,6 @@ const EmergencyDetailsSheet = ({ reportDetails }) => {
           </View>
         )}
       </View>
-
       {/* Image Section */}
       {reportDetails.imageUrl && (
         <View className="mt-2">

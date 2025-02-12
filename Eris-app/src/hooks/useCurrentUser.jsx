@@ -30,7 +30,7 @@ const useCurrentUser = () => {
         }
     }, [currentUser]);
 
-  return {currentUser, updateCurrentUser}
+  return {currentUser, updateCurrentUser, userInfo}
 }
 
 export default useCurrentUser
