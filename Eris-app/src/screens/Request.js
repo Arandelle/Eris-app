@@ -180,6 +180,7 @@ const Request = () => {
   const handleDeleteReport = async (id) => {
     const activeRequestRef = ref(database, `users/${userInfo?.uid}/activeRequest`);
     const reportRef = ref(database, `users/${userInfo?.uid}/emergencyHistory/${id}`);
+    const mainReportRef = ref(database, `emergencyRequest/${id}`);
     setLoading(true);
     try{
       if(id){
@@ -191,6 +192,7 @@ const Request = () => {
           
           await remove(reportRef);
           await remove(activeRequestRef);
+          await remove(mainReportRef);
 
           if(imagePath){
             const imageRef = storageRef(storage, imagePath);
