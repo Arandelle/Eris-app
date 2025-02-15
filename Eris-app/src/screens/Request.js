@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Image,
   SafeAreaView,
+  Button,
 } from "react-native";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
@@ -26,22 +27,23 @@ import useFetchRecords from "../hooks/useFetchRecords";
 import EmergencyDetailsSheet from "../component/EmergencyDetailsSheet";
 import { get, ref, remove } from "firebase/database";
 import { database, storage } from "../services/firebaseConfig";
-import {deleteObject, ref as storageRef} from "firebase/storage";
+import { deleteObject, ref as storageRef } from "firebase/storage";
+import { Video } from "expo-av";
 
 const Request = () => {
   const bottomSheetRef = useRef(null);
-  const { currentUser, userInfo} = useCurrentUser();
+  const videoRef = useRef(null);
+  const { currentUser, userInfo } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
-
+  const { file,setFile, chooseFile } = useUploadImage();
   const statuses = useMemo(() => ["awaiting response", "on-going"], []);
 
-  const { emergencyHistory } = useFetchRecords({ status: statuses});
-  
+  const { emergencyHistory } = useFetchRecords({ status: statuses });
+
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
   const { sendNotification } = useSendNotification(description);
-  const { photo, choosePhoto } = useUploadImage();
   const {
     isImageModalVisible,
     selectedImageUri,
@@ -52,7 +54,6 @@ const Request = () => {
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [activeRequestId, setActiveRequestId] = useState("");
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState(null);
   const [emergencyType, setEmergencyType] = useState("");
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
   const [loading, setLoading] = useState(false); // Initialize loading state
@@ -95,15 +96,9 @@ const Request = () => {
     checkActiveRequest();
   }, [currentUser, refreshing]);
 
-  useEffect(() => {
-    if (photo) {
-      setImageFile(photo);
-    }
-  }, [photo]);
-
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
-  
+
     if (isOffline) {
       setLoading(true);
       setRefreshing(false);
@@ -117,10 +112,9 @@ const Request = () => {
         setRefreshing(false);
       }
     }
-  
+
     setLoading(false); // Ensure this is set correctly
   };
-  
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -134,7 +128,7 @@ const Request = () => {
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.address,
       description,
-      imageFile,
+      imageFile: file.uri,
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
@@ -157,11 +151,10 @@ const Request = () => {
       await submitEmergencyReport({
         ...requestData,
       });
-      console.log(imageFile);
       Alert.alert("Emergency reported", "Help is on the way!");
       setDescription("");
       setLoading(false);
-      setImageFile(null);
+      setFile({});
       setHasActiveRequest(true);
     } catch (error) {
       Alert.alert(
@@ -173,47 +166,59 @@ const Request = () => {
   };
 
   const handleDeleteClick = () => {
-    Alert.alert("Cancel Report?", "Are you sure you want to cancel your emergency report?", [{
-      text: "Confirm",
-      onPress: () => handleDeleteReport(activeRequestId),
-    }, {
-      text: "Cancel",
-    }]);
-  }
+    Alert.alert(
+      "Cancel Report?",
+      "Are you sure you want to cancel your emergency report?",
+      [
+        {
+          text: "Confirm",
+          onPress: () => handleDeleteReport(activeRequestId),
+        },
+        {
+          text: "Cancel",
+        },
+      ]
+    );
+  };
 
   const handleDeleteReport = async (id) => {
-    const activeRequestRef = ref(database, `users/${userInfo?.uid}/activeRequest`);
-    const reportRef = ref(database, `users/${userInfo?.uid}/emergencyHistory/${id}`);
+    const activeRequestRef = ref(
+      database,
+      `users/${userInfo?.uid}/activeRequest`
+    );
+    const reportRef = ref(
+      database,
+      `users/${userInfo?.uid}/emergencyHistory/${id}`
+    );
     const mainReportRef = ref(database, `emergencyRequest/${id}`);
     setLoading(true);
-    try{
-      if(id){
+    try {
+      if (id) {
         const snapshot = await get(reportRef);
 
-        if(snapshot.exists()){
+        if (snapshot.exists()) {
           const reportData = snapshot.val();
           const imagePath = reportData.imageUrl;
-          
+
           await remove(reportRef);
           await remove(activeRequestRef);
           await remove(mainReportRef);
 
-          if(imagePath){
+          if (imagePath) {
             const imageRef = storageRef(storage, imagePath);
             await deleteObject(imageRef);
-          };
+          }
 
           Alert.alert("Deleted", "You have successfully deleted your request");
           setLoading(false);
         }
         setLoading(false);
       }
-    }catch(error){
+    } catch (error) {
       Alert.alert("Error", error);
       setLoading(false);
     }
-
-  }
+  };
 
   const reportDetails =
     emergencyHistory.length > 0
@@ -226,7 +231,7 @@ const Request = () => {
         <Text>Loading please wait...</Text>
       </View>
     );
-  };
+  }
 
   return (
     <>
@@ -303,26 +308,43 @@ const Request = () => {
                   value={description}
                 />
               </View>
-              {photo && imageFile ? (
+              {file.uri ? (
                 <View className="flex flex-row justify-center space-x-4">
-                  <View className="w-60 h-60">
-                    <TouchableOpacity onPress={() => handleImageClick(photo)}>
-                      <Image
-                        source={{ uri: photo }}
-                        className="w-full h-full"
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {file.type === "image" ? (
+                    <View className="w-60 h-60">
+                      <TouchableOpacity
+                        onPress={() => handleImageClick(file.uri)}
+                      >
+                        <Image
+                          source={{ uri: file.uri }}
+                          className="w-full h-full"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    file.type === "video" && (
+                      <View className="relative place-self-center">
+                        <Video
+                          ref={videoRef}
+                          source={{ uri: file.uri }}
+                          style={{ width: 300, height: 200 }}
+                          useNativeControls
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )
+                  )}
+
                   <View className="flex flex-col space-y-2">
                     <TouchableOpacity
                       className="p-2 bg-green-500 border border-green-600"
-                      onPress={choosePhoto}
+                      onPress={chooseFile}
                     >
                       <Text className="text-white font-bold">Edit 📝</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       className="p-2 border border-red-500"
-                      onPress={() => setImageFile(null)}
+                      onPress={() => setFile({})}
                     >
                       <Text>Delete❌</Text>
                     </TouchableOpacity>
@@ -331,17 +353,17 @@ const Request = () => {
               ) : (
                 <TouchableOpacity
                   className="p-4 bg-blue-800 rounded-md flex "
-                  onPress={choosePhoto}
+                  onPress={chooseFile}
                 >
                   <Text className="text-center w-full flex text-white font-bold">
-                    Add Photo 📷
+                    Add File 📷
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
           </View>
         </ScrollView>
-        
+
         {/** submit button */}
         <View className="px-5 py-4">
           <TouchableOpacity
@@ -356,10 +378,15 @@ const Request = () => {
             </Text>
           </TouchableOpacity>
         </View>
-            
+
         {/** detatils of emergency report */}
         <MyBottomSheet
-          children={<EmergencyDetailsSheet reportDetails={reportDetails} onCancel={handleDeleteClick} />}
+          children={
+            <EmergencyDetailsSheet
+              reportDetails={reportDetails}
+              onCancel={handleDeleteClick}
+            />
+          }
           ref={bottomSheetRef}
         />
       </SafeAreaView>

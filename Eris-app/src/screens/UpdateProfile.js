@@ -28,7 +28,7 @@ import {
 import CustomButton from "../component/CustomButton";
 
 const UpdateProfile = () => {
-  const { photo, choosePhoto } = useUploadImage(); //hooks for uploading photo
+  const { file, chooseFile } = useUploadImage("image"); //hooks for uploading photo
   const navigation = useNavigation();
   const { sendNotification } = useSendNotification();
   const { currentUser, updateCurrentUser } = useCurrentUser();
@@ -49,14 +49,14 @@ const UpdateProfile = () => {
     // This useEffect ensures the check icon appears immediately after the user selects an image from their gallery.
     // It automatically updates the `userData` object with the chosen image,
     // so the user doesn't need to click the image again to confirm their selection.
-    if (photo) {
+    if (file) {
       setUserData({
         ...userData,
         img: null, // Set img to null when a photo is selected to ensure the check icon doesn't appear for img.
-        imageFile: photo, // Set imageFile to the selected photo URI.
+        imageFile: file.uri, // Set imageFile to the selected photo URI.
       });
     }
-  }, [photo]); // Depend on photo, so this useEffect runs every time photo changes.
+  }, [file]); // Depend on photo, so this useEffect runs every time photo changes.
 
   const imageUrls = [
     ...Array.from(
@@ -182,7 +182,7 @@ const UpdateProfile = () => {
           {/**List of avatar in horizontal */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex py-4 flex-row items-center space-x-3 justify-center">
-              <TouchableOpacity onPress={choosePhoto}>
+              <TouchableOpacity onPress={chooseFile}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="camera" size={40} color={"gray"} />
                 </View>
@@ -190,11 +190,11 @@ const UpdateProfile = () => {
 
               {currentUser?.img && (
                 <TouchableOpacity
-                  onPress={() => setUserData({ ...userData,img: null, imageFile: photo })}
+                  onPress={() => setUserData({ ...userData,img: null, imageFile: file.uri })}
                 >
                   <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
                     <Image
-                      source={{ uri: photo || currentUser?.img }}
+                      source={{ uri: file.uri || currentUser?.img }}
                       className="w-16 h-16 rounded-full"
                     />
                     {(userData.imageFile || userData.img === null) && (

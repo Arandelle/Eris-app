@@ -2,75 +2,71 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
-// Rename to useUploadImage to follow hook naming convention
-const useUploadImage = () => {
-  const [photo, setPhoto] = useState(null);
+const useUploadImage = (mode = "both") => {
+  const [file, setFile] = useState({ uri: null, type: null });
 
-  // Function to select a photo from the gallery
-  const selectPhoto = async () => {
+  // Function to select a file from the gallery
+  const selectFile = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert("Permission to access media library is required!", "Please confirm");
+      Alert.alert("Permission Required", "You need to enable access to your gallery.");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
+      mediaTypes: mode === "image" ? ['images'] : ['images', 'videos'], // Image only for profile, both for uploads
+      allowsEditing: mode === "image", // Allow editing only for profile pictures
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+
+      if (mode === "image" && asset.type !== "image") {
+        Alert.alert("Invalid Selection", "Please select an image file.");
+        return;
+      }
+
+      setFile({ uri: asset.uri, type: asset.type });
+    }
+  };
+
+  // Function to take a photo using the camera
+  const takePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "You need to enable access to your camera.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Only images for camera
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
-    }
-  };
-
-  // Function to take a photo using the camera
-  const takePhoto = async () => {
-    console.log("Take photo");
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync(); // Request camera permission
-    if (!permissionResult.granted) {
-      Alert.alert("Permission to access camera is required!", "Please confirm");
-      return;
-    };
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if(!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      setFile({ uri: result.assets[0].uri, type: "image" });
     }
   };
 
   // Function to choose between gallery and camera
-  const choosePhoto = async () => {
+  const chooseFile = async () => {
     Alert.alert(
-      "Choose an image source",
-      "Select an image source to upload",
+      "Choose a Source",
+      `Select a ${mode === "image" ? "profile picture" : "file"} source`,
       [
-        {
-          text: "Gallery",
-          onPress: selectPhoto,
-        },
-        {
-          text: "Camera",
-          onPress: takePhoto,
-        },
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
+        { text: "Gallery", onPress: selectFile },
+        { text: "Camera", onPress: takePhoto },
+        { text: "Cancel", style: "cancel" },
       ],
-      { cancelable: false }
+      { cancelable: true }
     );
-  }
+  };
 
-  return { photo,choosePhoto};
+  return { file, setFile, chooseFile };
 };
 
 export default useUploadImage;
