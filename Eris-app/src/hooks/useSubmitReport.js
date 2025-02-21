@@ -9,18 +9,9 @@ import {
 import { storage } from "../services/firebaseConfig";
 
 export const submitEmergencyReport = async ({
-  currentUser,
-  location,
-  latitude,
-  longitude,
-  geoCodeLocation,
-  imageFile = null,
-  description = "Emergency alert from quick response button",
-  emergencyType = "Immediate Report",
-  sendNotification, // Pass the notification function
-  hasActiveRequest = false,
-  responderData = [], // Pass responderData from the component
+  data
 }) => {
+  const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, sendNotification, hasActiveRequest, responderData } = data;
   if (!currentUser || !currentUser.id) {
     throw new Error("No user is signed in.");
   }
@@ -31,18 +22,22 @@ export const submitEmergencyReport = async ({
     throw new Error("You have an active emergency request pending.");
   }
 
-  let imageUrl = imageFile;
+  let mediaUrl = "";
+  let mediaType = "";
 
-  if (imageFile) {
+  if (media) {
+
+    mediaType = media.type;
+
     try {
-      const imageRef = storageRef(storage, `emergencyImages/${Date.now()}.jpg`);
-      const response = await fetch(imageFile);
+      const mediaRef = storageRef(storage, `emergencyMedia/${media.uri.name}`);
+      const response = await fetch(media.uri);
       const blob = await response.blob();
-      await uploadBytes(imageRef, blob);
-      imageUrl = await getDownloadURL(imageRef);
+      await uploadBytes(mediaRef, blob);
+      mediaUrl = await getDownloadURL(mediaRef);
     } catch (error) {
       console.warn("Failed to upload image:", error.message);
-      imageUrl = ""; // Proceed without the image
+      mediaUrl = ""; // Proceed without the image
     }
   }
 
@@ -53,7 +48,10 @@ export const submitEmergencyReport = async ({
       userId: currentUser.id,
       timestamp: serverTimestamp(),
       description,
-      imageUrl,
+      media: {
+        mediaUrl,
+        mediaType
+      },
       emergencyType,
       status: "awaiting response",
       expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min validity
@@ -62,7 +60,7 @@ export const submitEmergencyReport = async ({
       location: {
         latitude,
         longitude,
-        address: geoCodeLocation,
+        geoCodeLocation
       },
     };
 

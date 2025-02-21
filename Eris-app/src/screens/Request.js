@@ -128,7 +128,10 @@ const Request = () => {
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.address,
       description,
-      imageFile: file.uri,
+      media: {
+        uri: file.uri || storedData.media.uri,
+        type: file.type || storedData.media.type,
+      },
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
       sendNotification,
@@ -149,7 +152,7 @@ const Request = () => {
 
     try {
       await submitEmergencyReport({
-        ...requestData,
+        data: requestData,
       });
       Alert.alert("Emergency reported!", "Help is on the way!");
       setDescription("");
@@ -161,6 +164,7 @@ const Request = () => {
         "Error",
         `Could not submit emergency report, please try again ${error}`
       );
+      console.error("Error submitting emergency report: ", error);
       setLoading(false); // Ensure loading is set to false on error
     }
   };

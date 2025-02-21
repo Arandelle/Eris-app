@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { formatDateWithTime } from '../helper/FormatDate';
 import { getTimeDifference } from '../helper/getTimeDifference';
+import { Video } from 'expo-av';
 
 const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
+
   if (!reportDetails) return null;
+  const videoRef = useRef(null);
+  const [videoLoading, setVideoLoading] = useState(false);
 
   const StatusBadge = () => (
     <View className="bg-blue-100 px-3 py-1 rounded-full self-start">
@@ -58,7 +62,7 @@ const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
             📍 Location
           </Text>
           <Text className="text-gray-700">
-            {reportDetails.location?.address}
+            {reportDetails.location?.geoCodeLocation}
           </Text>
         </View>
         {/* Description Section */}
@@ -74,20 +78,42 @@ const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
         )}
       </View>
       {/* Image Section */}
-      {reportDetails.imageUrl && (
+      {reportDetails.media.mediaType === "image" && (
         <View className="mt-2">
           <Text className="text-gray-700 font-semibold mb-2">
             📷 Emergency Photo
           </Text>
           <View className="rounded-lg overflow-hidden">
             <Image
-              source={{ uri: reportDetails.imageUrl }}
+              source={{ uri: reportDetails.media.mediaUrl }}
               className="h-64 w-full"
               resizeMode="cover"
             />
           </View>
         </View>
       )}
+
+      {reportDetails.media.mediaType === "video" && (
+       <View className="relative">
+       {videoLoading && (
+       <View className="absolute inset-0 bg-black/50 flex items-center justify-center h-full w-full">
+          <Text className="text-center text-white">
+            Video Loading...
+          </Text>
+       </View>
+       )}
+          <Video 
+            ref={videoRef}
+            source={{ uri: reportDetails.media.mediaUrl }}
+            useNativeControls
+            resizeMode='contain'
+            style={{ width: '100%', height: 300 }}
+            onLoadStart={() => setVideoLoading(true)}
+            onLoad={() => setVideoLoading(false)}
+            onError={() => setVideoLoading(false)}
+          />
+       </View>
+        )}
     </View>
   );
 };
