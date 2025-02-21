@@ -1,8 +1,7 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { View, TouchableOpacity, Image, Text, Pressable } from "react-native";
 import useFetchData from "../hooks/useFetchData";
-import { OfflineContext } from "../context/OfflineContext";
 import { formatDate } from "../helper/FormatDate";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import colors from "../constant/colors";
@@ -15,15 +14,25 @@ const Announcement = () => {
   const videoRef = useRef(null);
   const { data: adminData } = useFetchData("admins");
   const { data: announcement, loading } = useFetchData("announcement");
+  const [visibleCount, setVisibleCount] = useState(3);
+
+  const loadMore = () => {
+    setVisibleCount((prev) => prev + 3);
+  };
+
+  const slicedAnnouncement = announcement.slice(0, visibleCount);
+
   const {
     isImageModalVisible,
     selectedImageUri,
     handleImageClick,
     closeImageModal,
   } = useViewImage();
-  const { isOffline } = useContext(OfflineContext);
+
   const [expanded, setExpanded] = useState({});
   const [showSeeMore, setShowSeeMore] = useState({});
+  const [videoLoading, setVideoLoading] = useState(false);
+
   const getAdminsDetails = (userId) => {
     return adminData.find((user) => user.id === userId);
   };
@@ -31,7 +40,7 @@ const Announcement = () => {
 
   const handleTextLayout = (e, key) => {
     const { lines } = e.nativeEvent;
-    if (lines.length > 3) {
+    if (lines.length > 2) {
       setShowSeeMore((prev) => ({ ...prev, [key]: true }));
     }
   };
@@ -47,13 +56,13 @@ const Announcement = () => {
       <View className="space-y-3">
       {loading ? (
          <Text className="text-center text-gray-500 mt-3">Loading...</Text>
-      ) : announcement.length === 0 ? (
+      ) : slicedAnnouncement.length === 0 ? (
           <Text className="text-center text-gray-500 mt-3">
             No announcement available
         </Text>
       ) : (
-        announcement.length > 0 &&
-          announcement.map((item, key) => {
+        slicedAnnouncement.length > 0 &&
+          slicedAnnouncement.map((item, key) => {
             const adminDetails = getAdminsDetails(item.userId);
 
             return (
@@ -74,24 +83,32 @@ const Announcement = () => {
                   
                 </TouchableOpacity>
                 {item.fileType === "video" && (
-                 <View className="h-52 w-full">
+                 <View className="h-52 w-full relative">
+                  { videoLoading && 
+                  <View className="absolute inset-0 bg-black/50 flex items-center justify-center h-full w-full">
+                    <Text className="text-white text-center">Loading Video...</Text>
+                  </View>
+                  }
                    <Video 
                    ref={videoRef}
                     source={{uri: item.fileUrl}}
                     style={{ width: "100%", height: 208, alignSelf: "center" }}
                     useNativeControls
                     resizeMode="contain"
+                    onLoadStart={() => setVideoLoading(true)}
+                    onLoad={() => setVideoLoading(false)}
+                    onError={() => setVideoLoading(false)}
                    />
                  </View>
                 )}
                 <View className="p-4 space-y-2">
-                  <Text className="font-bold text-blue-500">
+                  <Text className="font-bold text-xs text-blue-500">
                     {formatDate(item.date)}
                   </Text>
                   <Pressable onPress={() => openLink(item.links, "links")}>
                     <View className="flex-row items-center">
                       <Text
-                        className={`font-bold text-lg ${
+                        className={`font-bold ${
                           item.links ? "underline" : ""
                         }`}
                       >
@@ -109,8 +126,8 @@ const Announcement = () => {
                   </Pressable>
 
                   <Text
-                  className="text-gray-600 text-lg text-justify"
-                  numberOfLines={expanded[key] ? undefined : 3}
+                  className="text-gray-600 text-justify"
+                  numberOfLines={expanded[key] ? undefined : 2}
                   onTextLayout={(e) => handleTextLayout(e, key)}
                 >
                   {item.description}
@@ -151,6 +168,11 @@ const Announcement = () => {
               </View>
             );
           })
+      )}
+      {visibleCount < announcement.length && (
+        <TouchableOpacity onPress={loadMore} className="flex items-center justify-center p-2 rounded-lg">
+          <Text className="text-blue-800 text-lg">View More</Text>
+        </TouchableOpacity>
       )}
       </View>
     </>
