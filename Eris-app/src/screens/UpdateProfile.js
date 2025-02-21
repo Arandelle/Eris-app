@@ -26,6 +26,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import CustomButton from "../component/CustomButton";
+import colors from "../constant/colors";
 
 const UpdateProfile = () => {
   const { file, chooseFile } = useUploadImage("image"); //hooks for uploading photo
@@ -39,6 +40,11 @@ const UpdateProfile = () => {
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
     imageFile: null,
   });
+
+  const handleAvatarSelection = (selectedAvatar) => {
+    setUserData({ ...userData, img: selectedAvatar, imageFile: null });
+  };
+
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({ mobileNum: "", age: "" });
   const [valid, setValid] = useState(true);
@@ -56,17 +62,17 @@ const UpdateProfile = () => {
         imageFile: file.uri, // Set imageFile to the selected photo URI.
       });
     }
-  }, [file]); // Depend on photo, so this useEffect runs every time photo changes.
+  }, [file]); // Depends on photo, so this useEffect runs every time photo changes.
 
   const imageUrls = [
     ...Array.from(
-      { length: 5 },
+      { length: 2 },
       (_, i) =>
         `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
     ),
     ...Array.from(
-      { length: 99 },
-      (_, i) => `https://api.multiavatar.com/${i + 1}.png`
+      { length: 3 },
+      (_, i) => `https://api.dicebear.com/7.x/avataaars/png?seed=${i +1}`
     ),
   ];
 
@@ -181,23 +187,25 @@ const UpdateProfile = () => {
 
           {/**List of avatar in horizontal */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex py-4 flex-row items-center space-x-3 justify-center">
+            <View className="flex py-4 flex-row items-center space-x-2 justify-center">
+            {/**button to upload image from gallery */}
               <TouchableOpacity onPress={chooseFile}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="camera" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
 
-              {currentUser?.img && (
+              {/** to display the current image of user */}
+              {userData.img && (
                 <TouchableOpacity
                   onPress={() => setUserData({ ...userData,img: null, imageFile: file.uri })}
                 >
                   <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
                     <Image
-                      source={{ uri: file.uri || currentUser?.img }}
+                      source={{ uri: file?.uri || userData.img }}
                       className="w-16 h-16 rounded-full"
                     />
-                    {(userData.imageFile || userData.img === null) && (
+                    {userData.img && (
                       <View className="absolute top-0 right-0 bg-white rounded-full">
                         <Icon
                           name="checkbox-marked-circle"
@@ -209,7 +217,7 @@ const UpdateProfile = () => {
                   </View>
                 </TouchableOpacity>
               )}
-
+              {/** list the choice avatar */}
               {imageUrls.map((url) => (
                 <TouchableOpacity
                   key={url}
@@ -234,6 +242,13 @@ const UpdateProfile = () => {
                   )}
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity 
+              onPress={() => navigation.navigate("Avatars", {
+                onSelectAvatar: handleAvatarSelection
+              })}
+              className="h-16 w-16 bg-gray-200 rounded-full flex justify-center items-center">
+              <Icon name="arrow-right-thick" size={20} color={colors.blue[800]}/>
+              </TouchableOpacity>
             </View>
           </ScrollView>
 

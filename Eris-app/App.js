@@ -22,6 +22,7 @@ import ChangePassModal from "./src/component/ChangePassModal";
 import PhoneSignin from "./src/screens/PhoneSignin";
 import { OfflineContext, OfflineProvider } from "./src/context/OfflineContext";
 import OfflineMode from "./src/screens/OfflineMode";
+import Avatars from "./src/screens/Avatars";
 
 const Stack = createNativeStackNavigator();
 
@@ -154,6 +155,14 @@ const MainAppp = () => {
                   title: "Update your profile",
                   headerShown: true,
                 })}
+              />
+              <Stack.Screen 
+                name="Avatars"
+                component={Avatars}
+                options={{
+                  headerShown: true,
+                  title: "Avatars",
+                }}
               />
             </>
           ) : isOffline ? (

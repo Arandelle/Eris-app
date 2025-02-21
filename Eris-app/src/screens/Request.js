@@ -54,7 +54,7 @@ const Request = () => {
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [activeRequestId, setActiveRequestId] = useState("");
   const [description, setDescription] = useState("");
-  const [emergencyType, setEmergencyType] = useState("");
+  const [emergencyType, setEmergencyType] = useState("medical");
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
   const [loading, setLoading] = useState(false); // Initialize loading state
 
@@ -151,7 +151,7 @@ const Request = () => {
       await submitEmergencyReport({
         ...requestData,
       });
-      Alert.alert("Emergency reported", "Help is on the way!");
+      Alert.alert("Emergency reported!", "Help is on the way!");
       setDescription("");
       setLoading(false);
       setFile({});
