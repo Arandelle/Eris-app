@@ -95,10 +95,10 @@ export const OfflineProvider = ({ children }) => {
     const THIRTY_MINUTES = 30 * 60 * 1000;
   
     if (storedData.offlineRequest) {
-      const { timestamp, ...requestData } = storedData.offlineRequest;
+      const requestData  = storedData.offlineRequest;
   
       // Check if request is still valid (within 30 minutes)
-      if (now - timestamp > THIRTY_MINUTES) {
+      if (now - requestData.timestamp > THIRTY_MINUTES) {
         console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
         Alert.alert("Time Limit", "Your last emergency report exceeded to time limit, please report new emergency if needed!")
@@ -113,6 +113,7 @@ export const OfflineProvider = ({ children }) => {
         Alert.alert("Online", "Your pending emergency request has been sent!");
       } catch (error) {
         console.error("Error syncing offline data:", error);
+        Alert.alert("Error syncing offline data", `Could not submit emergency report, please try again ${error}`);
       }
     }
   };
