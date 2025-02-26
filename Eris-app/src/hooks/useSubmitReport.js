@@ -7,11 +7,12 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { storage } from "../services/firebaseConfig";
-
+import useSendNotification from "./useSendNotification";
 export const submitEmergencyReport = async ({
   data
 }) => {
-  const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, sendNotification, hasActiveRequest, responderData } = data;
+  const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, hasActiveRequest, responderData } = data;
+  const {sendNotification} = useSendNotification(description);
   if (!currentUser || !currentUser.id) {
     throw new Error("No user is signed in.");
   }

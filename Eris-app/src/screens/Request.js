@@ -12,7 +12,6 @@ import {
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
-import useSendNotification from "../hooks/useSendNotification";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useUploadImage from "../helper/UploadImage";
 import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
@@ -44,7 +43,6 @@ const Request = () => {
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
   const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
-  const { sendNotification } = useSendNotification(description);
   const {
     isImageModalVisible,
     selectedImageUri,
@@ -154,7 +152,6 @@ const Request = () => {
       },
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
-      sendNotification,
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
     };

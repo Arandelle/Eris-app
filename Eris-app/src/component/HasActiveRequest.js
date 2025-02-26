@@ -1,15 +1,9 @@
-import React, { useRef } from "react";
-import MyBottomSheet from "./MyBottomSheet";
-import EmergencyDetailsSheet from "./EmergencyDetailsSheet";
 import { View, Text, TouchableOpacity } from "react-native";
 import openLink from "../helper/openLink";
 
 const HasActiveRequest = ({
-  reportDetails = {},
   recommendedHotlines = [],
-  handleDeleteClick,
 }) => {
-  const bottomSheetRef = useRef(null);
 
   return (
     <View className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg shadow-md border border-blue-200">
