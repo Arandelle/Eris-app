@@ -10,7 +10,7 @@ import { storage } from "../services/firebaseConfig";
 
 export const submitEmergencyReport = async ({
   data,
-  sendNotification
+  sendNotification = null
 }) => {
   const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, hasActiveRequest, responderData } = data;
   if (!currentUser || !currentUser.id) {
@@ -103,8 +103,6 @@ export const submitEmergencyReport = async ({
       }
     }
     }
-
-   
 
     return newRequestKey;
   } catch (error) {

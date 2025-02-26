@@ -43,7 +43,7 @@ const Request = () => {
 
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
-  const { isOffline, saveStoredData, storedData } = useContext(OfflineContext);
+  const { isOffline, saveStoredData, storedData, loading: syncingLoading } = useContext(OfflineContext);
   const { sendNotification } = useSendNotification();
   const {
     isImageModalVisible,
@@ -66,14 +66,26 @@ const Request = () => {
       : null;
 
   useEffect(() => {
+    let recommended = [];
     if (currentUser?.activeRequest && reportDetails) {
-      const recommended = hotlines.filter(
+       recommended = hotlines.filter(
         (hotline) => hotline.category === reportDetails.emergencyType
       );
-      setRecommendedHotlines(recommended);
-      console.log("recommended hotlines:", recommendedHotlines);
+      console.log("recommended hotlines:", recommended);
     }
-  }, [currentUser, reportDetails, refreshing]);
+
+    if(isOffline && storedData.hotlines && storedData.offlineRequest){
+       recommended =  storedData.hotlines.filter((hotlines) => hotlines.category === storedData.offlineRequest.emergencyType);
+      Alert.alert(
+        "Success",
+        `Recommended Hotlines: ${recommended.map((h) => h.name).join(", ")}`
+      );
+    }
+
+    setRecommendedHotlines(recommended);
+    console.log("Updated recommended hotlines:", recommended);
+
+  }, [currentUser, reportDetails, refreshing, isOffline, storedData.hotlines, storedData.offlineRequest]);
 
   useEffect(() => {
     const checkActiveRequest = async () => {
@@ -244,7 +256,7 @@ const Request = () => {
     }
   };
 
-  if (loading) {
+  if (loading || syncingLoading) {
     return (
       <View className="flex items-center justify-center h-full">
         <Text>Loading please wait...</Text>
@@ -274,7 +286,7 @@ const Request = () => {
                   ⚠️ Your network is unstable
                 </Text>
               )}
-              {hasActiveRequest ? (
+              {(hasActiveRequest ||(isOffline && storedData?.offlineRequest)) && (
                 <View className="space-y-2">
                   <View className="bg-red-100 p-4 shadow-md rounded-md">
                     <Text className="text-red-500 text-justify font-extrabold">
@@ -295,7 +307,8 @@ const Request = () => {
                     />
                   </View>
                 </View>
-              ) : (
+              ) }
+              {!isOffline && !hasActiveRequest && (
                 <View className="space-y-5">
                   <Text className="font-bold text-xl text-center text-red-600 mb-5">
                     Submit Detailed Report
@@ -399,7 +412,7 @@ const Request = () => {
         </ScrollView>
 
         {/** submit button */}
-        {!hasActiveRequest && (
+        {!hasActiveRequest && !isOffline && (
           <View className="px-5 py-4">
             <TouchableOpacity
               className={`${

@@ -7,6 +7,7 @@ import { submitEmergencyReport } from "../hooks/useSubmitReport";
 export const OfflineContext = createContext();
 
 export const OfflineProvider = ({ children }) => {
+  const [loading, setLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [storedData, setStoredData] = useState({});
 
@@ -91,6 +92,7 @@ export const OfflineProvider = ({ children }) => {
 
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
+    setLoading(true);
     const now = Date.now();
     const THIRTY_MINUTES = 30 * 60 * 1000;
   
@@ -102,6 +104,7 @@ export const OfflineProvider = ({ children }) => {
         console.log("Offline request expired, deleting from storage.");
         await removeStoredData("offlineRequest");
         Alert.alert("Time Limit", "Your last emergency report exceeded to time limit, please report new emergency if needed!")
+        setLoading(false);
         return;
       }
   
@@ -116,6 +119,8 @@ export const OfflineProvider = ({ children }) => {
         Alert.alert("Error syncing offline data", `Could not submit emergency report, please try again ${error}`);
       }
     }
+
+    setLoading(false);
   };
   
 
@@ -127,6 +132,7 @@ export const OfflineProvider = ({ children }) => {
         loadStoredData,
         removeStoredData,
         storedData,
+        loading
       }}
     >
       {children}
