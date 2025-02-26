@@ -34,24 +34,26 @@ const Hotlines = () => {
                 <View key={key} className="w-1/2 py-2">
                   <View className="border-2 border-blue-900 rounded-md">
                     <Text className="text-white text-center bg-blue-800 p-1 font-bold">
-                      {item.types.toUpperCase()}
+                      {item.organization.toUpperCase()}
                     </Text>
                     <Pressable
                       onPress={() =>
                         openLink(
-                          item.contact || item.email,
-                          item.contact ? "phone" : "email"
+                          item.contact, "phone"
                         )
                       }
                     >
                       <Text
-                        className={`text-red-500 font-extrabold text-center underline ${
-                          item.email ? "p-1" : "text-xl"
-                        }`}
+                        className={`text-red-500 font-extrabold text-center underline`}
                       >
-                        {item.contact || item.email}
+                        {item.contact}
                       </Text>
                     </Pressable>
+                    {item.email && (
+                      <Pressable onPress={() => openLink(item.email, "email")}>
+                        <Text className="text-red-500 font-extrabold text-center underline">{item.email}</Text>
+                      </Pressable>
+                    )}
                     <Text className="text-center font-bold text-blue-900">
                       {item.name}
                     </Text>
