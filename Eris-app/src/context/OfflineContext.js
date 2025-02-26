@@ -83,7 +83,7 @@ export const OfflineProvider = ({ children }) => {
         delete updatedData[key];
         return updatedData;
       });
-      Alert.alert("Success", `${key} removed successfully!`);
+      console.log("Success", `${key} removed successfully!`);
     } catch (error) {
       console.error(`Error removing ${key}:`, error);
     }

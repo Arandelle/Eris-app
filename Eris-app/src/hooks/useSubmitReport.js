@@ -7,12 +7,12 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { storage } from "../services/firebaseConfig";
-import useSendNotification from "./useSendNotification";
+
 export const submitEmergencyReport = async ({
-  data
+  data,
+  sendNotification
 }) => {
   const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, hasActiveRequest, responderData } = data;
-  const {sendNotification} = useSendNotification(description);
   if (!currentUser || !currentUser.id) {
     throw new Error("No user is signed in.");
   }
@@ -90,17 +90,21 @@ export const submitEmergencyReport = async ({
       },
     });
 
-    // Send notifications
+    if(sendNotification){
+       // Send notifications
     const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
-    await sendNotification("admins", adminId, "adminReport");
-    await sendNotification("users", currentUser.id, "userReport");
+    await sendNotification("admins", adminId, "adminReport", description);
+    await sendNotification("users", currentUser.id, "userReport", description);
 
     // Notify responders
     for (const responder of responderData) {
       if (responder.profileComplete) {
-        await sendNotification("responders", responder.id, "responderReport");
+        await sendNotification("responders", responder.id, "responderReport", description);
       }
     }
+    }
+
+   
 
     return newRequestKey;
   } catch (error) {

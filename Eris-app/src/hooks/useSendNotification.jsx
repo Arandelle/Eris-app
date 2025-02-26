@@ -3,11 +3,10 @@ import { database } from "../services/firebaseConfig";
 import { Alert } from "react-native";
 import useCurrentUser from "./useCurrentUser";
 
-const useSendNotification = (description = "N/A") => {
+const useSendNotification = () => {
   const { currentUser } = useCurrentUser();
-  const fullName = [currentUser?.firstname,currentUser?.lastname].filter(Boolean).join(' ') || "Anonymous";
-
-  const sendNotification = async (dataType, userId, messageType, additionalId) => {
+  
+  const sendNotification = async (dataType, userId, messageType, additionalId, description= "" ) => {
 
     const mainNotificationData = {
         isSeen: false,
@@ -58,14 +57,14 @@ const useSendNotification = (description = "N/A") => {
       adminReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `${fullName} has new emergency report`,
+        message: `${currentUser?.fullname} has new emergency report`,
         description,
         icon: "hospital-box",
       },
       responderReport: {
         ...mainNotificationData,
         userId: currentUser?.id,
-        message: `${fullName} has new emergency report`,
+        message: `${currentUser?.fullname} has new emergency report`,
         description,
         icon: "hospital-box",
       },
@@ -80,6 +79,7 @@ const useSendNotification = (description = "N/A") => {
       await push(notificationRef, notificationMessage[messageType]);
     } catch (error) {
       Alert.alert("Error", "Error submitting notification");
+      console.error("Error submitting notication", `${error}`);
     }
   };
 
