@@ -107,7 +107,7 @@ export const OfflineProvider = ({ children }) => {
   
       try {
         console.log("Syncing offline request:", requestData);
-        await submitEmergencyReport({...requestData });
+        await submitEmergencyReport({data : requestData });
         await removeStoredData("offlineRequest");
   
         Alert.alert("Online", "Your pending emergency request has been sent!");
