@@ -24,7 +24,7 @@ const Map = () => {
     (user) => user.id === currentUser?.activeRequest?.responderId
   );
 
-  const { img, firstname, lastname, customId } = responderDetails || {};
+  const { img, fullname, customId } = responderDetails || {};
 
   const bottomSheetRef = useRef(null);
 
@@ -133,7 +133,7 @@ const Map = () => {
                 <View className="flex-1 space-y-2">
                   <View>
                     <Text className="text-xl font-semibold text-gray-800">
-                      {`${firstname} ${lastname}`}
+                      {`${fullname}`}
                     </Text>
                     <Text className="text-sm text-gray-500">
                       ID: {customId}
