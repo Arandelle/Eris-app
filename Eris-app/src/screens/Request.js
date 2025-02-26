@@ -8,7 +8,6 @@ import {
   RefreshControl,
   Image,
   SafeAreaView,
-  Button,
 } from "react-native";
 import useLocationTracking from "../hooks/useLocationTracking";
 import useFetchData from "../hooks/useFetchData";
@@ -29,7 +28,7 @@ import { get, ref, remove } from "firebase/database";
 import { database, storage } from "../services/firebaseConfig";
 import { deleteObject, ref as storageRef } from "firebase/storage";
 import { Video } from "expo-av";
-import openLink from "../helper/openLink";
+import HasActiveRequest from "../component/HasActiveRequest";
 
 const Request = () => {
   const bottomSheetRef = useRef(null);
@@ -136,7 +135,7 @@ const Request = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-
+    console.log("loading...")
     // Create emergency request data
     const requestData = {
       currentUser: currentUser || storedData.currentUser,
@@ -146,9 +145,12 @@ const Request = () => {
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.address,
       description,
-      media: {
-        uri: file.uri || storedData.media.uri,
-        type: file.type || storedData.media.type,
+      media: file?.uri ? {
+        uri: file.uri || storedData.media.uri || "",
+        type: file.type || storedData.media.type || "",
+      } : {
+        uri: "",
+        type: ""
       },
       emergencyType,
       timestamp: Date.now(), // Store timestamp for expiration check
@@ -177,6 +179,7 @@ const Request = () => {
       setLoading(false);
       setFile({});
       setHasActiveRequest(true);
+      console.log("Done")
     } catch (error) {
       Alert.alert(
         "Error",
@@ -266,16 +269,13 @@ const Request = () => {
           }
         >
           <View className="p-5">
-            <Text className="font-bold text-xl text-center text-red-600 mb-5">
-              Submit Detailed Report
-            </Text>
             <View className="space-y-2 my-2">
               {isOffline && (
                 <Text className="bg-gray-500 text-white font-bold p-4 rounded-md">
                   ⚠️ Your network is unstable
                 </Text>
               )}
-              {hasActiveRequest && (
+              {hasActiveRequest ? (
                 <View className="space-y-2">
                   <View className="bg-red-100 p-4 shadow-md rounded-md">
                     <Text className="text-red-500 text-justify font-extrabold">
@@ -290,173 +290,131 @@ const Request = () => {
                       </TouchableOpacity>
                     </Text>
                   </View>
-                  <View className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg shadow-md border border-blue-200">
-                    <View className="mb-4 border-b border-blue-200 pb-2">
-                      <Text className="text-blue-600 font-bold text-lg">
-                        Need to talk to someone?
-                      </Text>
-                      <Text className="text-gray-600 text-sm mt-1">
-                        These resources are available 24/7 to provide support
-                      </Text>
-                    </View>
-
-                    {recommendedHotlines.length > 0 ? (
-                      <View className="space-y-3">
-                        {recommendedHotlines.map((hotline, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            onPress={() => openLink(hotline.contact, "phone")}
-                            className="bg-white rounded-lg p-3 flex-row items-center shadow-sm border border-gray-100 active:bg-blue-50"
-                          >
-                            <View className="bg-blue-100 p-2 rounded-full mr-3">
-                              <Text className="text-blue-600 font-bold">
-                                {index + 1}
-                              </Text>
-                            </View>
-
-                            <View className="flex-1">
-                              <Text className="text-gray-800 font-semibold">
-                                {hotline.organization}
-                              </Text>
-                              <Text className="text-blue-600 font-bold">
-                                {hotline.contact}
-                              </Text>
-                            </View>
-
-                            <View className="bg-blue-500 px-3 py-1 rounded-full">
-                              <Text className="text-white text-sm font-medium">
-                                Call
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    ) : (
-                      <View className="bg-gray-50 p-4 rounded-md">
-                        <Text className="text-gray-500 text-center">
-                          No hotlines available.
-                        </Text>
-                      </View>
-                    )}
-
-                    <Text className="text-xs text-gray-500 mt-4 text-center">
-                      All calls are confidential and many services offer support
-                      in multiple languages
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </View>
-
-            <View className="space-y-5">
-              <View>
-                <PickerField
-                  label="Emergency Type"
-                  value={emergencyType}
-                  onValueChange={(emergencyType) =>
-                    setEmergencyType(emergencyType)
-                  }
-                  items={[
-                    { label: "Medical 🚑", value: "medical" },
-                    { label: "Fire 🚒", value: "fire" },
-                    { label: "Crime 🕵️‍♂️", value: "crime" },
-                    { label: "Natural Disaster 🌪️", value: "natural disaster" },
-                    { label: "Other ⚠️", value: "other" },
-                  ]}
-                />
-              </View>
-              <View>
-                <TextInputStyle
-                  label="Location"
-                  value={geoCodeLocation}
-                  placeholder="Enter location"
-                  editable={false}
-                />
-              </View>
-              <View>
-                <TextInputStyle
-                  label={"Description (Optional)"}
-                  placeholder="Briefly describe the emergency"
-                  multiline
-                  numberOfLines={4}
-                  onChangeText={setDescription}
-                  value={description}
-                />
-              </View>
-              {file.uri ? (
-                <View className="flex flex-row justify-center space-x-4">
-                  {file.type === "image" ? (
-                    <View className="w-60 h-60">
-                      <TouchableOpacity
-                        onPress={() => handleImageClick(file.uri)}
-                      >
-                        <Image
-                          source={{ uri: file.uri }}
-                          className="w-full h-full"
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    file.type === "video" && (
-                      <View className="relative place-self-center">
-                        <Video
-                          ref={videoRef}
-                          source={{ uri: file.uri }}
-                          style={{ width: 300, height: 200 }}
-                          useNativeControls
-                          resizeMode="contain"
-                        />
-                      </View>
-                    )
-                  )}
-
-                  <View className="flex flex-col space-y-2">
-                    <TouchableOpacity
-                      className="p-2 bg-green-500 border border-green-600"
-                      onPress={chooseFile}
-                    >
-                      <Text className="text-white font-bold">Edit 📝</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className="p-2 border border-red-500"
-                      onPress={() => setFile({})}
-                    >
-                      <Text>Delete❌</Text>
-                    </TouchableOpacity>
+                  <View>
+                    <HasActiveRequest
+                      recommendedHotlines={recommendedHotlines}
+                    />
                   </View>
                 </View>
               ) : (
-                <TouchableOpacity
-                  className={`p-4 bg-blue-800 rounded-md flex ${
-                    hasActiveRequest ? "bg-blue-800/50" : "bg-blue-800"
-                  }`}
-                  onPress={chooseFile}
-                  disabled={loading || hasActiveRequest}
-                >
-                  <Text className="text-center w-full flex text-white font-bold">
-                    Add File 📷
+                <View className="space-y-5">
+                  <Text className="font-bold text-xl text-center text-red-600 mb-5">
+                    Submit Detailed Report
                   </Text>
-                </TouchableOpacity>
+                  <View>
+                    <PickerField
+                      label="Emergency Type"
+                      value={emergencyType}
+                      onValueChange={(emergencyType) =>
+                        setEmergencyType(emergencyType)
+                      }
+                      items={[
+                        { label: "Medical 🚑", value: "medical" },
+                        { label: "Fire 🚒", value: "fire" },
+                        { label: "Crime 🕵️‍♂️", value: "crime" },
+                        {
+                          label: "Natural Disaster 🌪️",
+                          value: "natural disaster",
+                        },
+                        { label: "Other ⚠️", value: "other" },
+                      ]}
+                    />
+                  </View>
+                  <View>
+                    <TextInputStyle
+                      label="Location"
+                      value={geoCodeLocation}
+                      placeholder="Enter location"
+                      editable={false}
+                    />
+                  </View>
+                  <View>
+                    <TextInputStyle
+                      label={"Description (Optional)"}
+                      placeholder="Briefly describe the emergency"
+                      multiline
+                      numberOfLines={4}
+                      onChangeText={setDescription}
+                      value={description}
+                    />
+                  </View>
+                  {file.uri ? (
+                    <View className="flex flex-row justify-center space-x-4">
+                      {file.type === "image" ? (
+                        <View className="w-60 h-60">
+                          <TouchableOpacity
+                            onPress={() => handleImageClick(file.uri)}
+                          >
+                            <Image
+                              source={{ uri: file.uri }}
+                              className="w-full h-full"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        file.type === "video" && (
+                          <View className="relative place-self-center">
+                            <Video
+                              ref={videoRef}
+                              source={{ uri: file.uri }}
+                              style={{ width: 300, height: 200 }}
+                              useNativeControls
+                              resizeMode="contain"
+                            />
+                          </View>
+                        )
+                      )}
+
+                      <View className="flex flex-col space-y-2">
+                        <TouchableOpacity
+                          className="p-2 bg-green-500 border border-green-600"
+                          onPress={chooseFile}
+                        >
+                          <Text className="text-white font-bold">Edit 📝</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="p-2 border border-red-500"
+                          onPress={() => setFile({})}
+                        >
+                          <Text>Delete❌</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      className={`p-4 bg-blue-800 rounded-md flex ${
+                        hasActiveRequest ? "bg-blue-800/50" : "bg-blue-800"
+                      }`}
+                      onPress={chooseFile}
+                      disabled={loading || hasActiveRequest}
+                    >
+                      <Text className="text-center w-full flex text-white font-bold">
+                        Add File 📷
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
             </View>
           </View>
         </ScrollView>
 
         {/** submit button */}
-        <View className="px-5 py-4">
-          <TouchableOpacity
-            className={`${
-              hasActiveRequest ? "bg-red-200" : "bg-red-600"
-            } p-3.5 rounded-md items-center`}
-            onPress={handleSubmit}
-            disabled={loading || hasActiveRequest}
-          >
-            <Text className="text-white text-lg font-bold">
-              Submit Emergency
-            </Text>
-          </TouchableOpacity>
-        </View>
-
+        {!hasActiveRequest && (
+          <View className="px-5 py-4">
+            <TouchableOpacity
+              className={`${
+                hasActiveRequest ? "bg-red-200" : "bg-red-600"
+              } p-3.5 rounded-md items-center`}
+              onPress={handleSubmit}
+              disabled={loading || hasActiveRequest}
+            >
+              <Text className="text-white text-lg font-bold">
+                Submit Emergency
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {/** detatils of emergency report */}
         <MyBottomSheet
           children={
