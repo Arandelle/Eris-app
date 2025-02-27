@@ -11,7 +11,6 @@ export const OfflineProvider = ({ children }) => {
   const [isOffline, setIsOffline] = useState(false);
   const [storedData, setStoredData] = useState({});
 
-
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(!state.isConnected);
@@ -26,12 +25,11 @@ export const OfflineProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-
   // **Dynamic function to save data**
   const saveStoredData = async (key, data) => {
     try {
       const existingData = storedData[key];
-      
+
       if (JSON.stringify(existingData) !== JSON.stringify(data)) {
         await AsyncStorage.setItem(key, JSON.stringify(data));
         setStoredData((prev) => ({ ...prev, [key]: data }));
@@ -42,7 +40,6 @@ export const OfflineProvider = ({ children }) => {
       console.error(error);
     }
   };
-  
 
   // **Dynamic function to load data**
   const loadStoredData = async (key) => {
@@ -58,9 +55,16 @@ export const OfflineProvider = ({ children }) => {
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
-    const keys = ["offlineRequest", "currentUser", "hotlines", "announcement", "admins", "activeRequestData"];
+    const keys = [
+      "offlineRequest",
+      "currentUser",
+      "hotlines",
+      "announcement",
+      "admins",
+      "activeRequestData",
+    ];
     let allData = {};
-  
+
     for (const key of keys) {
       try {
         const storedValue = await AsyncStorage.getItem(key);
@@ -71,10 +75,9 @@ export const OfflineProvider = ({ children }) => {
         console.error(`Error loading ${key}:`, error);
       }
     }
-  
+
     setStoredData(allData); // Update state once with all data
   };
-  
 
   // **Remove stored data dynamically**
   const removeStoredData = async (key) => {
@@ -93,36 +96,41 @@ export const OfflineProvider = ({ children }) => {
 
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
-    setLoading(true);    
-    try{
-      
-      if(storedData.offlineRequest && Object.keys(storedData.offlineRequest).length > 0){
-        const requestData = storedData.offlineRequest;
-        const now = Date.now();
-        const THIRTY_MINUTES = 30 * 60 * 1000;
+    setLoading(true);
+    const now = Date.now();
+    const THIRTY_MINUTES = 30 * 60 * 1000;
+    if (storedData.offlineRequest) {
+      const requestData = storedData.offlineRequest;
 
-        if(now - requestData.timestamp > THIRTY_MINUTES){
-          console.log("offline request expired, deleting from storage");
-          await removeStoredData("offlineRequest");
-          Alert.alert("Time limit", "Your last emergency report exceeded to the time limit, please report new emergency if needed!");
-          setLoading(false);
-        } else {
-          console.log("Syncing valid offline request", requestData);
-          await submitEmergencyReport({data: requestData});
-          await removeStoredData("offlineRequest");
-          Alert.alert("Back Online", "Your pending emergency request has been sent!");
-        }
-      } else{
-        console.log("No offline request found to sync");
+      if (now - requestData.timestamp > THIRTY_MINUTES) {
+        console.log("offline request expired, deleting from storage");
+        await removeStoredData("offlineRequest");
+        Alert.alert(
+          "Time limit",
+          "Your last emergency report exceeded to the time limit, please report new emergency if needed!"
+        );
+        setLoading(false);
       }
-    }catch(error){
+    }
+    try {
+      const requestData = storedData.offlineRequest;
+      console.log("Syncing valid offline request", requestData);
+      await submitEmergencyReport({ data: requestData });
+      await removeStoredData("offlineRequest");
+      Alert.alert(
+        "Back Online",
+        "Your pending emergency request has been sent!"
+      );
+    } catch (error) {
       console.error("Error syncing offline data: ", error);
-      Alert.alert("Error syncing offline data: ", `Could not submit emergency report: ${error}`)
-    } finally{
+      Alert.alert(
+        "Error syncing offline data: ",
+        `Could not submit emergency report: ${error}`
+      );
+    } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <OfflineContext.Provider
@@ -132,7 +140,7 @@ export const OfflineProvider = ({ children }) => {
         loadStoredData,
         removeStoredData,
         storedData,
-        loading
+        loading,
       }}
     >
       {children}
