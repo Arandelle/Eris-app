@@ -12,7 +12,7 @@ export const submitEmergencyReport = async ({
   data,
   sendNotification = null
 }) => {
-  const { currentUser, location, latitude, longitude, geoCodeLocation, media, description, emergencyType, hasActiveRequest, responderData } = data;
+  const { currentUser, location, latitude, longitude, geoCodeLocation,status, media, description, emergencyType,timestamp, hasActiveRequest, responderData } = data;
   if (!currentUser || !currentUser.id) {
     throw new Error("No user is signed in.");
   }
@@ -47,14 +47,14 @@ export const submitEmergencyReport = async ({
 
     const newRequest = {
       userId: currentUser.id,
-      timestamp: serverTimestamp(),
+      timestamp,
       description,
       media: {
         mediaUrl,
         mediaType
       },
       emergencyType,
-      status: "awaiting response",
+      status,
       expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min validity
       date: new Date().toISOString(),
       emergencyId: emergencyID,

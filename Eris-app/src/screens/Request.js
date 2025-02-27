@@ -24,7 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyBottomSheet from "../component/MyBottomSheet";
 import useFetchRecords from "../hooks/useFetchRecords";
 import EmergencyDetailsSheet from "../component/EmergencyDetailsSheet";
-import { get, ref, remove } from "firebase/database";
+import { get, ref, remove, serverTimestamp } from "firebase/database";
 import { database, storage } from "../services/firebaseConfig";
 import { deleteObject, ref as storageRef } from "firebase/storage";
 import { Video } from "expo-av";
@@ -43,7 +43,7 @@ const Request = () => {
 
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
-  const { isOffline, saveStoredData, storedData, loading: syncingLoading } = useContext(OfflineContext);
+  const { isOffline, saveStoredData,removeStoredData, storedData, loading: syncingLoading } = useContext(OfflineContext);
   const { sendNotification } = useSendNotification();
   const {
     isImageModalVisible,
@@ -165,7 +165,8 @@ const Request = () => {
         type: ""
       },
       emergencyType,
-      timestamp: Date.now(), // Store timestamp for expiration check
+      status: "awaiting response",
+      timestamp: Date.now() || serverTimestamp(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
     };
@@ -184,7 +185,7 @@ const Request = () => {
     try {
       await submitEmergencyReport({
         data: requestData,
-        sendNotification: sendNotification
+        sendNotification
       });
       Alert.alert("Emergency reported!", "Help is on the way!");
       setDescription("");
@@ -208,7 +209,13 @@ const Request = () => {
       [
         {
           text: "Confirm",
-          onPress: () => handleDeleteReport(activeRequestId),
+          onPress: () => {
+            if(isOffline){
+              removeStoredData("offlineRequest");
+              setHasActiveRequest(false);
+              Alert.alert("Delete", "You have successfully remove offline request");
+            }
+            handleDeleteReport(activeRequestId)},
         },
         {
           text: "Cancel",
@@ -308,7 +315,7 @@ const Request = () => {
                   </View>
                 </View>
               ) }
-              {!isOffline && !hasActiveRequest && (
+              {!hasActiveRequest && (
                 <View className="space-y-5">
                   <Text className="font-bold text-xl text-center text-red-600 mb-5">
                     Submit Detailed Report
@@ -412,7 +419,7 @@ const Request = () => {
         </ScrollView>
 
         {/** submit button */}
-        {!hasActiveRequest && !isOffline && (
+        {!hasActiveRequest  && (
           <View className="px-5 py-4">
             <TouchableOpacity
               className={`${
