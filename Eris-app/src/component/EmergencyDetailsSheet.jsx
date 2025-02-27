@@ -1,12 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { formatDateWithTime } from '../helper/FormatDate';
 import { getTimeDifference } from '../helper/getTimeDifference';
 import { Video } from 'expo-av';
+import { OfflineContext } from '../context/OfflineContext';
 
 const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
 
   if (!reportDetails) return null;
+  const {isOffline} = useContext(OfflineContext);
   const videoRef = useRef(null);
   const [videoLoading, setVideoLoading] = useState(false);
 
@@ -32,7 +34,7 @@ const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
             </Text>
           </View>
           <View className="flex-row items-center space-x-2">
-          {reportDetails.status === "awaiting response" && (
+          {reportDetails.status === "awaiting response" && !isOffline && (
             <TouchableOpacity 
               onPress={onCancel}
               className="bg-red-100 px-3 py-1 rounded-full"

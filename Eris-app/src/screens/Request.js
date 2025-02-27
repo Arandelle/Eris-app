@@ -75,7 +75,7 @@ const Request = () => {
           return {
         emergencyId: activeRequestData.tempRequestId || `offline_${Date.now()}`,
         emergencyType: activeRequestData.emergencyType,
-        status: "awaiting response",
+        status: activeRequestData.status,
         timestamp: activeRequestData.timestamp,
         date: new Date(activeRequestData.timestamp),
         location: {
@@ -197,6 +197,7 @@ const Request = () => {
 
     if (isOffline) {
       await saveStoredData("offlineRequest", requestData);
+      await saveStoredData("activeRequestData", requestData);
 
       Alert.alert(
         "Offline Mode",
@@ -234,13 +235,7 @@ const Request = () => {
       [
         {
           text: "Confirm",
-          onPress: () => {
-            if(isOffline){
-              removeStoredData("offlineRequest");
-              setHasActiveRequest(false);
-              Alert.alert("Delete", "You have successfully remove offline request");
-            }
-            handleDeleteReport(activeRequestId)},
+          onPress: () => handleDeleteReport(activeRequestId),
         },
         {
           text: "Cancel",
