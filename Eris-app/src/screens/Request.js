@@ -65,6 +65,34 @@ const Request = () => {
       ? emergencyHistory.find((report) => report.id === activeRequestId)
       : null;
 
+      const getFormattedReportDetails = () => {
+        if (reportDetails) {
+          // Already in the correct format
+          return reportDetails;
+        } else if (isOffline && (storedData.offlineRequest || storedData.activeRequestData)) {
+          const activeRequestData = storedData.offlineRequest || storedData.activeRequestData;
+          // Convert offlineRequest to match reportDetails structure
+          return {
+        emergencyId: activeRequestData.tempRequestId || `offline_${Date.now()}`,
+        emergencyType: activeRequestData.emergencyType,
+        status: "awaiting response",
+        timestamp: activeRequestData.timestamp,
+        date: new Date(activeRequestData.timestamp),
+        location: {
+          geoCodeLocation: activeRequestData.geoCodeLocation || activeRequestData.location
+        },
+        description: activeRequestData.description,
+        media: {
+          mediaType: activeRequestData.media?.type || "",
+          mediaUrl: activeRequestData.media?.uri || ""
+        }
+          };
+        }
+        return null;
+      };
+
+      const formattedReportDetails = getFormattedReportDetails();
+
       useEffect(() => {
         let recommended = [];
       
@@ -437,7 +465,7 @@ const Request = () => {
         <MyBottomSheet
           children={
             <EmergencyDetailsSheet
-              reportDetails={reportDetails}
+              reportDetails={formattedReportDetails}
               onCancel={handleDeleteClick}
             />
           }
