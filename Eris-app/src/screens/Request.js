@@ -130,7 +130,7 @@ const Request = () => {
           setHasActiveRequest(true);
           setActiveRequestId(currentUser?.activeRequest?.requestId);
         } else if (isOffline) {
-          if(storedData.offlineRequest || storedData.activeRequestData){
+          if(storedData?.offlineRequest || storedData?.activeRequestData){
           setHasActiveRequest(true);
           setActiveRequestId(storedData?.tempRequestId);
           } else{
@@ -146,7 +146,7 @@ const Request = () => {
     };
     console.log("active request id:", activeRequestId);
     checkActiveRequest();
-  }, [currentUser,storedData.offlineRequest,storedData.activeRequestData, refreshing]);
+  }, [currentUser,isOffline,storedData.offlineRequest,storedData.activeRequestData, refreshing]);
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
