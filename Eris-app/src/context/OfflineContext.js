@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext } from "react";
 import NetInfo from "@react-native-community/netinfo";
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 
@@ -14,20 +14,20 @@ export const OfflineProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      Alert.alert("Back online", `Network state changed: connected=${state.isConnected}, previous offline=${isOffline}`)
-      const wasOffline = isOffline;
-      setIsOffline(!state.isConnected);
-
-      // only run sync when transitioning from offline to online
-      if (wasOffline && state.isConnected) {
-        syncOfflineData(); // it will send the data from offLineRequest to firebase when back online (isConnected) 
+      ToastAndroid.show(`${state.isConnected ? "Back online" : "Unstable network"}`, ToastAndroid.SHORT, ToastAndroid.BOTTOM)
+      
+      if(!state.isConnected){
+        setIsOffline(true);
+      } else{
+        setIsOffline(false);
+        syncOfflineData();
       }
     });
 
     loadAllStoredData(); // Load all stored data when the app starts
 
     return () => unsubscribe();
-  }, [isOffline]);
+  }, []);
 
   // **Dynamic function to save data**
   const saveStoredData = async (key, data) => {
@@ -96,6 +96,7 @@ export const OfflineProvider = ({ children }) => {
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
     setLoading(true);
+    await loadStoredData("offlineRequest");
     try{
       
       if(storedData.offlineRequest && Object.keys(storedData.offlineRequest).length > 0){
