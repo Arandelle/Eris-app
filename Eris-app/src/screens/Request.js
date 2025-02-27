@@ -188,7 +188,7 @@ const Request = () => {
       },
       emergencyType,
       status: "awaiting response",
-      timestamp: Date.now() || serverTimestamp(), // Store timestamp for expiration check
+      timestamp: Date.now(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
       tempRequestId: `offline_${Date.now()}`

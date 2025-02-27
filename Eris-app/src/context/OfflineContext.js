@@ -46,18 +46,23 @@ export const OfflineProvider = ({ children }) => {
     try {
       const storedValue = await AsyncStorage.getItem(key);
       if (storedValue) {
-        setStoredData((prev) => ({ ...prev, [key]: JSON.parse(storedValue) }));
+        const parsedData = JSON.parse(storedValue);
+        setStoredData((prev) => ({ ...prev, [key]: parsedData }));
+        return parsedData; // Add this line to return data
       }
     } catch (error) {
       console.error(`Error loading ${key}:`, error);
     }
+    return null; // Ensure function returns null if no data found
   };
+  
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
     const keys = [
       "offlineRequest",
       "currentUser",
+      "users",
       "hotlines",
       "announcement",
       "admins",
@@ -99,38 +104,45 @@ export const OfflineProvider = ({ children }) => {
     setLoading(true);
     const now = Date.now();
     const THIRTY_MINUTES = 30 * 60 * 1000;
-    if (storedData.offlineRequest) {
-      const requestData = storedData.offlineRequest;
-
-      if (now - requestData.timestamp > THIRTY_MINUTES) {
-        console.log("offline request expired, deleting from storage");
-        await removeStoredData("offlineRequest");
-        Alert.alert(
-          "Time limit",
-          "Your last emergency report exceeded to the time limit, please report new emergency if needed!"
-        );
-        setLoading(false);
-      }
+  
+    let storedRequest = storedData?.offlineRequest;
+  
+    // If not found, try fetching from storage
+    if (!storedRequest) {
+      console.log("Fetching offline request from storage...");
+      storedRequest = await loadStoredData("offlineRequest");
     }
-    try {
-      const requestData = storedData.offlineRequest;
-      console.log("Syncing valid offline request", requestData);
-      await submitEmergencyReport({ data: requestData });
+  
+    if (!storedRequest) {
+      console.log("No offline request found in storage.");
+      Alert.alert("No offline request", "There is no pending offline request.");
+      setLoading(false);
+      return;
+    }
+    if (now - storedRequest.timestamp > THIRTY_MINUTES) {
+      console.log("Offline request expired, deleting from storage");
       await removeStoredData("offlineRequest");
       Alert.alert(
-        "Back Online",
-        "Your pending emergency request has been sent!"
+        "Time limit",
+        "Your last emergency report exceeded the time limit, please report a new emergency if needed!"
       );
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      console.log("Syncing valid offline request", storedRequest);
+      await submitEmergencyReport({ data: storedRequest });
+      await removeStoredData("offlineRequest");
+      Alert.alert("Back Online", "Your pending emergency request has been sent!");
     } catch (error) {
       console.error("Error syncing offline data: ", error);
-      Alert.alert(
-        "Error syncing offline data: ",
-        `Could not submit emergency report: ${error}`
-      );
-    } finally {
-      setLoading(false);
+      Alert.alert("Error", `Could not submit emergency report: ${error}`);
     }
+  
+    setLoading(false);
   };
+  
 
   return (
     <OfflineContext.Provider
