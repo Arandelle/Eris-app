@@ -65,57 +65,52 @@ const Request = () => {
       ? emergencyHistory.find((report) => report.id === activeRequestId)
       : null;
 
-  useEffect(() => {
-    let recommended = [];
-    if (currentUser?.activeRequest && reportDetails) {
-       recommended = hotlines.filter(
-        (hotline) => hotline.category === reportDetails.emergencyType
-      );
-      console.log("recommended hotlines:", recommended);
-    }
-
-    if(isOffline && storedData.hotlines && storedData.offlineRequest){
-       recommended =  storedData.hotlines.filter((hotlines) => hotlines.category === storedData.offlineRequest.emergencyType);
-      Alert.alert(
-        "Success",
-        `Recommended Hotlines: ${recommended.map((h) => h.name).join(", ")}`
-      );
-    }
-
-    setRecommendedHotlines(recommended);
-    console.log("Updated recommended hotlines:", recommended);
-
-  }, [currentUser, reportDetails, refreshing, isOffline, storedData.hotlines, storedData.offlineRequest]);
-
+      useEffect(() => {
+        let recommended = [];
+      
+        if (currentUser?.activeRequest && reportDetails) {
+          recommended = hotlines.filter(
+            (hotline) => hotline.category === reportDetails.emergencyType
+          );
+          console.log("recommended hotlines (online):", recommended);
+        }
+      
+        if (isOffline && (storedData.offlineRequest || storedData.activeRequestData)) {
+          const emergencyType = storedData.offlineRequest?.emergencyType || storedData.activeRequestData?.emergencyType;
+          recommended = storedData.hotlines.filter(
+            (hotline) => hotline.category === emergencyType
+          );
+        }
+      
+        setRecommendedHotlines(recommended);
+        console.log("Updated recommended hotlines:", recommended);
+      }, [
+        currentUser, 
+        reportDetails, 
+        refreshing, 
+        isOffline, 
+        storedData.hotlines, 
+        storedData.offlineRequest, 
+        storedData.activeRequestData
+      ]);
+      
   useEffect(() => {
     const checkActiveRequest = async () => {
       try {
-        const activeRequestData = await AsyncStorage.getItem(
-          "activeRequestData"
-        );
-
-        let parsedData = null;
-        if (activeRequestData) {
-          parsedData = JSON.parse(activeRequestData);
-        }
 
         if (currentUser?.activeRequest) {
           setHasActiveRequest(true);
           setActiveRequestId(currentUser?.activeRequest?.requestId);
-          await AsyncStorage.setItem(
-            "activeRequestData",
-            JSON.stringify({
-              hasActiveRequest: true,
-              requestId: currentUser.activeRequest.requestId,
-            })
-          );
-        } else if (isOffline && parsedData?.hasActiveRequest) {
+        } else if (isOffline) {
+          if(storedData.offlineRequest || storedData.activeRequestData){
           setHasActiveRequest(true);
-          setActiveRequestId(parsedData?.requestId);
+          setActiveRequestId(storedData?.tempRequestId);
+          } else{
+            setHasActiveRequest(false);
+          }
         } else {
           setHasActiveRequest(false);
           setActiveRequestId("");
-          await AsyncStorage.removeItem("activeRequestData");
         }
       } catch (error) {
         Alert.alert("Error", `${error}`);
@@ -123,7 +118,7 @@ const Request = () => {
     };
     console.log("active request id:", activeRequestId);
     checkActiveRequest();
-  }, [currentUser, refreshing]);
+  }, [currentUser,storedData.offlineRequest,storedData.activeRequestData, refreshing]);
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
@@ -169,6 +164,7 @@ const Request = () => {
       timestamp: Date.now() || serverTimestamp(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
+      tempRequestId: `offline_${Date.now()}`
     };
 
     if (isOffline) {
@@ -187,6 +183,7 @@ const Request = () => {
         data: requestData,
         sendNotification
       });
+      await saveStoredData("activeRequestData", requestData);
       Alert.alert("Emergency reported!", "Help is on the way!");
       setDescription("");
       setLoading(false);
@@ -253,6 +250,8 @@ const Request = () => {
           }
 
           Alert.alert("Deleted", "You have successfully deleted your request");
+          await removeStoredData("offlineRequest");
+          await removeStoredData("activeRequestData");
           setLoading(false);
         }
         setLoading(false);
@@ -293,7 +292,7 @@ const Request = () => {
                   ⚠️ Your network is unstable
                 </Text>
               )}
-              {(hasActiveRequest ||(isOffline && storedData?.offlineRequest)) && (
+              {hasActiveRequest && (
                 <View className="space-y-2">
                   <View className="bg-red-100 p-4 shadow-md rounded-md">
                     <Text className="text-red-500 text-justify font-extrabold">

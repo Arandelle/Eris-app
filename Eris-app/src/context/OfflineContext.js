@@ -57,7 +57,7 @@ export const OfflineProvider = ({ children }) => {
 
   // **Load all necessary stored data on app start**
   const loadAllStoredData = async () => {
-    const keys = ["offlineRequest", "currentUser", "hotlines", "announcement", "admins"];
+    const keys = ["offlineRequest", "currentUser", "hotlines", "announcement", "admins", "activeRequestData"];
     let allData = {};
   
     for (const key of keys) {
@@ -111,7 +111,7 @@ export const OfflineProvider = ({ children }) => {
       try {
         console.log("Syncing offline request:", requestData);
         await submitEmergencyReport({data : requestData });
-        await removeStoredData("offlineRequest");
+        // await removeStoredData("offlineRequest");
   
         Alert.alert("Online", "Your pending emergency request has been sent!");
       } catch (error) {
