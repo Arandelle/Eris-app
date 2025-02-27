@@ -14,9 +14,11 @@ export const OfflineProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
+      const wasOffline = isOffline;
       setIsOffline(!state.isConnected);
 
-      if (state.isConnected) {
+      // only run sync when transitioning from offline to online
+      if (wasOffline && state.isConnected) {
         syncOfflineData(); // it will send the data from offLineRequest to firebase when back online (isConnected) 
       }
     });
@@ -24,7 +26,7 @@ export const OfflineProvider = ({ children }) => {
     loadAllStoredData(); // Load all stored data when the app starts
 
     return () => unsubscribe();
-  }, []);
+  }, [isOffline]);
 
   // **Dynamic function to save data**
   const saveStoredData = async (key, data) => {
@@ -93,34 +95,33 @@ export const OfflineProvider = ({ children }) => {
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
     setLoading(true);
-    const now = Date.now();
-    const THIRTY_MINUTES = 30 * 60 * 1000;
-  
-    if (storedData.offlineRequest) {
-      const requestData  = storedData.offlineRequest;
-  
-      // Check if request is still valid (within 30 minutes)
-      if (now - requestData.timestamp > THIRTY_MINUTES) {
-        console.log("Offline request expired, deleting from storage.");
-        await removeStoredData("offlineRequest");
-        Alert.alert("Time Limit", "Your last emergency report exceeded to time limit, please report new emergency if needed!")
-        setLoading(false);
-        return;
-      }
-  
-      try {
-        console.log("Syncing offline request:", requestData);
-        await submitEmergencyReport({data : requestData });
-        await removeStoredData("offlineRequest");
-  
-        Alert.alert("Online", "Your pending emergency request has been sent!");
-      } catch (error) {
-        console.error("Error syncing offline data:", error);
-        Alert.alert("Error syncing offline data", `Could not submit emergency report, please try again ${error}`);
-      }
-    }
+    try{
+      
+      if(storedData.offlineRequest && Object.keys(storedData.offlineRequest).length > 0){
+        const requestData = storedData.offlineRequest;
+        const now = Date.now();
+        const THIRTY_MINUTES = 30 * 60 * 1000;
 
-    setLoading(false);
+        if(now - requestData.timestamp > THIRTY_MINUTES){
+          console.log("offline request expired, deleting from storage");
+          await removeStoredData("offlineRequest");
+          Alert.alert("Time limit", "Your last emergency report exceeded to the time limit, please report new emergency if needed!");
+          setLoading(false);
+        } else {
+          console.log("Syncing valid offline request", requestData);
+          await submitEmergencyReport({data: requestData});
+          await removeStoredData("offlineRequest");
+          Alert.alert("Back Online", "Your pending emergency request has been sent!");
+        }
+      } else{
+        console.log("No offline request found to sync");
+      }
+    }catch(error){
+      console.error("Error syncing offline data: ", error);
+      Alert.alert("Error syncing offline data: ", `Could not submit emergency report: ${error}`)
+    } finally{
+      setLoading(false);
+    }
   };
   
 
