@@ -14,20 +14,18 @@ export const OfflineProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      ToastAndroid.show(`${state.isConnected ? "Back online" : "Unstable network"}`, ToastAndroid.SHORT, ToastAndroid.BOTTOM)
-      
-      if(!state.isConnected){
-        setIsOffline(true);
-      } else{
-        setIsOffline(false);
+      setIsOffline(!state.isConnected);
+
+      if (state.isConnected) {
         syncOfflineData();
       }
     });
 
-    loadAllStoredData(); // Load all stored data when the app starts
+    loadAllStoredData();
 
     return () => unsubscribe();
   }, []);
+
 
   // **Dynamic function to save data**
   const saveStoredData = async (key, data) => {
