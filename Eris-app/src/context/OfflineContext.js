@@ -14,6 +14,7 @@ export const OfflineProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
+      Alert.alert("Back online", `Network state changed: connected=${state.isConnected}, previous offline=${isOffline}`)
       const wasOffline = isOffline;
       setIsOffline(!state.isConnected);
 
