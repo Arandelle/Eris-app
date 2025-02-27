@@ -95,8 +95,7 @@ export const OfflineProvider = ({ children }) => {
 
   // **Sync offline data when back online**
   const syncOfflineData = async () => {
-    setLoading(true);
-    await loadStoredData("offlineRequest");
+    setLoading(true);    
     try{
       
       if(storedData.offlineRequest && Object.keys(storedData.offlineRequest).length > 0){
