@@ -129,13 +129,9 @@ const Request = () => {
         if (currentUser?.activeRequest) {
           setHasActiveRequest(true);
           setActiveRequestId(currentUser?.activeRequest?.requestId);
-        } else if (isOffline) {
-          if(storedData?.offlineRequest || storedData?.activeRequestData){
+        } else if (isOffline && (storedData?.offlineRequest || storedData?.activeRequestData)) {
           setHasActiveRequest(true);
           setActiveRequestId(storedData?.tempRequestId);
-          } else{
-            setHasActiveRequest(false);
-          }
         } else {
           setHasActiveRequest(false);
           setActiveRequestId("");
