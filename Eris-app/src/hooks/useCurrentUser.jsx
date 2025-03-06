@@ -8,7 +8,7 @@ const useCurrentUser = () => {
     const {saveStoredData} = useContext(OfflineContext);
     const {data: userData} = useFetchData("users");
     const userInfo = auth.currentUser;
-    const currentUser = userData.find((user) => user.id === userInfo?.uid) || null;
+    const currentUser = userData?.find((user) => user.id === userInfo?.uid) || null;
 
     const updateCurrentUser = async (updatedData) => {
         if(userInfo?.uid){

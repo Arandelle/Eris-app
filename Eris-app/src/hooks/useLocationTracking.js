@@ -10,14 +10,14 @@ const useLocationTracking = (userData, setRefreshing =false) => {
   const [geoCodeLocation, setGeoCodeLocation] = useState("");
   const [responderLocation, setResponderLocation] = useState(null);
 
-  const updateLocationInFirebase = async (lat, long, address) => {
+  const updateLocationInFirebase = async (lat, long, geoCodeLocation) => {
     const user = auth.currentUser;
     const userLocationRef = ref(database, `users/${user?.uid}/location`);
     try {
       await update(userLocationRef, {
         latitude: lat,
         longitude: long,
-        address: address || "Location not available",
+        geoCodeLocation: geoCodeLocation || "Location not available",
       });
       console.log("Location updated in Firebase");
     } catch (error) {
@@ -46,7 +46,7 @@ const useLocationTracking = (userData, setRefreshing =false) => {
           setLatitude(latitude);
           setLongitude(longitude);
 
-          // Reverse geocoding to get the address
+          // Reverse geocoding to get the geoCodeLocation
           const reverseGeocode = await Location.reverseGeocodeAsync({
             latitude,
             longitude,

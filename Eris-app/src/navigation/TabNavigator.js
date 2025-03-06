@@ -190,7 +190,7 @@ const TabNavigator = () => {
         component={Notification}
         options={{
           title: "Notification",
-          tabBarBadge: notificationsCount === 0 ? null : notificationsCount,
+          tabBarBadge: notificationsCount === 0 ? null : notificationsCount > 99 ? "99+" : notificationsCount,
         }}
       />
       )}

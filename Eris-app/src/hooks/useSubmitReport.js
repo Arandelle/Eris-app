@@ -22,6 +22,9 @@ export const submitEmergencyReport = async ({
   if (hasActiveRequest) {
     throw new Error("You have an active emergency request pending.");
   }
+  if (!data) {
+    throw new Error("Data object is undefined");
+}
 
   let mediaUrl = "";
   let mediaType = "";

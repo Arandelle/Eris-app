@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,9 +29,11 @@ import {
   PanGestureHandler,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import Hotlines from "./Hotlines";
 import Announcement from "./Announcement";
+import ImmediateEmergency from "./ImmediateEmergency";
+import { OfflineContext } from "../context/OfflineContext";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
@@ -40,6 +42,7 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const NewsFeed = ({ dayTime, isVerified }) => {
   const navigation = useNavigation();
   const { data: responderData } = useFetchData("responders");
+  const {storedData} = useContext(OfflineContext);
   const { currentUser } = useCurrentUser();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,14 +56,15 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isBellSwipe, setIsBellSwipe] = useState(false);
+  const [emergencyType, setEmergencyType] = useState("");
 
   useEffect(() => {
-    if (currentUser?.activeRequest) {
+    if (currentUser && currentUser?.activeRequest) {
       setHasActiveRequest(true);
-    } else{
+    } else {
       setHasActiveRequest(false);
     }
-    
   }, [currentUser, refreshing]);
 
   useEffect(() => {
@@ -101,25 +105,41 @@ const NewsFeed = ({ dayTime, isVerified }) => {
 
   const handleConfirmReport = async () => {
     setLoading(true);
+
+    const requestData = {
+      currentUser: currentUser || storedData.currentUser,
+      location: location || storedData.currentUser.location.geoCodeLocation,
+      latitude: latitude || storedData.currentUser.location.latitude,
+      longitude: longitude || storedData.currentUser.location.longitude,
+      geoCodeLocation:
+        geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
+      description : "",
+      media: {
+        uri: "",
+        type: ""
+      },
+      emergencyType,
+      status: "pending",
+      timestamp: Date.now(), // Store timestamp for expiration check
+      hasActiveRequest: hasActiveRequest || false,
+      responderData: responderData || storedData.responders,
+      tempRequestId: `offline_${Date.now()}`
+    };
     try {
       await submitEmergencyReport({
-        currentUser,
-        location,
-        latitude,
-        longitude,
-        geoCodeLocation,
+        data: requestData,
         sendNotification,
-        hasActiveRequest,
-        responderData,
       });
       Alert.alert("Emergency reported", "Help is on the way!");
       setLoading(false);
+      setIsBellSwipe(false);
     } catch (error) {
       Alert.alert(
         "Error",
         `Could not submit emergency alert, please try again ${error}`
       );
       setLoading(false);
+      setIsBellSwipe(false);
     }
   };
 
@@ -153,21 +173,22 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const handleGestureEnd = (event) => {
     if (Math.abs(event.nativeEvent.translationX) > 50) {
       if (auth.currentUser.emailVerified) {
-        Alert.alert(
-          "Send Emergency Alert?",
-          "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-            },
-            {
-              text: "Send Alert",
-              style: "destructive",
-              onPress: handleConfirmReport,
-            },
-          ]
-        );
+        // Alert.alert(
+        //   "Send Emergency Alert?",
+        //   "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
+        //   [
+        //     {
+        //       text: "Cancel",
+        //       style: "cancel",
+        //     },
+        //     {
+        //       text: "Send Alert",
+        //       style: "destructive",
+        //       onPress: handleConfirmReport,
+        //     },
+        //   ]
+        // );
+        setIsBellSwipe(true);
       } else {
         setIsLinkingAccount(!isLinkingAccount);
       }
@@ -197,10 +218,10 @@ const NewsFeed = ({ dayTime, isVerified }) => {
     ).start();
   }, [slideAnim]);
 
-  const handleRefresh = async () =>{
+  const handleRefresh = async () => {
     setLoading(true);
     setTimeout(() => setLoading(false), 2000);
-  }
+  };
 
   if (loading)
     return (
@@ -216,6 +237,14 @@ const NewsFeed = ({ dayTime, isVerified }) => {
 
   return (
     <>
+      {isBellSwipe && (
+          <ImmediateEmergency isBellSwipe={isBellSwipe} 
+          setIsBellSwipe={setIsBellSwipe}
+            handleConfirmReport={handleConfirmReport}
+            emergencyType={emergencyType}
+            setEmergencyType={setEmergencyType}
+          />
+          )}
 
       <ProfileReminderModal />
 
@@ -297,7 +326,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                 </Animated.View>
               </PanGestureHandler>
               <Text className="text-gray-50 font-thin text-md">
-              🔴 Fire, crime, and emergencies need quick response.
+                🔴 Fire, crime, and emergencies need quick response.
               </Text>
             </Animated.View>
           </GestureHandlerRootView>
@@ -311,7 +340,9 @@ const NewsFeed = ({ dayTime, isVerified }) => {
               {!isSearching ? (
                 <View className="flex flex-row space-x-2 items-center bg-blue-800">
                   <View className="rounded-full border border-green-500">
-                    <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Profile")}
+                    >
                       <Image
                         source={{ uri: currentUser?.img }}
                         className="h-12 w-12 rounded-full"
@@ -356,15 +387,14 @@ const NewsFeed = ({ dayTime, isVerified }) => {
             paddingTop: HEADER_MAX_HEIGHT,
           }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-        {/** Main content hotlines and announcement */}
+          {/** Main content hotlines and announcement */}
           <View className="flex-1 p-3 bg-white space-y-3">
-            <Hotlines/>
+            <Hotlines />
             <Announcement />
           </View>
-
         </ScrollView>
         <Animated.View
           style={{

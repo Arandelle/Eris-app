@@ -173,11 +173,11 @@ const Request = () => {
     // Create emergency request data
     const requestData = {
       currentUser: currentUser || storedData.currentUser,
-      location: location || storedData.currentUser.location.address,
+      location: location || storedData.currentUser.location.geoCodeLocation,
       latitude: latitude || storedData.currentUser.location.latitude,
       longitude: longitude || storedData.currentUser.location.longitude,
       geoCodeLocation:
-        geoCodeLocation || storedData.currentUser.location.address,
+        geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
       description,
       media: file?.uri ? {
         uri: file.uri || storedData.media.uri || "",
