@@ -41,7 +41,7 @@ const useFetchRecords = ({status}) => {
 
         return ()=> unsubscribe();
       }
-    }, [status])
+    }, [statusArray])
 
   return {emergencyHistory, loading}
 }

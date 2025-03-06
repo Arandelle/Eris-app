@@ -20,9 +20,9 @@ const TopBarNavigator = () => {
            tabBarLabelStyle : {fontWeight: "bold"},
         })}
     >
-        <Toptab.Screen name="pending" children={() => <Records status={"pending"}/>} />
-        <Toptab.Screen name="on-going" children={() => <Records status={"on-going"}/>} />
-        <Toptab.Screen name="resolved" children={() => <Records status={"resolved"}/>} />
+        <Toptab.Screen name="pending" component={Records} initialParams={{status: "pending"}} />
+        <Toptab.Screen name="on-going" component={Records} initialParams={{status: "on-going"}} />
+        <Toptab.Screen name="resolved"  component={Records} initialParams={{status: "resolved"}}/>
     </Toptab.Navigator>
   )
 }

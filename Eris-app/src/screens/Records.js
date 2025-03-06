@@ -6,14 +6,15 @@ import ImageViewer from "react-native-image-viewing";
 import { useMemo } from "react";
 import useViewImage from "../hooks/useViewImage";
 
-const Records = ({ status }) => {
+const Records = ({ route }) => {
+  const {status} = route.params
   const { emergencyHistory } = useFetchRecords({ status });
 
   const sortedData = useMemo(() => {
     return [...emergencyHistory].sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
-  });
+  }, [emergencyHistory]);
 
   return (
     <View className="p-2 bg-white">
@@ -21,7 +22,7 @@ const Records = ({ status }) => {
         <View className="space-y-2">
           {sortedData.length > 0 ? (
             sortedData.map((emergency) => (
-              <View className="space-y-2">
+              <View key={emergency.emergencyId} className="space-y-2">
                 <RecordItem emergency={emergency} />
               </View>
             ))
