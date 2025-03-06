@@ -34,7 +34,7 @@ const EmergencyDetailsSheet = ({ reportDetails, onCancel }) => {
             </Text>
           </View>
           <View className="flex-row items-center space-x-2">
-          {reportDetails.status === "awaiting response" && !isOffline && (
+          {reportDetails.status === "pending" && !isOffline && (
             <TouchableOpacity 
               onPress={onCancel}
               className="bg-red-100 px-3 py-1 rounded-full"

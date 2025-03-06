@@ -37,7 +37,7 @@ const Request = () => {
   const { data: responderData } = useFetchData("responders");
   const { data: hotlines } = useFetchData("hotlines");
   const { file, setFile, chooseFile } = useUploadImage();
-  const statuses = useMemo(() => ["awaiting response", "on-going"], []);
+  const statuses = useMemo(() => ["pending", "on-going"], []);
 
   const { emergencyHistory } = useFetchRecords({ status: statuses });
 
@@ -187,7 +187,7 @@ const Request = () => {
         type: ""
       },
       emergencyType,
-      status: "awaiting response",
+      status: "pending",
       timestamp: Date.now(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,

@@ -6,7 +6,7 @@ const TopBarNavigator = () => {
 
     const Toptab = createMaterialTopTabNavigator();
     const activeColor = {
-        awaiting: colors.orange[500],
+        pending: colors.orange[500],
         "on-going" : colors.blue[500],
         resolved : colors.green[500]
     }
@@ -20,7 +20,7 @@ const TopBarNavigator = () => {
            tabBarLabelStyle : {fontWeight: "bold"},
         })}
     >
-        <Toptab.Screen name="awaiting" children={() => <Records status={"awaiting response"}/>} />
+        <Toptab.Screen name="pending" children={() => <Records status={"pending"}/>} />
         <Toptab.Screen name="on-going" children={() => <Records status={"on-going"}/>} />
         <Toptab.Screen name="resolved" children={() => <Records status={"resolved"}/>} />
     </Toptab.Navigator>

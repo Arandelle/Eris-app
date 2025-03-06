@@ -51,7 +51,7 @@ const RecordItem = ({ emergency }) => {
   } = useViewImage();
 
   const emergencyStatus = {
-    "awaiting response": "bg-orange-100 text-orange-600",
+    "pending": "bg-orange-100 text-orange-600",
     "on-going": "bg-blue-100 text-blue-600",
     resolved: "bg-green-100 text-green-600",
     expired: "bg-red-300",
@@ -67,7 +67,7 @@ const RecordItem = ({ emergency }) => {
       />
       <View className="border border-gray-300 rounded-lg">
         <View className="flex flex-row space-x-2 p-4">
-          {emergency.status !== "awaiting response" && (
+          {emergency.status !== "pending" && (
             <>
               <TouchableOpacity
                 onPress={() => handleImageClick(responderDetails?.img)}
@@ -106,7 +106,7 @@ const RecordItem = ({ emergency }) => {
               <RowStyle label={"Description"} value={emergency.description} />
             </View>
             <View>
-              <RowStyle label={"Location"} value={emergency.location.address} />
+              <RowStyle label={"Location"} value={emergency.location.geoCodeLocation} />
             </View>
             <View>
               <RowStyle
@@ -126,7 +126,7 @@ const RecordItem = ({ emergency }) => {
             {emergency.dateResolved && (
               <View>
                 <RowStyle
-                  label={"Dete Resolved"}
+                  label={"Date Resolved"}
                   value={formatDateWithTime(emergency.dateResolved)}
                 />
               </View>
@@ -142,7 +142,7 @@ const RowStyle = ({ label, value }) => {
   return (
     <View className="flex flex-row">
       <Text className="w-1/3 font-bold text-gray-500">{label}</Text>
-      <Text className="flex-1 font-bold">{value}</Text>
+      <Text className="flex-1 font-bold">{value || "N/A"}</Text>
     </View>
   );
 };
