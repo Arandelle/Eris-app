@@ -19,6 +19,7 @@ const Map = () => {
     useLocationTracking(currentUser, setRefreshing);
   const { route, distance } = useRoute(responderLocation, latitude, longitude);
   const [initialIndex, setInitialIndex] = useState(0);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const responderDetails = responderData?.find(
     (user) => user.id === currentUser?.activeRequest?.responderId
@@ -33,6 +34,10 @@ const Map = () => {
   const handleRefresh = () => {
     setRefreshing(true);
     trackUserLocation();
+  };
+
+  const placeLocation = (event) => {
+    setSelectedLocation(event.nativeEvent.coordinate);
   };
 
   const openBottomSheet = () => {
@@ -70,6 +75,7 @@ const Map = () => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}
+          onPress={placeLocation}
         >
           {/* User Location Marker */}
           <Marker
@@ -88,6 +94,10 @@ const Map = () => {
             >
               <Image source={responderMarker} className="h-10 w-10" />
             </Marker>
+          )}
+
+          {selectedLocation && (
+            <Marker coordinate={selectedLocation} title="Your selected location" pinColor={colors.green[800]}/>
           )}
 
           {/* Route Polyline */}

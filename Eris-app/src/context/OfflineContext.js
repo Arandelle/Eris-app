@@ -113,7 +113,7 @@ export const OfflineProvider = ({ children }) => {
       storedRequest = await loadStoredData("offlineRequest");
     }
   
-    if (!storedRequest) {
+    if (!storedRequest && isOffline) {
       console.log("No offline request found in storage.");
       Alert.alert("No offline request", "There is no pending offline request.");
       setLoading(false);
