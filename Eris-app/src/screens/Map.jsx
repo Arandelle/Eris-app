@@ -55,9 +55,9 @@ const Map = () => {
       });
       
       if (result && result.length > 0) {
-        const address = result[0];
-        const formattedAddress = `${address.street || ''}, ${address.district || ''}, ${address.city || ''}, ${address.region || ''}`;
-        setGeoCodedAddress(formattedAddress);
+        const {name, city, region, country} = result[0];
+        const locString = `${name ? name : ""} - ${city}, ${region}, ${country}`;
+        setGeoCodedAddress(locString.trim());
       }
     } catch (error) {
       console.error("Error reverse geocoding:", error);

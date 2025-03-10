@@ -28,10 +28,12 @@ import { database, storage } from "../../services/firebaseConfig";
 import { deleteObject, ref as storageRef } from "firebase/storage";
 import { Video } from "expo-av";
 import HasActiveRequest from "../../component/HasActiveRequest";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const Request = () => {
-  const navigation = useNavigation()
+  const route = useRoute();
+  const navigation = useNavigation();
+  const selectedLocation = route.params?.selectedLocation
   const bottomSheetRef = useRef(null);
   const videoRef = useRef(null);
   const { currentUser, userInfo } = useCurrentUser();
@@ -379,7 +381,7 @@ const Request = () => {
                   <View className="flex flex-row space-x-2">
                       <View className="flex-1 basis-3/4">
                         <TextInputStyle
-                          label="Location"
+                          label="Current Location"
                           value={geoCodeLocation}
                           placeholder="Enter location"
                           editable={false}
@@ -398,6 +400,17 @@ const Request = () => {
                        </View>
                       
                   </View>
+
+                  {selectedLocation && (
+                    <View>
+                      <TextInputStyle 
+                        label={"Your selected location"}
+                        placeholder={selectedLocation.geoCodedAddress}
+                        value={selectedLocation.geoCodedAddress}
+                        editable={false}
+                      />
+                    </View>
+                  )}
    
                   <View>
                     <TextInputStyle
