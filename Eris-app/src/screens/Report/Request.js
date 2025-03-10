@@ -186,14 +186,22 @@ const Request = () => {
   const handleSubmit = async () => {
     setLoading(true);
     console.log("loading...");
+
+    const locationData = selectedLocation ? {
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+      geoCodeLocation: selectedLocation.geoCodedAddress
+    } : {
+      latitude: latitude || storedData.currentUser.location.latitude,
+      longitude: longitude || storedData.currentUser.location.longitude,
+      geoCodeLocation: geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
+    }
+
     // Create emergency request data
     const requestData = {
       currentUser: currentUser || storedData.currentUser,
       location: location || storedData.currentUser.location.geoCodeLocation,
-      latitude: latitude || storedData.currentUser.location.latitude,
-      longitude: longitude || storedData.currentUser.location.longitude,
-      geoCodeLocation:
-        geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
+      ...locationData,
       description,
       media: file?.uri
         ? {
@@ -374,22 +382,42 @@ const Request = () => {
                           label: "Natural Disaster 🌪️",
                           value: "natural disaster",
                         },
+                        { label: "Public Safety ⚠️", value: "other" },
                         { label: "Other ⚠️", value: "other" },
                       ]}
                     />
                   </View>
                   <View className="flex flex-row space-x-2">
                       <View className="flex-1 basis-3/4">
+                      {selectedLocation ? (
+                        <TextInputStyle 
+                        label={"Your selected location"}
+                        placeholder={selectedLocation.geoCodedAddress}
+                        value={selectedLocation.geoCodedAddress}
+                        editable={false}
+                      />
+                      ) : (
                         <TextInputStyle
                           label="Current Location"
                           value={geoCodeLocation}
                           placeholder="Enter location"
                           editable={false}
                         />
+                      )}
                       </View>
                        <View className="space-y-2">
-                        <Text>Find on map</Text>
-                         <TouchableOpacity
+                        <Text>Use current location</Text>
+                        {selectedLocation ? (
+                          <TouchableOpacity
+                          className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
+                          onPress={() => navigation.setParams({selectedLocation: null})}
+                        >
+                          <Text className="text-center whitespace-nowrap">
+                           My Location
+                          </Text>
+                        </TouchableOpacity>
+                        ) : (
+                          <TouchableOpacity
                           className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
                           onPress={() => navigation.navigate("Map", {label: "Select location with emergency!"})}
                         >
@@ -397,21 +425,11 @@ const Request = () => {
                             Select 📍
                           </Text>
                         </TouchableOpacity>
+                        )}
+                        
                        </View>
                       
-                  </View>
-
-                  {selectedLocation && (
-                    <View>
-                      <TextInputStyle 
-                        label={"Your selected location"}
-                        placeholder={selectedLocation.geoCodedAddress}
-                        value={selectedLocation.geoCodedAddress}
-                        editable={false}
-                      />
-                    </View>
-                  )}
-   
+                  </View>   
                   <View>
                     <TextInputStyle
                       label={"Description (Optional)"}

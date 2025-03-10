@@ -66,6 +66,7 @@ export const submitEmergencyReport = async ({
         longitude,
         geoCodeLocation
       },
+      senderLocation: location
     };
 
     // Generate a new key for the emergency request
