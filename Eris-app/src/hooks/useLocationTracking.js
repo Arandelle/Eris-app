@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 import { auth, database } from "../services/firebaseConfig";
 import { ref, update, onValue } from "firebase/database";
 
-const useLocationTracking = (userData, setRefreshing =false) => {
+const useLocationTracking = (responderData, setRefreshing =false) => {
   const [location, setLocation] = useState("");
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
@@ -59,7 +59,7 @@ const useLocationTracking = (userData, setRefreshing =false) => {
             setGeoCodeLocation(locString.trim());
 
             // Update Firebase with geocoded location
-            if (userData) {
+            if (responderData) {
               await updateLocationInFirebase(latitude, longitude, locString.trim());
             }
           } else {
@@ -103,7 +103,7 @@ const useLocationTracking = (userData, setRefreshing =false) => {
       }
       unsubscribeResponder();
     };
-  }, [userData]);
+  }, [responderData]);
 
   return { location, latitude, longitude, geoCodeLocation, responderLocation, trackUserLocation};
 };

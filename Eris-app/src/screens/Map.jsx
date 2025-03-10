@@ -18,13 +18,26 @@ const Map = () => {
   const navigation = useNavigation();
   const routeParams = useRoute();
   const label = routeParams.params?.label;
-  const returnScreen = routeParams.params?.returnScreen || "Request";
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
   const [refreshing, setRefreshing] = useState(false);
   const { latitude, longitude, responderLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
-  const { route, distance } = useRouteMap(responderLocation, latitude, longitude);
+
+  const [activeEmergencyCoords, setActiveEmergencyCoords] = useState({});
+
+  useEffect(() => {
+
+    if(currentUser?.activeRequest){
+      setActiveEmergencyCoords({
+        latitude: currentUser.activeRequest?.latitude,
+        longitude: currentUser.activeRequest?.longitude
+      })
+    }
+    
+  },[currentUser]);
+
+  const { route, distance } = useRouteMap(responderLocation, activeEmergencyCoords.latitude, activeEmergencyCoords.longitude);
   const [initialIndex, setInitialIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showSetLocationButton, setShowSetLocationButton] = useState(false);
@@ -108,7 +121,7 @@ const Map = () => {
         </View>
       </ScrollView>
     );
-  }
+  };
 
   return (
     <>
@@ -149,9 +162,9 @@ const Map = () => {
           )}
 
           {/* Draggable Selected Location Marker */}
-          {selectedLocation && (
+          {(selectedLocation || activeEmergencyCoords) &&(
             <Marker
-              coordinate={selectedLocation}
+              coordinate={selectedLocation || activeEmergencyCoords}
               title="Your selected location"
               description={geoCodedAddress}
               pinColor={colors.green[800]}
