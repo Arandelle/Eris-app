@@ -9,28 +9,29 @@ import {
   Image,
   SafeAreaView,
 } from "react-native";
-import useLocationTracking from "../hooks/useLocationTracking";
-import useFetchData from "../hooks/useFetchData";
-import useCurrentUser from "../hooks/useCurrentUser";
-import useSendNotification from "../hooks/useSendNotification";
-import { submitEmergencyReport } from "../hooks/useSubmitReport";
-import useUploadImage from "../helper/UploadImage";
-import TextInputStyle from "../component/TextInputStyle"; // Ensure this import is correct
-import PickerField from "../component/PickerField";
-import { OfflineContext } from "../context/OfflineContext";
-import useViewImage from "../hooks/useViewImage";
+import useLocationTracking from "../../hooks/useLocationTracking";
+import useFetchData from "../../hooks/useFetchData";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import useSendNotification from "../../hooks/useSendNotification";
+import { submitEmergencyReport } from "../../hooks/useSubmitReport";
+import useUploadImage from "../../helper/UploadImage";
+import TextInputStyle from "../../component/TextInputStyle"; // Ensure this import is correct
+import PickerField from "../../component/PickerField";
+import { OfflineContext } from "../../context/OfflineContext";
+import useViewImage from "../../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import MyBottomSheet from "../component/MyBottomSheet";
-import useFetchRecords from "../hooks/useFetchRecords";
-import EmergencyDetailsSheet from "../component/EmergencyDetailsSheet";
-import { get, ref, remove, serverTimestamp } from "firebase/database";
-import { database, storage } from "../services/firebaseConfig";
+import MyBottomSheet from "../../component/MyBottomSheet";
+import useFetchRecords from "../../hooks/useFetchRecords";
+import EmergencyDetailsSheet from "../../component/EmergencyDetailsSheet";
+import { get, ref, remove } from "firebase/database";
+import { database, storage } from "../../services/firebaseConfig";
 import { deleteObject, ref as storageRef } from "firebase/storage";
 import { Video } from "expo-av";
-import HasActiveRequest from "../component/HasActiveRequest";
+import HasActiveRequest from "../../component/HasActiveRequest";
+import { useNavigation } from "@react-navigation/native";
 
 const Request = () => {
+  const navigation = useNavigation()
   const bottomSheetRef = useRef(null);
   const videoRef = useRef(null);
   const { currentUser, userInfo } = useCurrentUser();
@@ -43,7 +44,8 @@ const Request = () => {
 
   const { location, latitude, longitude, geoCodeLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
-  const { isOffline, saveStoredData,removeStoredData, storedData, loading: syncingLoading } = useContext(OfflineContext);
+  const { isOffline, saveStoredData, removeStoredData, storedData } =
+    useContext(OfflineContext);
   const { sendNotification } = useSendNotification();
   const {
     isImageModalVisible,
@@ -65,76 +67,88 @@ const Request = () => {
       ? emergencyHistory.find((report) => report.id === activeRequestId)
       : null;
 
-      const getFormattedReportDetails = () => {
-        if (reportDetails) {
-          // Already in the correct format
-          return reportDetails;
-        } else if (isOffline && (storedData.offlineRequest || storedData.activeRequestData)) {
-          const activeRequestData = storedData.offlineRequest || storedData.activeRequestData;
-          // Convert offlineRequest to match reportDetails structure
-          return {
+  const getFormattedReportDetails = () => {
+    if (reportDetails) {
+      // Already in the correct format
+      return reportDetails;
+    } else if (
+      isOffline &&
+      (storedData.offlineRequest || storedData.activeRequestData)
+    ) {
+      const activeRequestData =
+        storedData.offlineRequest || storedData.activeRequestData;
+      // Convert offlineRequest to match reportDetails structure
+      return {
         emergencyId: activeRequestData.tempRequestId || `offline_${Date.now()}`,
         emergencyType: activeRequestData.emergencyType,
         status: activeRequestData.status,
         timestamp: activeRequestData.timestamp,
         date: new Date(activeRequestData.timestamp),
         location: {
-          geoCodeLocation: activeRequestData.geoCodeLocation || activeRequestData.location
+          geoCodeLocation:
+            activeRequestData.geoCodeLocation || activeRequestData.location,
         },
         description: activeRequestData.description,
         media: {
           mediaType: activeRequestData.media?.type || "",
-          mediaUrl: activeRequestData.media?.uri || ""
-        }
-          };
-        }
-        return null;
+          mediaUrl: activeRequestData.media?.uri || "",
+        },
       };
+    }
+    return null;
+  };
 
-      const formattedReportDetails = getFormattedReportDetails();
+  const formattedReportDetails = getFormattedReportDetails();
 
-      useEffect(() => {
-        let recommended = [];
-      
-        if (currentUser?.activeRequest && reportDetails) {
-          recommended = hotlines.filter(
-            (hotline) => hotline.category === reportDetails.emergencyType
-          );
-          console.log("recommended hotlines (online):", recommended);
-        }
-      
-        if (isOffline && (storedData.offlineRequest || storedData.activeRequestData)) {
-          const emergencyType = storedData.offlineRequest?.emergencyType || storedData.activeRequestData?.emergencyType;
-          recommended = storedData.hotlines.filter(
-            (hotline) => hotline.category === emergencyType
-          );
-        }
-      
-        setRecommendedHotlines(recommended);
-        console.log("Updated recommended hotlines:", recommended);
-      }, [
-        currentUser, 
-        reportDetails, 
-        refreshing, 
-        isOffline, 
-        storedData.hotlines, 
-        storedData.offlineRequest, 
-        storedData.activeRequestData
-      ]);
-      
+  // recommended hotlines
+  useEffect(() => {
+    let recommended = [];
+
+    if (currentUser?.activeRequest && reportDetails) {
+      recommended = hotlines.filter(
+        (hotline) => hotline.category === reportDetails.emergencyType
+      );
+      console.log("recommended hotlines (online):", recommended);
+    }
+
+    if (
+      isOffline &&
+      (storedData.offlineRequest || storedData.activeRequestData)
+    ) {
+      const emergencyType =
+        storedData.offlineRequest?.emergencyType ||
+        storedData.activeRequestData?.emergencyType;
+      recommended = storedData.hotlines.filter(
+        (hotline) => hotline.category === emergencyType
+      );
+    }
+
+    setRecommendedHotlines(recommended);
+    console.log("Updated recommended hotlines:", recommended);
+  }, [
+    currentUser,
+    reportDetails,
+    refreshing,
+    isOffline,
+    storedData.hotlines,
+    storedData.offlineRequest,
+    storedData.activeRequestData,
+  ]);
+
+  // check emergency status
   useEffect(() => {
     const checkActiveRequest = async () => {
       try {
-
         if (currentUser?.activeRequest) {
           setHasActiveRequest(true);
           setActiveRequestId(currentUser?.activeRequest?.requestId);
         } else if (isOffline) {
-          if(storedData.offlineRequest || storedData.activeRequestData){
-            const activeRequestData = storedData.offlineRequest || storedData.activeRequestData;
+          if (storedData.offlineRequest || storedData.activeRequestData) {
+            const activeRequestData =
+              storedData.offlineRequest || storedData.activeRequestData;
             setHasActiveRequest(true);
             setHasActiveRequest(activeRequestData.tempRequestId || "");
-          } 
+          }
         } else {
           setHasActiveRequest(false);
           setActiveRequestId("");
@@ -145,7 +159,7 @@ const Request = () => {
     };
     console.log("active request id:", activeRequestId);
     checkActiveRequest();
-  }, [currentUser,isOffline,storedData, refreshing]);
+  }, [currentUser, isOffline, storedData, refreshing]);
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation
@@ -169,7 +183,7 @@ const Request = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    console.log("loading...")
+    console.log("loading...");
     // Create emergency request data
     const requestData = {
       currentUser: currentUser || storedData.currentUser,
@@ -179,19 +193,21 @@ const Request = () => {
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
       description,
-      media: file?.uri ? {
-        uri: file.uri || storedData.media.uri || "",
-        type: file.type || storedData.media.type || "",
-      } : {
-        uri: "",
-        type: ""
-      },
+      media: file?.uri
+        ? {
+            uri: file.uri || storedData.media.uri || "",
+            type: file.type || storedData.media.type || "",
+          }
+        : {
+            uri: "",
+            type: "",
+          },
       emergencyType,
       status: "pending",
       timestamp: Date.now(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
-      tempRequestId: `offline_${Date.now()}`
+      tempRequestId: `offline_${Date.now()}`,
     };
 
     if (isOffline) {
@@ -209,7 +225,7 @@ const Request = () => {
     try {
       await submitEmergencyReport({
         data: requestData,
-        sendNotification
+        sendNotification,
       });
       await saveStoredData("activeRequestData", requestData);
       Alert.alert("Emergency reported!", "Help is on the way!");
@@ -284,7 +300,7 @@ const Request = () => {
     }
   };
 
-  if (loading || syncingLoading) {
+  if (loading) {
     return (
       <View className="flex items-center justify-center h-full">
         <Text>Loading please wait...</Text>
@@ -335,7 +351,7 @@ const Request = () => {
                     />
                   </View>
                 </View>
-              ) }
+              )}
               {!hasActiveRequest && (
                 <View className="space-y-5">
                   <Text className="font-bold text-xl text-center text-red-600 mb-5">
@@ -360,14 +376,29 @@ const Request = () => {
                       ]}
                     />
                   </View>
-                  <View>
-                    <TextInputStyle
-                      label="Location"
-                      value={geoCodeLocation}
-                      placeholder="Enter location"
-                      editable={false}
-                    />
+                  <View className="flex flex-row space-x-2">
+                      <View className="flex-1 basis-3/4">
+                        <TextInputStyle
+                          label="Location"
+                          value={geoCodeLocation}
+                          placeholder="Enter location"
+                          editable={false}
+                        />
+                      </View>
+                       <View className="space-y-2">
+                        <Text>Find on map</Text>
+                         <TouchableOpacity
+                          className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
+                          onPress={() => navigation.navigate("Map", {label: "Select location with emergency!"})}
+                        >
+                          <Text className="text-center whitespace-nowrap">
+                            Select 📍
+                          </Text>
+                        </TouchableOpacity>
+                       </View>
+                      
                   </View>
+   
                   <View>
                     <TextInputStyle
                       label={"Description (Optional)"}
@@ -422,13 +453,13 @@ const Request = () => {
                     </View>
                   ) : (
                     <TouchableOpacity
-                      className={`p-4 bg-blue-800 rounded-md flex ${
+                      className={`p-4 bg-blue-800 rounded-md ${
                         hasActiveRequest ? "bg-blue-800/50" : "bg-blue-800"
                       }`}
                       onPress={chooseFile}
                       disabled={loading || hasActiveRequest}
                     >
-                      <Text className="text-center w-full flex text-white font-bold">
+                      <Text className="text-center text-white font-bold">
                         Add File 📷
                       </Text>
                     </TouchableOpacity>
@@ -440,7 +471,7 @@ const Request = () => {
         </ScrollView>
 
         {/** submit button */}
-        {!hasActiveRequest  && (
+        {!hasActiveRequest && (
           <View className="px-5 py-4">
             <TouchableOpacity
               className={`${

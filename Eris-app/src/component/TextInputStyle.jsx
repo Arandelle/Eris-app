@@ -5,7 +5,7 @@ const TextInputStyle = ({ label, placeholder, value, onChangeText, keyboardType}
     <View className="space-y-2">
       <Text>{label}</Text>
       <TextInput
-        className="w-full border border-gray-300 rounded-lg p-4"
+        className="w-full border border-gray-300 rounded-lg p-4 bg-white"
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}

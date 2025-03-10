@@ -1,25 +1,34 @@
-import { useMemo, useRef, useState } from "react";
-import { Text, View, Image, ScrollView, RefreshControl } from "react-native";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { Text, View, Image, ScrollView, RefreshControl, TouchableOpacity } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
+import { useNavigation } from "@react-navigation/native";
 import Logo from "../../assets/logo.png";
 import responderMarker from "../../assets/ambulance.png";
 import useLocationTracking from "../hooks/useLocationTracking";
-import useRoute from "../hooks/useRoute";
+import useRouteMap from "../hooks/useRoute";
 import useCurrentUser from "../hooks/useCurrentUser";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import useFetchData from "../hooks/useFetchData";
 import colors from "../constant/colors";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useRoute } from "@react-navigation/native";
+import * as Location from "expo-location";
 
 const Map = () => {
+  const navigation = useNavigation();
+  const routeParams = useRoute();
+  const label = routeParams.params?.label;
+  const returnScreen = routeParams.params?.returnScreen || "Request";
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
   const [refreshing, setRefreshing] = useState(false);
   const { latitude, longitude, responderLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
-  const { route, distance } = useRoute(responderLocation, latitude, longitude);
+  const { route, distance } = useRouteMap(responderLocation, latitude, longitude);
   const [initialIndex, setInitialIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showSetLocationButton, setShowSetLocationButton] = useState(false);
+  const [geoCodedAddress, setGeoCodedAddress] = useState("");
 
   const responderDetails = responderData?.find(
     (user) => user.id === currentUser?.activeRequest?.responderId
@@ -28,8 +37,33 @@ const Map = () => {
   const { img, fullname, customId } = responderDetails || {};
 
   const bottomSheetRef = useRef(null);
+  const mapRef = useRef(null);
 
   const snapPoints = useMemo(() => ["30%", "50%"], []);
+
+  useEffect(() => {
+    if (selectedLocation) {
+      reverseGeocode(selectedLocation);
+    }
+  }, [selectedLocation]);
+
+  const reverseGeocode = async (location) => {
+    try {
+      const result = await Location.reverseGeocodeAsync({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+      
+      if (result && result.length > 0) {
+        const address = result[0];
+        const formattedAddress = `${address.street || ''}, ${address.district || ''}, ${address.city || ''}, ${address.region || ''}`;
+        setGeoCodedAddress(formattedAddress);
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+      setGeoCodedAddress("Location address not available");
+    }
+  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -38,10 +72,23 @@ const Map = () => {
 
   const placeLocation = (event) => {
     setSelectedLocation(event.nativeEvent.coordinate);
+    setShowSetLocationButton(true);
   };
 
   const openBottomSheet = () => {
-    bottomSheetRef.current?.snapToIndex(initialIndex); // Open the bottom sheet to the first snap point
+    bottomSheetRef.current?.snapToIndex(initialIndex);
+  };
+
+  const handleSetLocation = () => {
+    if (selectedLocation) {
+      navigation.navigate("Request", {
+        selectedLocation: {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          geoCodedAddress: geoCodedAddress
+        }
+      });
+    }
   };
 
   if (!latitude || !longitude) {
@@ -63,11 +110,16 @@ const Map = () => {
     );
   }
 
-
   return (
     <>
       <View className="flex-1">
+        {label && (
+          <View className="absolute top-0 p-4 bg-blue-800 shadow-md w-full z-10">
+            <Text className="text-center text-white font-bold">{label}</Text>
+          </View>
+        )}
         <MapView
+          ref={mapRef}
           className="flex-1"
           initialRegion={{
             latitude,
@@ -75,7 +127,7 @@ const Map = () => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}
-          onPress={placeLocation}
+          onPress={label ? placeLocation : null}
         >
           {/* User Location Marker */}
           <Marker
@@ -90,14 +142,22 @@ const Map = () => {
               coordinate={responderLocation}
               title="Responder"
               pinColor={colors.red[800]}
-              onPress={openBottomSheet} // Open bottom sheet when marker is pressed
+              onPress={openBottomSheet}
             >
               <Image source={responderMarker} className="h-10 w-10" />
             </Marker>
           )}
 
+          {/* Draggable Selected Location Marker */}
           {selectedLocation && (
-            <Marker coordinate={selectedLocation} title="Your selected location" pinColor={colors.green[800]}/>
+            <Marker
+              coordinate={selectedLocation}
+              title="Your selected location"
+              description={geoCodedAddress}
+              pinColor={colors.green[800]}
+              draggable={true}
+              onDragEnd={placeLocation}
+            />
           )}
 
           {/* Route Polyline */}
@@ -110,9 +170,21 @@ const Map = () => {
           )}
         </MapView>
 
+        {/* Set Location Button */}
+        {showSetLocationButton && selectedLocation && (
+          <View className="absolute bottom-6 w-full items-center">
+            <TouchableOpacity
+              onPress={handleSetLocation}
+              className="bg-blue-800 py-3 px-6 rounded-lg shadow-lg"
+            >
+              <Text className="text-white font-bold text-lg">Set Location</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <BottomSheet
           ref={bottomSheetRef}
-          index={responderLocation ? initialIndex : -1} // Start hidden
+          index={responderLocation ? initialIndex : -1}
           snapPoints={snapPoints}
           enablePanDownToClose={true}
         >
@@ -150,7 +222,7 @@ const Map = () => {
                     </Text>
                   </View>
                   <Text className="w-64 text-sm text-gray-600 leading-5">
-                    I’m on my way to your location. Please remain calm; I’ll be
+                    I'm on my way to your location. Please remain calm; I'll be
                     there to assist you shortly.
                   </Text>
                 </View>

@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "../screens/Map";
-import Request from "../screens/Request";
+import Request from "../screens/Report/Request";
 import Notification from "../screens/Notification";
 import Profile from "../screens/Profile";
 import { View } from "react-native";
@@ -91,13 +91,13 @@ const TabNavigator = () => {
           const icons = {
             Home: "home",
             Map: "map-marker",
-            Report: "hospital-box",
+            Request: "hospital-box",
             Notification: "bell",
             Profile: "account-circle",
           };
 
           const iconName = icons[route.name];
-          const isMiddle = route.name === "Report";
+          const isMiddle = route.name === "Request";
 
           return (
             <View className="items-center">
@@ -176,7 +176,7 @@ const TabNavigator = () => {
      
       {isVerified && (
         <Tab.Screen
-          name="Report"
+          name="Request"
           component={Request}
           options={{
             title: "Submit Emergency Assistance",

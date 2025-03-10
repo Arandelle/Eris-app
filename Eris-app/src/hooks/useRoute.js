@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const useRoute = (responderPosition, latitude, longitude) => {
+const useRouteMap = (responderPosition, latitude, longitude) => {
 
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
@@ -38,4 +38,4 @@ const useRoute = (responderPosition, latitude, longitude) => {
   return {route,setRoute, distance,setDistance}
 };
 
-export default useRoute;
+export default useRouteMap;
