@@ -382,7 +382,7 @@ const Request = () => {
                           label: "Natural Disaster 🌪️",
                           value: "natural disaster",
                         },
-                        { label: "Public Safety ⚠️", value: "other" },
+                        { label: "Public Disturbance 🦺", value: "public disturbance" },
                         { label: "Other ⚠️", value: "other" },
                       ]}
                     />
