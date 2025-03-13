@@ -9,9 +9,7 @@ import {
   View,
   StatusBar,
   Image,
-  Modal,
   TextInput,
-  TouchableWithoutFeedback,
   SafeAreaView,
   RefreshControl,
 } from "react-native";
@@ -23,7 +21,6 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import useLocationTracking from "../hooks/useLocationTracking";
 import { submitEmergencyReport } from "../hooks/useSubmitReport";
 import useSendNotification from "../hooks/useSendNotification";
-import { handleAccountLinking } from "../hooks/useLinkAnonymous";
 import { auth } from "../services/firebaseConfig";
 import {
   PanGestureHandler,
@@ -34,6 +31,7 @@ import Hotlines from "./Hotlines";
 import Announcement from "./Announcement";
 import ImmediateEmergency from "./ImmediateEmergency";
 import { OfflineContext } from "../context/OfflineContext";
+import LinkEmailModal from "./LinkEmailModal";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
@@ -42,7 +40,7 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const NewsFeed = ({ dayTime, isVerified }) => {
   const navigation = useNavigation();
   const { data: responderData } = useFetchData("responders");
-  const {storedData} = useContext(OfflineContext);
+  const { storedData } = useContext(OfflineContext);
   const { currentUser } = useCurrentUser();
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,8 +49,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const { sendNotification } = useSendNotification();
   const scrollOffsetY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -113,17 +109,17 @@ const NewsFeed = ({ dayTime, isVerified }) => {
       longitude: longitude || storedData.currentUser.location.longitude,
       geoCodeLocation:
         geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
-      description : "",
+      description: "",
       media: {
         uri: "",
-        type: ""
+        type: "",
       },
       emergencyType,
       status: "pending",
       timestamp: Date.now(), // Store timestamp for expiration check
       hasActiveRequest: hasActiveRequest || false,
       responderData: responderData || storedData.responders,
-      tempRequestId: `offline_${Date.now()}`
+      tempRequestId: `offline_${Date.now()}`,
     };
     try {
       await submitEmergencyReport({
@@ -140,24 +136,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
       );
       setLoading(false);
       setIsBellSwipe(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const result = await handleAccountLinking(auth, email, password);
-
-      if (result) {
-        // Show success message
-        alert(
-          "Account successfully linked! Please check your email for verification."
-        );
-      }
-    } catch (error) {
-      // Show error message
-      alert("Failed to link account. Please try again.");
     }
   };
 
@@ -238,13 +216,14 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   return (
     <>
       {isBellSwipe && (
-          <ImmediateEmergency isBellSwipe={isBellSwipe} 
+        <ImmediateEmergency
+          isBellSwipe={isBellSwipe}
           setIsBellSwipe={setIsBellSwipe}
-            handleConfirmReport={handleConfirmReport}
-            emergencyType={emergencyType}
-            setEmergencyType={setEmergencyType}
-          />
-          )}
+          handleConfirmReport={handleConfirmReport}
+          emergencyType={emergencyType}
+          setEmergencyType={setEmergencyType}
+        />
+      )}
 
       <ProfileReminderModal />
 
@@ -285,17 +264,20 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                             <Icon
                               name="email-fast"
                               size={80}
-                              color={colors.gray[400]}
+                              color={colors.green[400]}
                             />
                             <Icon
                               name="arrow-right-circle"
                               size={30}
-                              color={colors.gray[300]}
+                              color={colors.green[300]}
                             />
                           </Animated.View>
                         </View>
                         <Text className="text-white text-lg">
                           Slide to link an email
+                        </Text>
+                        <Text className="text-gray-50 font-thin text-md">
+                          📩 Please link your email to save your account
                         </Text>
                       </>
                     ) : (
@@ -320,14 +302,14 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                         <Text className="text-white text-lg">
                           Slide for quick emergency report
                         </Text>
+                        <Text className="text-gray-50 font-thin text-md">
+                          🔴 Fire, crime, and emergencies need quick response.
+                        </Text>
                       </>
                     )}
                   </TouchableOpacity>
                 </Animated.View>
               </PanGestureHandler>
-              <Text className="text-gray-50 font-thin text-md">
-                🔴 Fire, crime, and emergencies need quick response.
-              </Text>
             </Animated.View>
           </GestureHandlerRootView>
 
@@ -414,90 +396,12 @@ const NewsFeed = ({ dayTime, isVerified }) => {
         </Animated.View>
       </View>
 
-      <Modal
-        visible={isLinkingAccount}
-        transparent={true}
-        onRequestClose={() => setIsLinkingAccount(false)}
-        animationType="slide"
-      >
-        <ScrollView>
-          <TouchableWithoutFeedback onPress={() => setIsLinkingAccount(false)}>
-            <View
-              className="h-screen w-full flex items-center justify-center p-4"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-            >
-              <View className="w-full flex  justify-center p-4 rounded-lg space-y-6 bg-white shadow-xl">
-                <View className="space-y-2">
-                  <Text className="font-bold text-green-600 text-2xl">
-                    Link your account
-                  </Text>
-                  <Text className="text-gray-500 text-md">
-                    To make it easier to access your account in the future,
-                    please link an email and password. This will let you log in
-                    directly without using guest access
-                  </Text>
-                  {!isVerified && auth.currentUser?.email && (
-                    <Text className="text-gray-500 text-lg">
-                      Verify this email{" "}
-                      <Text className="text-red-500">
-                        {auth.currentUser.email}
-                      </Text>
-                    </Text>
-                  )}
-                </View>
-                {!isVerified && !auth.currentUser?.email && (
-                  <View className="space-y-6">
-                    <View className="relative z-10">
-                      <View className="flex items-center absolute top-4 left-3 z-50">
-                        <Icon
-                          name={"email"}
-                          size={20}
-                          color={colors.green[600]}
-                        />
-                      </View>
-                      <TextInput
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                        placeholder={"Email"}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                        onChangeText={setEmail}
-                        value={email}
-                      />
-                    </View>
-
-                    <View className="relative z-10">
-                      <View className="flex items-center absolute top-4 left-3 z-50">
-                        <Icon name="lock" size={20} color={colors.green[600]} />
-                      </View>
-                      <TextInput
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-green-800 focus:border-green-800 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
-                        onChangeText={setPassword}
-                        value={password}
-                        placeholder="Password"
-                        secureTextEntry
-                      />
-                      <TouchableOpacity className="absolute right-4 top-4 flex items-center">
-                        <Icon name="eye" size={20} color={colors.green[600]} />
-                      </TouchableOpacity>
-                    </View>
-
-                    <View>
-                      <TouchableOpacity
-                        className="w-full bg-green-600 p-3 rounded-lg shadow-lg"
-                        onPress={handleSubmit}
-                      >
-                        <Text className="text-center text-lg text-white font-bold">
-                          Save account details
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </ScrollView>
-      </Modal>
+      <LinkEmailModal
+        isLinkingAccount={isLinkingAccount}
+        setIsLinkingAccount={setIsLinkingAccount}
+        isVerified={isVerified}
+        auth={auth}
+      />
     </>
   );
 };

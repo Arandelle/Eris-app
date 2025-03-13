@@ -42,7 +42,6 @@ const Map = () => {
   //determine which coordinates to use for routing
   const destinationCoords = activeEmergencyCoords.latitude && activeEmergencyCoords.longitude ? activeEmergencyCoords : {latitude, longitude};
 
-
   const { route, distance } = useRouteMap(responderLocation, destinationCoords.latitude, destinationCoords.longitude);
   const [initialIndex, setInitialIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -130,7 +129,7 @@ const Map = () => {
       );
 
       if(!isLocationInside){
-        Alert.alert("Restricted Area!", "Please select a location within highlighted area on the map.",
+        Alert.alert("Our emergency response system is not yet available in this location", "Please select a location within highlighted area on the map.",
           [{text: "OK"}],
         );
 
