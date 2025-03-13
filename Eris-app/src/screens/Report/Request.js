@@ -29,6 +29,7 @@ import { deleteObject, ref as storageRef } from "firebase/storage";
 import { Video } from "expo-av";
 import HasActiveRequest from "../../component/HasActiveRequest";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import checkActiveReport from "./checkActiveReport";
 
 const Request = () => {
   const route = useRoute();
@@ -56,8 +57,7 @@ const Request = () => {
     closeImageModal,
   } = useViewImage();
 
-  const [hasActiveRequest, setHasActiveRequest] = useState(false);
-  const [activeRequestId, setActiveRequestId] = useState("");
+  const {hasActiveRequest, activeRequestId} = checkActiveReport(refreshing)
   const [description, setDescription] = useState("");
   const [emergencyType, setEmergencyType] = useState("medical");
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
@@ -136,32 +136,6 @@ const Request = () => {
     storedData.offlineRequest,
     storedData.activeRequestData,
   ]);
-
-  // check emergency status
-  useEffect(() => {
-    const checkActiveRequest = async () => {
-      try {
-        if (currentUser?.activeRequest) {
-          setHasActiveRequest(true);
-          setActiveRequestId(currentUser?.activeRequest?.requestId);
-        } else if (isOffline) {
-          if (storedData.offlineRequest || storedData.activeRequestData) {
-            const activeRequestData =
-              storedData.offlineRequest || storedData.activeRequestData;
-            setHasActiveRequest(true);
-            setHasActiveRequest(activeRequestData.tempRequestId || "");
-          }
-        } else {
-          setHasActiveRequest(false);
-          setActiveRequestId("");
-        }
-      } catch (error) {
-        Alert.alert("Error", `${error}`);
-      }
-    };
-    console.log("active request id:", activeRequestId);
-    checkActiveRequest();
-  }, [currentUser, isOffline, storedData, refreshing]);
 
   const handleRefresh = async () => {
     setRefreshing(true); // Start refresh animation

@@ -151,21 +151,6 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const handleGestureEnd = (event) => {
     if (Math.abs(event.nativeEvent.translationX) > 50) {
       if (auth.currentUser.emailVerified) {
-        // Alert.alert(
-        //   "Send Emergency Alert?",
-        //   "This will immediately:\n• Share your location\n• Alert emergency responders\n• Dispatch help to your location",
-        //   [
-        //     {
-        //       text: "Cancel",
-        //       style: "cancel",
-        //     },
-        //     {
-        //       text: "Send Alert",
-        //       style: "destructive",
-        //       onPress: handleConfirmReport,
-        //     },
-        //   ]
-        // );
         setIsBellSwipe(true);
       } else {
         setIsLinkingAccount(!isLinkingAccount);
