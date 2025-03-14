@@ -32,6 +32,7 @@ import Announcement from "./Announcement";
 import ImmediateEmergency from "./ImmediateEmergency";
 import { OfflineContext } from "../context/OfflineContext";
 import LinkEmailModal from "./LinkEmailModal";
+import checkActiveReport from "./Report/checkActiveReport";
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = 70;
@@ -54,6 +55,7 @@ const NewsFeed = ({ dayTime, isVerified }) => {
   const [loading, setLoading] = useState(false);
   const [isBellSwipe, setIsBellSwipe] = useState(false);
   const [emergencyType, setEmergencyType] = useState("");
+  const { reportStatus } = checkActiveReport();
 
   useEffect(() => {
     if (currentUser && currentUser?.activeRequest) {
@@ -272,24 +274,63 @@ const NewsFeed = ({ dayTime, isVerified }) => {
                             className="flex flex-row  space-x-4 items-center"
                             style={{ transform: [{ translateX: slideAnim }] }}
                           >
-                            <Icon
-                              name="bell-ring"
-                              size={80}
-                              color={colors.yellow[400]}
-                            />
-                            <Icon
-                              name="arrow-right-circle"
-                              size={30}
-                              color={colors.gray[300]}
-                            />
+                            {reportStatus ? (
+                              <Icon
+                                name={`${
+                                  reportStatus === "pending"
+                                    ? "progress-clock"
+                                    : "car-emergency"
+                                }`}
+                                size={80}
+                                color={colors.yellow[400]}
+                              />
+                            ) : (
+                              <>
+                                <Icon
+                                  name="bell-ring"
+                                  size={80}
+                                  color={colors.yellow[300]}
+                                />
+                                <Icon
+                                  name="arrow-right-circle"
+                                  size={30}
+                                  color={colors.gray[300]}
+                                />
+                              </>
+                            )}
                           </Animated.View>
                         </View>
-                        <Text className="text-white text-lg">
-                          Slide for quick emergency report
-                        </Text>
-                        <Text className="text-gray-50 font-thin text-md">
-                          🔴 Fire, crime, and emergencies need quick response.
-                        </Text>
+                        <View className="flex items-center justify-center pt-4">
+                          {reportStatus === "on-going" ? (
+                            <>
+                              <Text className="text-white text-lg">
+                                Responder is on your way.
+                              </Text>
+                              <Text className="text-gray-50 font-thin text-md">
+                                ✅ Stay calm and wait for their assistance.
+                              </Text>
+                            </>
+                          ) : reportStatus === "pending" ? (
+                            <>
+                              <Text className="text-white text-lg">
+                                Your report has been sent
+                              </Text>
+                              <Text className="text-gray-50 font-thin text-md">
+                                ✅ Please wait for the responder.
+                              </Text>
+                            </>
+                          ) : (
+                            <>
+                              <Text className="text-white text-lg">
+                                Slide for quick emergency report
+                              </Text>
+                              <Text className="text-gray-50 font-thin text-md">
+                                🔴 Fire, crime, and emergencies need quick
+                                response.
+                              </Text>
+                            </>
+                          )}
+                        </View>
                       </>
                     )}
                   </TouchableOpacity>

@@ -34,7 +34,7 @@ import checkActiveReport from "./checkActiveReport";
 const Request = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const selectedLocation = route.params?.selectedLocation
+  const selectedLocation = route.params?.selectedLocation;
   const bottomSheetRef = useRef(null);
   const videoRef = useRef(null);
   const { currentUser, userInfo } = useCurrentUser();
@@ -57,7 +57,7 @@ const Request = () => {
     closeImageModal,
   } = useViewImage();
 
-  const {hasActiveRequest, activeRequestId} = checkActiveReport(refreshing)
+  const { reportStatus, activeRequestId } = checkActiveReport(refreshing);
   const [description, setDescription] = useState("");
   const [emergencyType, setEmergencyType] = useState("medical");
   const [refreshing, setRefreshing] = useState(false); // To track refresh state
@@ -161,15 +161,18 @@ const Request = () => {
     setLoading(true);
     console.log("loading...");
 
-    const locationData = selectedLocation ? {
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
-      geoCodeLocation: selectedLocation.geoCodedAddress
-    } : {
-      latitude: latitude || storedData.currentUser.location.latitude,
-      longitude: longitude || storedData.currentUser.location.longitude,
-      geoCodeLocation: geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
-    }
+    const locationData = selectedLocation
+      ? {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          geoCodeLocation: selectedLocation.geoCodedAddress,
+        }
+      : {
+          latitude: latitude || storedData.currentUser.location.latitude,
+          longitude: longitude || storedData.currentUser.location.longitude,
+          geoCodeLocation:
+            geoCodeLocation || storedData.currentUser.location.geoCodeLocation,
+        };
 
     // Create emergency request data
     const requestData = {
@@ -189,7 +192,7 @@ const Request = () => {
       emergencyType,
       status: "pending",
       timestamp: Date.now(), // Store timestamp for expiration check
-      hasActiveRequest: hasActiveRequest || false,
+      reportStatus: reportStatus || false,
       responderData: responderData || storedData.responders,
       tempRequestId: `offline_${Date.now()}`,
     };
@@ -216,7 +219,6 @@ const Request = () => {
       setDescription("");
       setLoading(false);
       setFile({});
-      setHasActiveRequest(true);
     } catch (error) {
       Alert.alert(
         "Error",
@@ -314,12 +316,27 @@ const Request = () => {
                   ⚠️ Your network is unstable
                 </Text>
               )}
-              {hasActiveRequest && (
+              {reportStatus && (
                 <View className="space-y-2">
-                  <View className="bg-red-100 p-4 shadow-md rounded-md">
-                    <Text className="text-red-500 text-justify font-extrabold">
-                      ⚠️ You have an active emergency report. Please wait for it
-                      to be resolved
+                  <View
+                    className={`${
+                      reportStatus === "pending" ? "bg-red-100" : "bg-green-100"
+                    } p-4 shadow-md rounded-md`}
+                  >
+                    <View>
+                      {reportStatus === "pending" ? (
+                        <Text className="text-red-500 font-extrabold">
+                          ⚠️ You have an active emergency report. Please wait
+                          for it to be resolved
+                        </Text>
+                      ) : (
+                        reportStatus === "on-going" && (
+                          <Text className="text-green-500 text-justify font-extrabold">
+                            🚑 Your responder is on your way, stay calm and wait for their assistance.
+                          </Text>
+                        )
+                      )}
+
                       <TouchableOpacity
                         onPress={() =>
                           bottomSheetRef.current?.openBottomSheet()
@@ -327,7 +344,7 @@ const Request = () => {
                       >
                         <Text className="underline"> See details</Text>
                       </TouchableOpacity>
-                    </Text>
+                    </View>
                   </View>
                   <View>
                     <HasActiveRequest
@@ -336,7 +353,7 @@ const Request = () => {
                   </View>
                 </View>
               )}
-              {!hasActiveRequest && (
+              {!reportStatus && (
                 <View className="space-y-5">
                   <Text className="font-bold text-xl text-center text-red-600 mb-5">
                     Submit Detailed Report
@@ -356,20 +373,23 @@ const Request = () => {
                           label: "Natural Disaster 🌪️",
                           value: "natural disaster",
                         },
-                        { label: "Public Disturbance 🦺", value: "public disturbance" },
+                        {
+                          label: "Public Disturbance 🦺",
+                          value: "public disturbance",
+                        },
                         { label: "Other ⚠️", value: "other" },
                       ]}
                     />
                   </View>
                   <View className="flex flex-row space-x-2">
-                      <View className="flex-1 basis-3/4">
+                    <View className="flex-1 basis-3/4">
                       {selectedLocation ? (
-                        <TextInputStyle 
-                        label={"Your selected location"}
-                        placeholder={selectedLocation.geoCodedAddress}
-                        value={selectedLocation.geoCodedAddress}
-                        editable={false}
-                      />
+                        <TextInputStyle
+                          label={"Your selected location"}
+                          placeholder={selectedLocation.geoCodedAddress}
+                          value={selectedLocation.geoCodedAddress}
+                          editable={false}
+                        />
                       ) : (
                         <TextInputStyle
                           label="Current Location"
@@ -378,32 +398,36 @@ const Request = () => {
                           editable={false}
                         />
                       )}
-                      </View>
-                       <View className="space-y-2">
-                        <Text>Use current location</Text>
-                        {selectedLocation ? (
-                          <TouchableOpacity
+                    </View>
+                    <View className="space-y-2">
+                      <Text>Use current location</Text>
+                      {selectedLocation ? (
+                        <TouchableOpacity
                           className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
-                          onPress={() => navigation.setParams({selectedLocation: null})}
+                          onPress={() =>
+                            navigation.setParams({ selectedLocation: null })
+                          }
                         >
                           <Text className="text-center whitespace-nowrap">
-                           My Location
+                            My Location
                           </Text>
                         </TouchableOpacity>
-                        ) : (
-                          <TouchableOpacity
+                      ) : (
+                        <TouchableOpacity
                           className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
-                          onPress={() => navigation.navigate("Map", {label: "Select location with emergency!"})}
+                          onPress={() =>
+                            navigation.navigate("Map", {
+                              label: "Select location with emergency!",
+                            })
+                          }
                         >
                           <Text className="text-center whitespace-nowrap">
                             Select 📍
                           </Text>
                         </TouchableOpacity>
-                        )}
-                        
-                       </View>
-                      
-                  </View>   
+                      )}
+                    </View>
+                  </View>
                   <View>
                     <TextInputStyle
                       label={"Description (Optional)"}
@@ -458,11 +482,11 @@ const Request = () => {
                     </View>
                   ) : (
                     <TouchableOpacity
-                      className={`p-4 bg-blue-800 rounded-md ${
-                        hasActiveRequest ? "bg-blue-800/50" : "bg-blue-800"
+                      className={`p-4 rounded-md ${
+                        !!reportStatus ? "bg-blue-800/50" : "bg-blue-800"
                       }`}
                       onPress={chooseFile}
-                      disabled={loading || hasActiveRequest}
+                      disabled={loading || !!reportStatus}
                     >
                       <Text className="text-center text-white font-bold">
                         Add File 📷
@@ -476,14 +500,14 @@ const Request = () => {
         </ScrollView>
 
         {/** submit button */}
-        {!hasActiveRequest && (
+        {!reportStatus && (
           <View className="px-5 py-4">
             <TouchableOpacity
               className={`${
-                hasActiveRequest ? "bg-red-200" : "bg-red-600"
+                !!reportStatus ? "bg-red-200" : "bg-red-600"
               } p-3.5 rounded-md items-center`}
               onPress={handleSubmit}
-              disabled={loading || hasActiveRequest}
+              disabled={loading || !!reportStatus}
             >
               <Text className="text-white text-lg font-bold">
                 Submit Emergency

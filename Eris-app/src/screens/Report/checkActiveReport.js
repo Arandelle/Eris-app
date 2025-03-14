@@ -6,7 +6,7 @@ const checkActiveReport = (refreshing) => {
 
     const {currentUser} = useCurrentUser();
     const {isOffline, storedData} = useContext(OfflineContext);
-     const [hasActiveRequest, setHasActiveRequest] = useState(false);
+    const [reportStatus, setReportStatus] = useState("");
      const [activeRequestId, setActiveRequestId] = useState("");
 
      // check emergency status
@@ -14,19 +14,27 @@ const checkActiveReport = (refreshing) => {
     const checkActiveRequest = async () => {
       try {
         if (currentUser?.activeRequest) {
-          setHasActiveRequest(true);
-          setActiveRequestId(currentUser?.activeRequest?.requestId);
-        } else if (isOffline) {
-          if (storedData.offlineRequest || storedData.activeRequestData) {
-            const activeRequestData =
-              storedData.offlineRequest || storedData.activeRequestData;
-            setHasActiveRequest(true);
-            setHasActiveRequest(activeRequestData.tempRequestId || "");
+          const {status, requestId} = currentUser.activeRequest;
+
+          if(status === "pending" || status === "on-going"){
+            setReportStatus(status);
+            setActiveRequestId(requestId);
+            return;
           }
-        } else {
-          setHasActiveRequest(false);
-          setActiveRequestId("");
         }
+       if (isOffline && storedData?.activeRequestData) {
+
+        const {status, tempRequestId} = storedData.activeRequestData;
+
+        if(status === "pending" || status === "on-going"){
+          setReportStatus(status);
+          setActiveRequestId(tempRequestId);
+
+          return;
+        }
+        } 
+          setReportStatus("");
+          setActiveRequestId("");
       } catch (error) {
         Alert.alert("Error", `${error}`);
       }
@@ -35,7 +43,7 @@ const checkActiveReport = (refreshing) => {
     checkActiveRequest();
   }, [currentUser, isOffline, storedData, refreshing]);
 
-  return {hasActiveRequest, activeRequestId};
+  return {reportStatus, activeRequestId};
 }
 
-export default checkActiveReport
+export default checkActiveReport;

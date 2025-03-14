@@ -91,6 +91,7 @@ export const submitEmergencyReport = async ({
         requestId: newRequestKey,
         latitude,
         longitude,
+        status: "pending"
       },
     });
 
