@@ -1,6 +1,14 @@
 import { useMemo, useRef, useState, useEffect } from "react";
-import { Text, View, Image, ScrollView, RefreshControl, TouchableOpacity, Alert } from "react-native";
-import MapView, { Polyline, Marker, Circle } from "react-native-maps";
+import {
+  Text,
+  View,
+  Image,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import MapView, { Polyline, Marker, Circle, Polygon } from "react-native-maps";
 import { useNavigation } from "@react-navigation/native";
 import Logo from "../../assets/logo.png";
 import responderMarker from "../../assets/ambulance.png";
@@ -21,6 +29,8 @@ const Map = () => {
   const label = routeParams.params?.label;
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
+  const { data: systemData } = useFetchData("systemData");
+  const [storedArea, setStoredArea] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const { latitude, longitude, responderLocation, trackUserLocation } =
     useLocationTracking(currentUser, setRefreshing);
@@ -29,20 +39,25 @@ const Map = () => {
   const [isUserInRestrictedArea, setIsUserInRestrictedArea] = useState(true);
 
   useEffect(() => {
-
-    if(currentUser?.activeRequest){
+    if (currentUser?.activeRequest) {
       setActiveEmergencyCoords({
         latitude: currentUser.activeRequest?.latitude,
-        longitude: currentUser.activeRequest?.longitude
-      })
+        longitude: currentUser.activeRequest?.longitude,
+      });
     }
-    
-  },[currentUser]);
+  }, [currentUser]);
 
   //determine which coordinates to use for routing
-  const destinationCoords = activeEmergencyCoords.latitude && activeEmergencyCoords.longitude ? activeEmergencyCoords : {latitude, longitude};
+  const destinationCoords =
+    activeEmergencyCoords.latitude && activeEmergencyCoords.longitude
+      ? activeEmergencyCoords
+      : { latitude, longitude };
 
-  const { route, distance } = useRouteMap(responderLocation, destinationCoords.latitude, destinationCoords.longitude);
+  const { route, distance } = useRouteMap(
+    responderLocation,
+    destinationCoords.latitude,
+    destinationCoords.longitude
+  );
   const [initialIndex, setInitialIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showSetLocationButton, setShowSetLocationButton] = useState(false);
@@ -62,32 +77,60 @@ const Map = () => {
   const restrictedArea = {
     latitude: 14.33289,
     longitude: 120.85065,
-    restrictedRadius: 700
+    restrictedRadius: 700,
   };
 
   // check if user is inside the restricted area
   useEffect(() => {
-    if(latitude && longitude){
-      try{
-        const isInside = geolib.isPointWithinRadius(
-          {latitude, longitude},
-          {latitude: restrictedArea.latitude, longitude: restrictedArea.longitude},
-          restrictedArea.restrictedRadius
+    if (latitude && longitude) {
+      try {
+        const polygonCoordinates = storedArea.map(coord => ({
+          latitude: coord.latitude,
+          longitude: coord.longitude,
+        }));
+        const isInside = geolib.isPointInPolygon(
+          { latitude, longitude },
+          polygonCoordinates
+          // {
+          //   latitude: storedArea?.latitude,
+          //   longitude: storedArea?.longitude,
+          // },
         );
 
         setIsUserInRestrictedArea(isInside);
 
-        if(!isInside){
-          Alert.alert('Area restricted', "You're outside the allowed area. Some features will be limited.",
-            [{text: "Ok"}], {cancelable: false}
+        if (!isInside) {
+          Alert.alert(
+            "Area restricted",
+            "You're outside the allowed area. Some features will be limited.",
+            [{ text: "Ok" }],
+            { cancelable: false }
           );
         }
-      }catch(error){
+      } catch (error) {
         console.error(error);
-        setIsUserInRestrictedArea(true) // default to true in case of error
+        setIsUserInRestrictedArea(true); // default to true in case of error
       }
     }
   }, [latitude, longitude]);
+
+  // get the systemData coordinates
+  useEffect(() => {
+    if (systemData && systemData.length > 0) {
+      const systemDetails = systemData.find(
+        (system) => system.id === "details"
+      );
+      if (systemDetails?.coordinates) {
+        const formattedData = Object.values(systemDetails.coordinates).map(
+          (coord) => ({
+            latitude: coord.lat,
+            longitude: coord.lng,
+          })
+        );
+        setStoredArea(formattedData);
+      }
+    }
+  }, [systemData]);
 
   useEffect(() => {
     if (selectedLocation) {
@@ -95,17 +138,18 @@ const Map = () => {
     }
   }, [selectedLocation]);
 
-
   const reverseGeocode = async (location) => {
     try {
       const result = await Location.reverseGeocodeAsync({
         latitude: location.latitude,
         longitude: location.longitude,
       });
-      
+
       if (result && result.length > 0) {
-        const {name, city, region, country} = result[0];
-        const locString = `${name ? name : ""} - ${city}, ${region}, ${country}`;
+        const { name, city, region, country } = result[0];
+        const locString = `${
+          name ? name : ""
+        } - ${city}, ${region}, ${country}`;
         setGeoCodedAddress(locString.trim());
       }
     } catch (error) {
@@ -121,29 +165,34 @@ const Map = () => {
 
   const placeLocation = (event) => {
     const emergencyLocation = event.nativeEvent.coordinate;
-    try{
-      const isLocationInside = geolib.isPointWithinRadius(
+    try {
+      const polygonCoordinates = storedArea.map(coord => ({
+        latitude: coord.latitude,
+        longitude: coord.longitude,
+      }));
+      const isLocationInside = geolib.isPointInPolygon(
         emergencyLocation,
-        {latitude: restrictedArea.latitude, longitude: restrictedArea.longitude},
-        restrictedArea.restrictedRadius
+        polygonCoordinates
       );
 
-      if(!isLocationInside){
-        Alert.alert("Our emergency response system is not yet available in this location", "Please select a location within highlighted area on the map.",
-          [{text: "OK"}],
+      if (!isLocationInside) {
+        Alert.alert(
+          "Our emergency response system is not yet available in this location",
+          "Please select a location within highlighted area on the map.",
+          [{ text: "OK" }]
         );
 
         return;
       }
 
-      
-    setSelectedLocation(emergencyLocation);
-    setShowSetLocationButton(true);
-
-    } catch(error){
+      setSelectedLocation(emergencyLocation);
+      setShowSetLocationButton(true);
+    } catch (error) {
       console.error(error);
-      Alert.alert("Error placing location", "There was problem verifying your location. Please try again.",
-        [{text: "OK"}]
+      Alert.alert(
+        "Error placing location",
+        "There was problem verifying your location. Please try again.",
+        [{ text: "OK" }]
       );
     }
   };
@@ -158,8 +207,8 @@ const Map = () => {
         selectedLocation: {
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
-          geoCodedAddress: geoCodedAddress
-        }
+          geoCodedAddress: geoCodedAddress,
+        },
       });
     }
   };
@@ -181,14 +230,16 @@ const Map = () => {
         </View>
       </ScrollView>
     );
-  };
+  }
 
   return (
     <>
       <View className="flex-1">
         {!isUserInRestrictedArea && (
           <View className="absolute top-0 p-3 bg-red-500 w-full z-20">
-            <Text className="text-center text-white font-bold">Warning: You are outside the allowed service area</Text>
+            <Text className="text-center text-white font-bold">
+              Warning: You are outside the allowed service area
+            </Text>
           </View>
         )}
 
@@ -212,7 +263,9 @@ const Map = () => {
           <Marker
             coordinate={{ latitude, longitude }}
             title={"Your Location"}
-            pinColor={isUserInRestrictedArea ?  colors.blue[800] : colors.red[800]}
+            pinColor={
+              isUserInRestrictedArea ? colors.blue[800] : colors.red[800]
+            }
           />
 
           {/* Responder Location Marker */}
@@ -228,7 +281,7 @@ const Map = () => {
           )}
 
           {/* Draggable Selected Location Marker */}
-          {(selectedLocation || activeEmergencyCoords.latitude) &&(
+          {(selectedLocation || activeEmergencyCoords.latitude) && (
             <Marker
               coordinate={selectedLocation || activeEmergencyCoords}
               title="Your selected location"
@@ -247,29 +300,41 @@ const Map = () => {
               strokeWidth={3}
             />
           )}
-
-          <Circle 
+          {/** displat the created map from system Data */}
+          {storedArea.length > 0 && (
+            <Polygon
+              coordinates={storedArea}
+              fillColor="rgba(0,0,255,0.1)"
+              strokeColor="#3388ff"
+              strokeWidth={2}
+            />
+          )}
+          {/* <Circle
             center={{
               latitude: restrictedArea.latitude,
-              longitude: restrictedArea.longitude
+              longitude: restrictedArea.longitude,
             }}
             radius={restrictedArea.restrictedRadius}
             strokeColor="#3388ff"
             fillColor="rgba(0, 0,255,0.1)"
-          />
+          /> */}
         </MapView>
 
         {/* Set Location Button */}
-        {showSetLocationButton && selectedLocation && isUserInRestrictedArea && (
-          <View className="absolute bottom-6 w-full items-center">
-            <TouchableOpacity
-              onPress={handleSetLocation}
-              className="bg-blue-800 py-3 px-6 rounded-lg shadow-lg"
-            >
-              <Text className="text-white font-bold text-lg">Set Location</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        {showSetLocationButton &&
+          selectedLocation &&
+          isUserInRestrictedArea && (
+            <View className="absolute bottom-6 w-full items-center">
+              <TouchableOpacity
+                onPress={handleSetLocation}
+                className="bg-blue-800 py-3 px-6 rounded-lg shadow-lg"
+              >
+                <Text className="text-white font-bold text-lg">
+                  Set Location
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
         <BottomSheet
           ref={bottomSheetRef}
