@@ -36,7 +36,7 @@ const Map = () => {
     useLocationTracking(currentUser, setRefreshing);
 
   const [activeEmergencyCoords, setActiveEmergencyCoords] = useState({});
-  const [isUserInRestrictedArea, setIsUserInRestrictedArea] = useState(true);
+  const [isInEmergencyArea, setIsInEmergencyArea] = useState(true);
 
   useEffect(() => {
     if (currentUser?.activeRequest) {
@@ -60,7 +60,6 @@ const Map = () => {
   );
   const [initialIndex, setInitialIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [showSetLocationButton, setShowSetLocationButton] = useState(false);
   const [geoCodedAddress, setGeoCodedAddress] = useState("");
 
   const responderDetails = responderData?.find(
@@ -82,7 +81,7 @@ const Map = () => {
 
   // check if user is inside the restricted area
   useEffect(() => {
-    if (latitude && longitude) {
+    if (latitude && longitude && storedArea.length > 0) {
       try {
         const polygonCoordinates = storedArea.map(coord => ({
           latitude: coord.latitude,
@@ -91,13 +90,7 @@ const Map = () => {
         const isInside = geolib.isPointInPolygon(
           { latitude, longitude },
           polygonCoordinates
-          // {
-          //   latitude: storedArea?.latitude,
-          //   longitude: storedArea?.longitude,
-          // },
         );
-
-        setIsUserInRestrictedArea(isInside);
 
         if (!isInside) {
           Alert.alert(
@@ -106,10 +99,13 @@ const Map = () => {
             [{ text: "Ok" }],
             { cancelable: false }
           );
+          return;
         }
+
+        setIsInEmergencyArea(isInside);
       } catch (error) {
         console.error(error);
-        setIsUserInRestrictedArea(true); // default to true in case of error
+        setIsInEmergencyArea(true); // default to true in case of error
       }
     }
   }, [latitude, longitude]);
@@ -186,7 +182,6 @@ const Map = () => {
       }
 
       setSelectedLocation(emergencyLocation);
-      setShowSetLocationButton(true);
     } catch (error) {
       console.error(error);
       Alert.alert(
@@ -210,7 +205,9 @@ const Map = () => {
           geoCodedAddress: geoCodedAddress,
         },
       });
+      navigation.setParams({ label: null })
     }
+    setSelectedLocation(null);
   };
 
   if (!latitude || !longitude) {
@@ -235,7 +232,7 @@ const Map = () => {
   return (
     <>
       <View className="flex-1">
-        {!isUserInRestrictedArea && (
+        {!isInEmergencyArea && (
           <View className="absolute top-0 p-3 bg-red-500 w-full z-20">
             <Text className="text-center text-white font-bold">
               Warning: You are outside the allowed service area
@@ -257,14 +254,14 @@ const Map = () => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}
-          onPress={label && isUserInRestrictedArea ? placeLocation : null}
+          onPress={label && isInEmergencyArea ? placeLocation : null}
         >
           {/* User Location Marker */}
           <Marker
             coordinate={{ latitude, longitude }}
             title={"Your Location"}
             pinColor={
-              isUserInRestrictedArea ? colors.blue[800] : colors.red[800]
+              isInEmergencyArea ? colors.blue[800] : colors.red[800]
             }
           />
 
@@ -287,7 +284,7 @@ const Map = () => {
               title="Your selected location"
               description={geoCodedAddress}
               pinColor={colors.green[800]}
-              draggable={isUserInRestrictedArea}
+              draggable={isInEmergencyArea}
               onDragEnd={placeLocation}
             />
           )}
@@ -321,9 +318,8 @@ const Map = () => {
         </MapView>
 
         {/* Set Location Button */}
-        {showSetLocationButton &&
-          selectedLocation &&
-          isUserInRestrictedArea && (
+        {selectedLocation &&
+          isInEmergencyArea && (
             <View className="absolute bottom-6 w-full items-center">
               <TouchableOpacity
                 onPress={handleSetLocation}
