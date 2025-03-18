@@ -18,6 +18,7 @@ import colors from "../constant/colors";
 import useFetchDocuments from "../hooks/useFetchDocuments";
 import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const Profile = () => {
   const user = auth.currentUser;
@@ -35,6 +36,7 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      await logAuditTrail("Logout");
     } catch (e) {
       console.error(e);
     }

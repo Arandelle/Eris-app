@@ -10,6 +10,7 @@ import { generateUniqueBarangayID } from "../helper/generateID";
 import useSendNotification from "./useSendNotification";
 import { useNavigation } from "@react-navigation/native";
 import ErrorMessages from "../helper/ErrorMessages";
+import logAuditTrail from "./useAuditTrail";
 
 const useHandleSignup = () => {
   const [error, setError] = useState("");
@@ -54,6 +55,7 @@ const useHandleSignup = () => {
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       await sendNotification("admins", adminId, "userCreatedAccount", user.uid);
       await sendNotification("users", user.uid, "welcomeUser");
+      await logAuditTrail("Sign-up using email", user.uid);
       return { success: true, userId };
 
       // Handle navigation or other logic after successful signup

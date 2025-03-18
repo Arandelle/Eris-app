@@ -11,6 +11,7 @@ import {
 import colors from "../constant/colors";
 import { handleAccountLinking } from "../hooks/useLinkAnonymous";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const LinkEmailModal = ({
   isLinkingAccount,
@@ -26,6 +27,7 @@ const LinkEmailModal = ({
 
     try {
       const result = await handleAccountLinking(auth, email, password);
+      await logAuditTrail("Linked an email");
 
       if (result) {
         // Show success message

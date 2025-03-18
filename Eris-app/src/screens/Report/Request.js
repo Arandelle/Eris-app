@@ -30,6 +30,7 @@ import { Video } from "expo-av";
 import HasActiveRequest from "../../component/HasActiveRequest";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import checkActiveReport from "./checkActiveReport";
+import logAuditTrail from "../../hooks/useAuditTrail";
 
 const Request = () => {
   const route = useRoute();
@@ -276,6 +277,7 @@ const Request = () => {
           Alert.alert("Deleted", "You have successfully deleted your request");
           await removeStoredData("offlineRequest");
           await removeStoredData("activeRequestData");
+          await logAuditTrail("Cancel Emergency Report");
           setLoading(false);
         }
         setLoading(false);

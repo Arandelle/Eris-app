@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const ChangePassModal = () => {
     const navigate = useNavigation();
@@ -39,6 +40,7 @@ const ChangePassModal = () => {
         Alert.alert("Error updating!", "New password do not match");
       } else {
         await updatePassword(user, newPassword);
+        await logAuditTrail("Update Password");
         Alert.alert("Success update!", "Successfully changed password");
         navigate.goBack();
       }

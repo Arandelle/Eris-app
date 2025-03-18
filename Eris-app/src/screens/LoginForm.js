@@ -25,6 +25,7 @@ import colors from "../constant/colors";
 import useSendNotification from "../hooks/useSendNotification";
 import ErrorMessages from "../helper/ErrorMessages";
 import { OfflineContext } from "../context/OfflineContext";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -75,6 +76,7 @@ const LoginForm = () => {
 
         if (userSnapshot.exists()) {
           const userData = userSnapshot.val();
+          await logAuditTrail("Login", user.uid);
           ToastAndroid.show(
             "Login Successfully",
             ToastAndroid.SHORT,
@@ -127,6 +129,7 @@ const LoginForm = () => {
       const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
       await sendNotification("admins", adminId, "userGuest", user?.uid);
       await sendNotification("users", user?.uid, "welcomeGuest");
+      await logAuditTrail("Login as guest");
 
     } catch (error) {
       console.error("Anonymous login error:", error);

@@ -7,6 +7,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { storage } from "../services/firebaseConfig";
+import logAuditTrail from "./useAuditTrail";
 
 export const submitEmergencyReport = async ({
   data,
@@ -100,6 +101,7 @@ export const submitEmergencyReport = async ({
     const adminId = "7KRIOXYy6QTW6QmnWfh9xqCNL6T2";
     await sendNotification("admins", adminId, "adminReport", description);
     await sendNotification("users", currentUser.id, "userReport", description);
+    await logAuditTrail("Submit Emergency Report");
 
     // Notify responders
     for (const responder of responderData) {

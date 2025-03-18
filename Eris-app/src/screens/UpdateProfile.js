@@ -27,6 +27,7 @@ import {
 } from "firebase/storage";
 import CustomButton from "../component/CustomButton";
 import colors from "../constant/colors";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const UpdateProfile = () => {
   const { file, chooseFile } = useUploadImage("image"); //hooks for uploading photo
@@ -161,6 +162,7 @@ const UpdateProfile = () => {
 
     try {
       await updateCurrentUser(updatedData); // Update user profile in your database
+      await logAuditTrail("Update Profile");
       await sendNotification("users", currentUser.id, "userProfileUpdate"); // Notify about profile update
       Alert.alert("Success", "Profile updated successfully");
       navigation.goBack();

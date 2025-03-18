@@ -9,6 +9,7 @@ import TextInputStyle from "../component/TextInputStyle";
 import PickerField from "../component/PickerField"; // Ensure this path is correct
 import useCurrentUser from "../hooks/useCurrentUser";
 import useFetchDocuments from "../hooks/useFetchDocuments";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const Clearance = () => {
   const { currentUser } = useCurrentUser();
@@ -50,6 +51,7 @@ const Clearance = () => {
 
     try {
       await push(clearanceRef, newClearanceData);
+      await logAuditTrail("Submit Certificate Request")
       Alert.alert(
         "Success",
         "You can go to your barangay hall to get your barangay certificate!"
