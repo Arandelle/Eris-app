@@ -6,6 +6,7 @@ import {
   Text,
   ScrollView,
   Image,
+  TextInput
 } from "react-native";
 import {
   GestureHandlerRootView,

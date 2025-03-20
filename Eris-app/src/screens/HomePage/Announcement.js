@@ -163,11 +163,11 @@ const Announcement = () => {
 
                   <View className="pt-2 flex flex-row items-center space-x-3">
                     <TouchableOpacity
-                      onPress={() => handleImageClick(adminDetails?.imageUrl)}
+                      onPress={() => handleImageClick(adminDetails?.fileUrl)}
                     >
                       <Image
                         source={{
-                          uri: adminDetails?.imageUrl,
+                          uri: adminDetails?.fileUrl,
                         }}
                         className="h-10 w-10 rounded-full"
                       />
