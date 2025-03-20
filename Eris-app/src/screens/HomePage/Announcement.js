@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { View, TouchableOpacity, Image, Text, Pressable } from "react-native";
-import useFetchData from "../hooks/useFetchData";
-import { formatDate } from "../helper/FormatDate";
-import { getTimeDifference } from "../helper/getTimeDifference";
-import colors from "../constant/colors";
-import openLink from "../helper/openLink";
-import useViewImage from "../hooks/useViewImage";
+import useFetchData from "../../hooks/useFetchData";
+import { formatDate } from "../../helper/FormatDate";
+import { getTimeDifference } from "../../helper/getTimeDifference";
+import colors from "../../constant/colors";
+import openLink from "../../helper/openLink";
+import useViewImage from "../../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
 import { Video } from "expo-av";
 

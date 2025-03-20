@@ -11,13 +11,13 @@ import {
   Pressable,
   Linking,
 } from "react-native";
-import ProfileReminderModal from "../component/ProfileReminderModal";
+import ProfileReminderModal from "../../component/ProfileReminderModal";
 import { ref, onValue } from "firebase/database";
-import { database } from "../services/firebaseConfig";
-import { formatDate } from "../helper/FormatDate";
-import { getTimeDifference } from "../helper/getTimeDifference";
+import { database } from "../../services/firebaseConfig";
+import { formatDate } from "../../helper/FormatDate";
+import { getTimeDifference } from "../../helper/getTimeDifference";
 import ImageViewer from "react-native-image-viewing";
-import useFetchData from "../hooks/useFetchData";
+import useFetchData from "../../hooks/useFetchData";
 
 const Home = ({ setShowTabBar }) => {
   const {data: hotlines} = useFetchData("hotlines");

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/Home";
+import Home from "../screens/HomePage/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "../screens/Map";
 import Request from "../screens/Report/Request";
@@ -10,7 +10,7 @@ import { View } from "react-native";
 import { useNotificationData } from "../hooks/useNotificationData";
 import colors from "../constant/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
-import NewsFeed from "../screens/NewsFeed";
+import NewsFeed from "../screens/HomePage/NewsFeed";
 import { auth } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import useFetchDocuments from "../hooks/useFetchDocuments";

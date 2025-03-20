@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { View, Text, Pressable } from "react-native";
-import useFetchData from "../hooks/useFetchData";
-import openLink from "../helper/openLink";
-import { OfflineContext } from "../context/OfflineContext";
+import useFetchData from "../../hooks/useFetchData";
+import openLink from "../../helper/openLink";
+import { OfflineContext } from "../../context/OfflineContext";
 
 const Hotlines = () => {
   const { data: hotlines, loading } = useFetchData("hotlines");

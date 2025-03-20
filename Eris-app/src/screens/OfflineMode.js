@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import Hotlines from "./Hotlines";
+import Hotlines from "./HomePage/Hotlines";
 
 const OfflineMode = () => {
   return (
