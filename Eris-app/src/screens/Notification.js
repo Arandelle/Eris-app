@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -7,16 +14,28 @@ import { useNavigation } from "@react-navigation/native";
 import { useNotificationData } from "../hooks/useNotificationData";
 import useResponderData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
+import colors from "../constant/colors";
+import handleDeleteData from "../hooks/useDeleteData";
+import { useEffect } from "react";
+import { useMemo } from "react";
 
 const Notification = () => {
   const { notificationsCount, notifications, markAllNotificationsAsRead } =
     useNotificationData();
-  const [viewAll, setViewAll] = useState(false);
 
-  const sortedNotification = notifications.sort((a,b) => new Date(b.date) - new Date(a.date));
-  const displayedNotifications = viewAll
-    ? sortedNotification
-    : sortedNotification.slice(0, 6); // it's like telling viewAll is true? then show all notifications else slice it to 7
+  const sortedNotifications = useMemo(() => {
+    return notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [notifications]);
+
+  const [displayedNotifications, setDisplayedNotifications] = useState([]);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 6;
+
+  useEffect(() => {
+    setDisplayedNotifications(
+      sortedNotifications.slice(0, page * itemsPerPage)
+    );
+  }, [page, sortedNotifications]);
 
   return (
     <>
@@ -44,17 +63,13 @@ const Notification = () => {
             </View>
           )}
 
-          {!viewAll &&
-            notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
-              <TouchableOpacity
-                className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
-                onPress={() => setViewAll(true)}
-              >
-                <Text className="text-center text">
-                  See previous notification
-                </Text>
-              </TouchableOpacity>
-            )}
+          {notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+            <TouchableOpacity onPress={() => setPage(page + 1)}>
+              <Text className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200">
+                See previous notifications
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </>
@@ -63,10 +78,11 @@ const Notification = () => {
 
 const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
-  const { currentUser} = useCurrentUser()
+  const { currentUser } = useCurrentUser();
   const { data: responderData } = useResponderData("responders");
   const { data: admin } = useResponderData("admins");
   const { handleSpecificNotification } = useNotificationData();
+  const [loading, setLoading] = useState(false);
 
   const responderDetails = responderData.find(
     (responder) => responder.id === notification.responderId
@@ -88,63 +104,79 @@ const NotificationItem = ({ notification }) => {
     "hospital-box": "bg-orange-500",
     "shield-check": "bg-green-500",
     "car-emergency": "bg-red-500",
-    "close-circle" : "bg-red-500",
-    "clipboard-check-outline" : "bg-gray-500",
-    "check-circle" : "bg-green-500"
+    "close-circle": "bg-red-500",
+    "clipboard-check-outline": "bg-gray-500",
+    "check-circle": "bg-green-500",
+  };
+
+  const handleDeleteNotification = async (id) => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      await handleDeleteData(id, `users/${currentUser?.id}/notifications`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-      <TouchableOpacity
-        key={notification.id}
-        onPress={() => {
-          handleSpecificNotification(notification.id);
-          switch (notification.icon) {
-            case "account-check":
-            case "account-alert":
-              navigation.navigate("Profile");
-              break;
-            case "hospital-box":
-              navigation.navigate("Emergency Records", {
-                screen: "awaiting-response",
-              });
-              break;
-            case "shield-check":
-              navigation.navigate("Emergency Records", { screen: "resolved" });
-              break;
-            case "car-emergency":
-              navigation.navigate("Emergency Records", { screen: "on-going" });
-              break;
-            case "close-circle":
-            case "clipboard-check-outline":
-            case "check-circle":
-              navigation.navigate("Clearance");
-              break;
-            default:
-              break;
-          }
-        }}
+    <TouchableOpacity
+      key={notification.id}
+      onPress={() => {
+        handleSpecificNotification(notification.id);
+        switch (notification.icon) {
+          case "account-check":
+          case "account-alert":
+            navigation.navigate("Profile");
+            break;
+          case "hospital-box":
+            navigation.navigate("Emergency Records", {
+              screen: "pending",
+            });
+            break;
+          case "shield-check":
+            navigation.navigate("Emergency Records", { screen: "resolved" });
+            break;
+          case "car-emergency":
+            navigation.navigate("Emergency Records", { screen: "on-going" });
+            break;
+          case "close-circle":
+          case "clipboard-check-outline":
+          case "check-circle":
+            navigation.navigate("Clearance");
+            break;
+          default:
+            break;
+        }
+      }}
+    >
+      <View
+        className={`flex flex-row justify-between p-4 ${
+          notification.isSeen ? "bg-white" : "bg-blue-50"
+        }`}
       >
-        <View
-          className={`flex flex-row justify-between p-4 ${
-            notification.isSeen ? "bg-white" : "bg-blue-50"
-          }`}
-        >
-          <View className="relative">
-            <View>
-              <Image
-                source={{ uri: notificationImg[notification.icon] || adminDetails?.imageUrl}}
-                className="rounded-full h-16 w-16 border-4 border-blue-500"
-              />
-              <View
-                className={`absolute bottom-0 -right-[4px] ${
-                  notificationData[notification.icon]
-                } rounded-full p-1.5 border border-blue-50`}
-              >
-                <Icon name={notification.icon} size={18} color={"white"} />
-              </View>
+        <View className="relative">
+          <View>
+            <Image
+              source={{
+                uri:
+                  notificationImg[notification.icon] || adminDetails?.imageUrl,
+              }}
+              className="rounded-full h-16 w-16 border-4 border-blue-500"
+            />
+            <View
+              className={`absolute bottom-0 -right-[4px] ${
+                notificationData[notification.icon]
+              } rounded-full p-1.5 border border-blue-50`}
+            >
+              <Icon name={notification.icon} size={18} color={"white"} />
             </View>
           </View>
-          <View className="pl-4 flex-1">
+        </View>
+        <View className="pl-4 flex-1">
+          <View className="flex flex-row justify-between">
             <View className="text-sm mb-1 text-gray-600">
               <Text className="font-semibold text-lg text-gray-800">
                 {notification.title}
@@ -153,17 +185,23 @@ const NotificationItem = ({ notification }) => {
                 {notification.message}
               </Text>
             </View>
-            <View className="flex flex-row justify-between text-xs text-gray-500">
-              <Text className="text-blue-500">
-                {getTimeDifference(notification.timestamp)}
-              </Text>
-              <Text className="text-gray-500">
-                {formatDate(notification.date)}
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => handleDeleteNotification(notification.id)}
+            >
+              <Icon name={loading ? `loading` : "delete-forever"} size={20} color={colors.red[400]} />
+            </TouchableOpacity>
+          </View>
+          <View className="flex flex-row justify-between text-xs text-gray-500">
+            <Text className="text-blue-500">
+              {getTimeDifference(notification.timestamp)}
+            </Text>
+            <Text className="text-gray-500">
+              {formatDate(notification.date)}
+            </Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
   );
 };
 

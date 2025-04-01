@@ -107,7 +107,7 @@ const RecordItem = ({ emergency }) => {
               <RowStyle label={"Description"} value={emergency.description} />
             </View>
             <View>
-              <RowStyle label={"Location"} value={emergency.location.geoCodeLocation} />
+              <RowStyle label={"Location"} value={emergency.location?.geoCodeLocation} />
             </View>
             <View>
               <RowStyle
