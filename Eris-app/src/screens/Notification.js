@@ -18,6 +18,7 @@ import colors from "../constant/colors";
 import { useEffect } from "react";
 import { useMemo } from "react";
 import useDeleteData from "../hooks/useDeleteData";
+import handleDeleteData from "../hooks/useDeleteData";
 
 const Notification = () => {
   const { notificationsCount, notifications, markAllNotificationsAsRead } =
@@ -63,7 +64,7 @@ const Notification = () => {
             </View>
           )}
 
-          {notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+          {notifications.length > 6 && (
             <TouchableOpacity onPress={() => setPage(page + 1)}>
               <Text className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200">
                 See previous notifications
@@ -78,7 +79,7 @@ const Notification = () => {
 
 const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
-  const { handleDeleteData, loading } = useDeleteData();
+  const [isDeleting, setIsDeleting] = useState(false); // Local loading state for this specific item
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useResponderData("responders");
   const { data: admin } = useResponderData("admins");
@@ -110,7 +111,16 @@ const NotificationItem = ({ notification }) => {
   };
 
   const handleDeleteNotification = async (id) => {
-    await handleDeleteData(id, `users/${currentUser?.id}/notifications`);
+    if (isDeleting) return; // Prevent multiple clicks
+    
+    setIsDeleting(true); // Set local loading immediately
+    try {
+      await handleDeleteData(id, `users/${currentUser?.id}/notifications`);
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -168,10 +178,10 @@ const NotificationItem = ({ notification }) => {
           </View>
         </View>
         <View className="pl-4 flex-1">
-          <View className="flex flex-row justify-between">
+          <View className="flex relative flex-row justify-between">
             <View className="text-sm mb-1 text-gray-600">
               <Text className="font-semibold text-lg text-gray-800">
-                {notification.title}
+                {isDeleting ? "Deleting ..." : notification.title}
               </Text>
               <Text className="font-semibold text-gray-500">
                 {notification.message}
@@ -179,9 +189,9 @@ const NotificationItem = ({ notification }) => {
             </View>
             <TouchableOpacity
               onPress={() => handleDeleteNotification(notification.id)}
-              disabled={loading} // Disable the button while loading
+              disabled={isDeleting}
             >
-              {loading ? (
+              {isDeleting ? (
                 <ActivityIndicator size="small" color={colors.red[400]} />
               ) : (
                 <Icon name="delete-forever" size={20} color={colors.red[400]} />
