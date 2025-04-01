@@ -5,7 +5,7 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
@@ -15,9 +15,9 @@ import { useNotificationData } from "../hooks/useNotificationData";
 import useResponderData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
-import handleDeleteData from "../hooks/useDeleteData";
 import { useEffect } from "react";
 import { useMemo } from "react";
+import useDeleteData from "../hooks/useDeleteData";
 
 const Notification = () => {
   const { notificationsCount, notifications, markAllNotificationsAsRead } =
@@ -78,11 +78,11 @@ const Notification = () => {
 
 const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
+  const { handleDeleteData, loading } = useDeleteData();
   const { currentUser } = useCurrentUser();
   const { data: responderData } = useResponderData("responders");
   const { data: admin } = useResponderData("admins");
   const { handleSpecificNotification } = useNotificationData();
-  const [loading, setLoading] = useState(false);
 
   const responderDetails = responderData.find(
     (responder) => responder.id === notification.responderId
@@ -110,15 +110,7 @@ const NotificationItem = ({ notification }) => {
   };
 
   const handleDeleteNotification = async (id) => {
-    if (loading) return;
-    try {
-      setLoading(true);
-      await handleDeleteData(id, `users/${currentUser?.id}/notifications`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    await handleDeleteData(id, `users/${currentUser?.id}/notifications`);
   };
 
   return (
@@ -187,8 +179,13 @@ const NotificationItem = ({ notification }) => {
             </View>
             <TouchableOpacity
               onPress={() => handleDeleteNotification(notification.id)}
+              disabled={loading} // Disable the button while loading
             >
-              <Icon name={loading ? `loading` : "delete-forever"} size={20} color={colors.red[400]} />
+              {loading ? (
+                <ActivityIndicator size="small" color={colors.red[400]} />
+              ) : (
+                <Icon name="delete-forever" size={20} color={colors.red[400]} />
+              )}
             </TouchableOpacity>
           </View>
           <View className="flex flex-row justify-between text-xs text-gray-500">
