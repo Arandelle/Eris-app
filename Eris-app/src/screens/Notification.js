@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,9 +15,6 @@ import { useNotificationData } from "../hooks/useNotificationData";
 import useResponderData from "../hooks/useFetchData";
 import useCurrentUser from "../hooks/useCurrentUser";
 import colors from "../constant/colors";
-import { useEffect } from "react";
-import { useMemo } from "react";
-import useDeleteData from "../hooks/useDeleteData";
 import handleDeleteData from "../hooks/useDeleteData";
 
 const Notification = () => {

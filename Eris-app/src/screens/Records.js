@@ -1,13 +1,26 @@
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import useFetchRecords from "../hooks/useFetchRecords";
 import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
 import ImageViewer from "react-native-image-viewing";
 import { useMemo } from "react";
 import useViewImage from "../hooks/useViewImage";
+import { useState } from "react";
+import handleDeleteData from "../hooks/useDeleteData";
+import useCurrentUser from "../hooks/useCurrentUser";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import colors from "../constant/colors";
 
 const Records = ({ route }) => {
-  const {status} = route.params
+  const { status } = route.params;
   const { emergencyHistory } = useFetchRecords({ status });
 
   const sortedData = useMemo(() => {
@@ -38,6 +51,8 @@ const Records = ({ route }) => {
 };
 
 const RecordItem = ({ emergency }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const {currentUser} = useCurrentUser();
   const { data: responderData } = useFetchData("responders");
 
   const responderDetails = responderData?.find(
@@ -52,11 +67,25 @@ const RecordItem = ({ emergency }) => {
   } = useViewImage();
 
   const emergencyStatus = {
-    "pending": "bg-orange-100 text-orange-600",
+    pending: "bg-orange-100 text-orange-600",
     "on-going": "bg-blue-100 text-blue-600",
     resolved: "bg-green-100 text-green-600",
     expired: "bg-red-300",
   };
+
+  const handleDeleteRecord = async (id) => {
+    if(isDeleting) return;
+    setIsDeleting(true);
+
+    try{
+      await handleDeleteData(id, `users/${currentUser?.id}/emergencyHistory`);
+    }catch{
+      console.error(error);
+      Alert.alert("Error deleting: " `${error}`)
+    }finally{
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <>
@@ -67,25 +96,41 @@ const RecordItem = ({ emergency }) => {
         onRequestClose={closeImageModal}
       />
       <View className="border border-gray-300 rounded-lg">
-        <View className="flex flex-row space-x-2 p-4">
+        <View className="flex flex-row p-4 justify-between">
           {emergency.status !== "pending" && (
             <>
-              <TouchableOpacity
-                onPress={() => handleImageClick(responderDetails?.img)}
-              >
-                <Image
-                  source={{ uri: responderDetails?.img }}
-                  className="h-12 w-12 rounded-full"
-                />
-              </TouchableOpacity>
-              <View>
-                <Text className="text-lg font-bold">
-                  {responderDetails?.fullname || "responderDetails name"}
-                </Text>
-                <Text className="text-sm text-gray-400">
-                  {responderDetails?.customId}
-                </Text>
+              <View className="flex flex-row space-x-2">
+                <TouchableOpacity
+                  onPress={() => handleImageClick(responderDetails?.img)}
+                >
+                  <Image
+                    source={{ uri: responderDetails?.img }}
+                    className="h-12 w-12 rounded-full"
+                  />
+                </TouchableOpacity>
+                <View>
+                  <Text className="text-lg font-bold">
+                    {isDeleting ? "Deleting..." : responderDetails?.fullname || "responderDetails name"}
+                  </Text>
+                  <Text className="text-sm text-gray-400">
+                    {responderDetails?.customId}
+                  </Text>
+                </View>
               </View>
+              <TouchableOpacity
+                onPress={() => handleDeleteRecord(emergency.id)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color={colors.red[400]} />
+                ) : (
+                  <Icon
+                    name="delete-forever"
+                    size={20}
+                    color={colors.red[400]}
+                  />
+                )}
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -107,7 +152,10 @@ const RecordItem = ({ emergency }) => {
               <RowStyle label={"Description"} value={emergency.description} />
             </View>
             <View>
-              <RowStyle label={"Location"} value={emergency.location?.geoCodeLocation} />
+              <RowStyle
+                label={"Location"}
+                value={emergency.location?.geoCodeLocation}
+              />
             </View>
             <View>
               <RowStyle
