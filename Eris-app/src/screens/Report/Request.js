@@ -402,7 +402,7 @@ const Request = () => {
                       )}
                     </View>
                     <View className="space-y-2">
-                      <Text>Use current location</Text>
+                      <Text>Select Location</Text>
                       {selectedLocation ? (
                         <TouchableOpacity
                           className="p-4 flex-1 basis-1/4 rounded-md border border-gray-300 bg-white"
