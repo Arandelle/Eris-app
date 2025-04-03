@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/HomePage/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Map from "../screens/Map";
 import Request from "../screens/Report/Request";

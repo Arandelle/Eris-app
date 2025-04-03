@@ -3,7 +3,7 @@ import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "r
 
 const ImmediateEmergency = ({ isBellSwipe, setIsBellSwipe,handleConfirmReport,emergencyType, setEmergencyType}) => {
 
-  const list = ["medical", "fire", "crime", "natural disaster"];
+  const list = ["medical", "fire", "crime", "natural disaster", "public disturbance"];
 
   return (
     <Modal

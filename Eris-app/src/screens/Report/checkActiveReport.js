@@ -16,7 +16,7 @@ const checkActiveReport = (refreshing) => {
         if (currentUser?.activeRequest) {
           const {status, requestId} = currentUser.activeRequest;
 
-          if(status === "pending" || status === "on-going"){
+          if(status === "pending" || status === "on-going" || status === "resolved"){
             setReportStatus(status);
             setActiveRequestId(requestId);
             return;

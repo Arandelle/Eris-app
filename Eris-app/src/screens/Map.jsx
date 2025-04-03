@@ -22,9 +22,12 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useRoute } from "@react-navigation/native";
 import * as Location from "expo-location";
 import * as geolib from "geolib";
+import checkActiveReport from "./Report/checkActiveReport";
 
 const Map = () => {
   const navigation = useNavigation();
+  const bottomSheetRef = useRef(null);
+  const mapRef = useRef(null);
   const routeParams = useRoute();
   const label = routeParams.params?.label;
   const { currentUser } = useCurrentUser();
@@ -37,6 +40,7 @@ const Map = () => {
 
   const [activeEmergencyCoords, setActiveEmergencyCoords] = useState({});
   const [isInEmergencyArea, setIsInEmergencyArea] = useState(true);
+  const {reportStatus} = checkActiveReport();
 
   useEffect(() => {
     if (currentUser?.activeRequest) {
@@ -68,9 +72,6 @@ const Map = () => {
 
   const { img, fullname, customId } = responderDetails || {};
 
-  const bottomSheetRef = useRef(null);
-  const mapRef = useRef(null);
-
   const snapPoints = useMemo(() => ["30%", "50%"], []);
 
   const restrictedArea = {
@@ -78,6 +79,15 @@ const Map = () => {
     longitude: 120.85065,
     restrictedRadius: 700,
   };
+
+  //useEffect to dynamically open/close the bottomsheet
+  useEffect(() => {
+      if (!reportStatus) {
+        bottomSheetRef.current?.close(); // Close the BottomSheet
+      } else {
+        bottomSheetRef.current?.snapToIndex(initialIndex)
+      }
+  }, [reportStatus]);
 
   // check if user is inside the restricted area
   useEffect(() => {
@@ -123,8 +133,7 @@ const Map = () => {
             longitude: coord.lng,
           })
         );
-        setStoredArea(formattedData);
-      }
+        setStoredArea(formattedData);      }
     }
   }, [systemData]);
 
@@ -266,7 +275,7 @@ const Map = () => {
           />
 
           {/* Responder Location Marker */}
-          {responderLocation && (
+          {responderLocation && reportStatus === "on-going" && (
             <Marker
               coordinate={responderLocation}
               title="Responder"
@@ -290,7 +299,7 @@ const Map = () => {
           )}
 
           {/* Route Polyline */}
-          {route.length > 0 && (
+          {route.length > 0 && reportStatus ==="on-going" && (
             <Polyline
               coordinates={route}
               strokeColor="#FF0000"
